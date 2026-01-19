@@ -46,7 +46,11 @@ function RootLayoutContent() {
             </>
           )}
         </Stack>
-        <StatusBar style="auto" />
+
+        <StatusBar
+          style={colorScheme === "dark" ? "light" : "dark"}
+          translucent
+        />
       </ThemeProvider>
     </SafeAreaProvider>
   );

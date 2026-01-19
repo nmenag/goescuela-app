@@ -1,9 +1,9 @@
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { Tabs } from "expo-router";
 import React from "react";
 import { StyleSheet } from "react-native";
 
 import { HapticTab } from "@/components/haptic-tab";
-import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
 const COLORS = {
@@ -32,7 +32,7 @@ export default function TabLayout() {
         options={{
           title: "Home",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={24} name="house.fill" color={color} />
+            <Ionicons name="home" size={24} color={color} />
           ),
         }}
       />
@@ -41,16 +41,7 @@ export default function TabLayout() {
         options={{
           title: "Mis cursos",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={24} name="book.fill" color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="notifications"
-        options={{
-          title: "Notifications",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={24} name="bell.fill" color={color} />
+            <Ionicons name="book" size={24} color={color} />
           ),
         }}
       />
@@ -59,7 +50,7 @@ export default function TabLayout() {
         options={{
           title: "Profile",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={24} name="person.fill" color={color} />
+            <Ionicons name="person" size={24} color={color} />
           ),
         }}
       />
