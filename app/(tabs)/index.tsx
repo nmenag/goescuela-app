@@ -1,157 +1,241 @@
-import { Image } from "expo-image";
-import { BookOpen, Heart, Zap } from "lucide-react-native";
-import { Platform, StyleSheet, View } from "react-native";
-
-import { Button } from "@/components/button";
-import { Card } from "@/components/card";
-import { HelloWave } from "@/components/hello-wave";
-import ParallaxScrollView from "@/components/parallax-scroll-view";
+import { CategoryCard } from "@/components/category-card";
+import { CircularProgressBar } from "@/components/circular-progress";
+import { CourseCard } from "@/components/course-card";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { Link } from "expo-router";
+import { useAuth } from "@/context/AuthContext";
+import {
+  getCurrentStudent,
+  getStudentCourseProgress,
+  getStudentEnrolledCourses,
+  mockCategories,
+  mockCourses,
+} from "@/data/mockData";
+import { useRouter } from "expo-router";
+import React from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity
+} from "react-native";
+
+const COLORS = {
+  primary: "#FAE0F0",
+  background: "#FFFFFF",
+  text: "#1F2937",
+  textLight: "#6B7280",
+  border: "#E5E7EB",
+};
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
-      headerImage={
-        <Image
-          source={require("@/assets/images/partial-react-logo.png")}
-          style={styles.reactLogo}
+  const router = useRouter();
+  const { user } = useAuth();
+  const student = getCurrentStudent();
+  const enrolledCourses = getStudentEnrolledCourses(student.id);
+
+  // Get the first enrolled course for the featured "Course in Progress"
+  const inProgressCourse = enrolledCourses[0];
+  const inProgressProgress = getStudentCourseProgress(
+    student.id,
+    inProgressCourse.id,
+  );
+
+  const handleCoursePress = (courseId: string) => {
+    router.push({
+      pathname: "/course-detail",
+      params: { courseId },
+    });
+  };
+
+  const renderHeader = () => (
+    <ThemedView style={styles.header}>
+      <ThemedText style={styles.greeting}>Good morning 👋</ThemedText>
+      <ThemedText style={styles.name}>{user?.name || "Student"}</ThemedText>
+    </ThemedView>
+  );
+
+  const renderCourseInProgress = () => (
+    <ThemedView style={styles.section}>
+      <ThemedText style={styles.sectionTitle}>Course in Progress</ThemedText>
+      <TouchableOpacity
+        style={styles.courseProgressCard}
+        onPress={() => handleCoursePress(inProgressCourse.id)}
+        activeOpacity={0.7}
+      >
+        <ThemedView style={styles.courseProgressContent}>
+          <ThemedView style={styles.courseProgressLeft}>
+            <ThemedText style={styles.courseProgressTitle}>
+              {inProgressCourse.title}
+            </ThemedText>
+            <ThemedText style={styles.courseProgressInstructor}>
+              {inProgressCourse.instructor.name}
+            </ThemedText>
+            <ThemedText style={styles.courseProgressStats}>
+              {inProgressProgress?.completedLessons.length || 0} lessons
+              completed
+            </ThemedText>
+          </ThemedView>
+          <CircularProgressBar
+            size={100}
+            strokeWidth={6}
+            progress={inProgressProgress?.progress || 0}
+            color={COLORS.primary}
+          />
+        </ThemedView>
+      </TouchableOpacity>
+    </ThemedView>
+  );
+
+  const renderFeaturedCategories = () => (
+    <ThemedView style={styles.section}>
+      <ThemedView style={styles.sectionHeader}>
+        <ThemedText style={styles.sectionTitle}>Featured Categories</ThemedText>
+        <TouchableOpacity onPress={() => router.push("/courses")}>
+          <ThemedText style={styles.viewAll}>View all</ThemedText>
+        </TouchableOpacity>
+      </ThemedView>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        scrollEventThrottle={16}
+        style={styles.categoriesScroll}
+      >
+        {mockCategories.map((category) => (
+          <CategoryCard
+            key={category.id}
+            id={category.id}
+            name={category.name}
+            icon={category.icon}
+            onPress={() => router.push("/courses")}
+          />
+        ))}
+      </ScrollView>
+    </ThemedView>
+  );
+
+  const renderRecommendedCourses = () => (
+    <ThemedView style={styles.section}>
+      <ThemedView style={styles.sectionHeader}>
+        <ThemedText style={styles.sectionTitle}>Recommended For You</ThemedText>
+        <TouchableOpacity onPress={() => router.push("/courses")}>
+          <ThemedText style={styles.viewAll}>View all</ThemedText>
+        </TouchableOpacity>
+      </ThemedView>
+      {mockCourses.slice(0, 3).map((course) => (
+        <CourseCard
+          key={course.id}
+          id={course.id}
+          title={course.title}
+          instructor={course.instructor.name}
+          thumbnail={course.thumbnail}
+          rating={course.rating}
+          students={course.students}
+          price={course.price}
+          onPress={() => handleCoursePress(course.id)}
         />
-      }
-    >
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome Go escuela!</ThemedText>
-        <HelloWave />
-      </ThemedView>
+      ))}
+    </ThemedView>
+  );
 
-      {/* NativeWind & Tailwind CSS Demo */}
-      <View className="px-4 py-4">
-        <Card
-          title="🎉 NativeWind Enabled"
-          description="This app now uses Tailwind CSS with NativeWind for styling!"
-        >
-          <View className="flex-row gap-3">
-            <View className="flex-1">
-              <View className="bg-blue-100 dark:bg-blue-900 rounded-md p-3 items-center">
-                <Zap size={24} color="#3B82F6" className="mb-2" />
-                <ThemedText className="text-center text-sm font-semibold">
-                  Fast
-                </ThemedText>
-              </View>
-            </View>
-            <View className="flex-1">
-              <View className="bg-green-100 dark:bg-green-900 rounded-md p-3 items-center">
-                <Heart size={24} color="#10B981" className="mb-2" />
-                <ThemedText className="text-center text-sm font-semibold">
-                  Beautiful
-                </ThemedText>
-              </View>
-            </View>
-            <View className="flex-1">
-              <View className="bg-purple-100 dark:bg-purple-900 rounded-md p-3 items-center">
-                <BookOpen size={24} color="#A855F7" className="mb-2" />
-                <ThemedText className="text-center text-sm font-semibold">
-                  Simple
-                </ThemedText>
-              </View>
-            </View>
-          </View>
-        </Card>
-
-        <Card
-          title="🎨 Lucide Icons"
-          description="Beautiful icons integrated with your app"
-        >
-          <View className="gap-3">
-            <Button title="Primary Button" variant="primary" />
-            <Button title="Secondary Button" variant="secondary" />
-            <Button title="Outline Button" variant="outline" />
-          </View>
-        </Card>
-      </View>
-
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit{" "}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText>{" "}
-          to see changes. Press{" "}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: "cmd + d",
-              android: "cmd + m",
-              web: "F12",
-            })}
-          </ThemedText>{" "}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction
-              title="Action"
-              icon="cube"
-              onPress={() => alert("Action pressed")}
-            />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert("Share pressed")}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert("Delete pressed")}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
-
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">
-            npm run reset-project
-          </ThemedText>{" "}
-          to get a fresh <ThemedText type="defaultSemiBold">app</ThemedText>{" "}
-          directory. This will move the current{" "}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{" "}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  return (
+    <ThemedView style={styles.container}>
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+        scrollEventThrottle={16}
+      >
+        {renderHeader()}
+        {renderCourseInProgress()}
+        {renderFeaturedCategories()}
+        {renderRecommendedCourses()}
+      </ScrollView>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  header: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 24,
+    backgroundColor: COLORS.background,
+  },
+  greeting: {
+    fontSize: 14,
+    color: COLORS.textLight,
+    marginBottom: 4,
+  },
+  name: {
+    fontSize: 28,
+    fontWeight: "700",
+    color: COLORS.text,
+  },
+  section: {
+    paddingHorizontal: 20,
+    marginBottom: 32,
+  },
+  sectionHeader: {
     flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
-    gap: 8,
+    marginBottom: 16,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: COLORS.text,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: "absolute",
+  viewAll: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: COLORS.primary,
+  },
+  courseProgressCard: {
+    borderRadius: 16,
+    backgroundColor: "#F3E8FF",
+    overflow: "hidden",
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  courseProgressContent: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 20,
+    backgroundColor: "#F3E8FF",
+  },
+  courseProgressLeft: {
+    flex: 1,
+    marginRight: 16,
+  },
+  courseProgressTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: COLORS.text,
+    marginBottom: 4,
+  },
+  courseProgressInstructor: {
+    fontSize: 13,
+    color: COLORS.textLight,
+    marginBottom: 12,
+  },
+  courseProgressStats: {
+    fontSize: 12,
+    color: "#6D28D9",
+    fontWeight: "600",
+  },
+  categoriesScroll: {
+    marginHorizontal: -20,
+    paddingHorizontal: 20,
   },
 });
