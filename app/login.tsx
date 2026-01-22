@@ -2,13 +2,16 @@ import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { BrandingColors } from "@/constants/theme";
 import { useAuth } from "@/context/AuthContext";
+import { Eye, EyeOff } from "lucide-react-native";
 import React, { useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    StyleSheet,
-    TextInput,
-    TouchableOpacity,
+  ActivityIndicator,
+  Alert,
+  Image,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 const COLORS = {
@@ -21,26 +24,18 @@ const COLORS = {
   error: "#DC2626",
 };
 
-export const LoginScreen = () => {
+export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { login } = useAuth();
 
   const handleLogin = async () => {
-    if (!email.trim() || !password.trim()) {
-      Alert.alert("Error", "Please fill in all fields");
-      return;
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      Alert.alert("Error", "Please enter a valid email address");
-      return;
-    }
-
     setLoading(true);
     try {
-      await login(email, password);
+      // Demo mode - skip validation and login immediately
+      await login(email || "demo@example.com", password || "demo123");
     } catch (error) {
       Alert.alert(
         "Login Failed",
@@ -56,11 +51,10 @@ export const LoginScreen = () => {
       <ThemedView style={styles.content}>
         {/* Header */}
         <ThemedView style={styles.header}>
-          <ThemedText style={styles.title}>Goescuela</ThemedText>
-          <ThemedText style={styles.subtitle}>Welcome Back</ThemedText>
-          <ThemedText style={styles.description}>
-            Sign in to continue learning and exploring amazing courses
-          </ThemedText>
+          <Image
+            source={require("@/assets/images/logo.png")}
+            style={styles.logo}
+          />
         </ThemedView>
 
         {/* Login Form */}
@@ -81,15 +75,28 @@ export const LoginScreen = () => {
 
           <ThemedView style={styles.inputGroup}>
             <ThemedText style={styles.label}>Password</ThemedText>
-            <TextInput
-              style={styles.input}
-              placeholder="••••••••"
-              placeholderTextColor={COLORS.textLight}
-              secureTextEntry
-              editable={!loading}
-              value={password}
-              onChangeText={setPassword}
-            />
+            <View style={styles.passwordInputContainer}>
+              <TextInput
+                style={styles.passwordInput}
+                placeholder="••••••••"
+                placeholderTextColor={COLORS.textLight}
+                secureTextEntry={!showPassword}
+                editable={!loading}
+                value={password}
+                onChangeText={setPassword}
+              />
+              <TouchableOpacity
+                style={styles.eyeIcon}
+                onPress={() => setShowPassword(!showPassword)}
+                disabled={loading}
+              >
+                {showPassword ? (
+                  <EyeOff size={20} color={COLORS.textLight} />
+                ) : (
+                  <Eye size={20} color={COLORS.textLight} />
+                )}
+              </TouchableOpacity>
+            </View>
           </ThemedView>
 
           {/* Forgot Password Link */}
@@ -99,7 +106,6 @@ export const LoginScreen = () => {
             </ThemedText>
           </TouchableOpacity>
 
-          {/* Login Button */}
           <TouchableOpacity
             style={[styles.loginButton, loading && styles.loginButtonDisabled]}
             onPress={handleLogin}
@@ -113,29 +119,10 @@ export const LoginScreen = () => {
             )}
           </TouchableOpacity>
         </ThemedView>
-
-        {/* Demo Credentials */}
-        <ThemedView style={styles.demoSection}>
-          <ThemedText style={styles.demoLabel}>Demo Credentials:</ThemedText>
-          <ThemedText style={styles.demoText}>
-            Email: sarah@example.com
-          </ThemedText>
-          <ThemedText style={styles.demoText}>Password: password123</ThemedText>
-        </ThemedView>
-
-        {/* Sign Up Link */}
-        <ThemedView style={styles.signupSection}>
-          <ThemedText style={styles.signupText}>
-            Don't have an account?{" "}
-          </ThemedText>
-          <TouchableOpacity disabled={loading}>
-            <ThemedText style={styles.signupLink}>Sign up</ThemedText>
-          </TouchableOpacity>
-        </ThemedView>
       </ThemedView>
     </ThemedView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -151,6 +138,12 @@ const styles = StyleSheet.create({
     marginBottom: 40,
     alignItems: "center",
     backgroundColor: COLORS.background,
+  },
+  logo: {
+    width: 120,
+    height: 120,
+    resizeMode: "contain",
+    marginBottom: 24,
   },
   title: {
     fontSize: 32,
@@ -194,6 +187,25 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     backgroundColor: "#F9FAFB",
   },
+  passwordInputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 12,
+    backgroundColor: "#F9FAFB",
+  },
+  passwordInput: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 16,
+    color: COLORS.text,
+  },
+  eyeIcon: {
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
   forgotPassword: {
     fontSize: 14,
     fontWeight: "500",
@@ -202,14 +214,14 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   loginButton: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: BrandingColors.hotPink,
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: "center",
     justifyContent: "center",
     marginTop: 12,
     minHeight: 48,
-    shadowColor: COLORS.primary,
+    shadowColor: BrandingColors.hotPink,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
