@@ -1,16 +1,17 @@
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
+import { BrandingColors } from "@/constants/theme";
 import React, { useState } from "react";
 import {
     LayoutAnimation,
     Platform,
     StyleSheet,
     TouchableOpacity,
-    UIManager
+    UIManager,
 } from "react-native";
 
 const COLORS = {
-  primary: "#FAE0F0",
+  primary: BrandingColors.hotPink,
   text: "#1F2937",
   textLight: "#6B7280",
   border: "#E5E7EB",

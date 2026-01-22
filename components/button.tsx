@@ -1,3 +1,4 @@
+import { BrandingColors } from "@/constants/theme";
 import { LucideIcon } from "lucide-react-native";
 import { Pressable, Text } from "react-native";
 
@@ -17,9 +18,9 @@ export function Button({
   size = "md",
 }: ButtonProps) {
   const variantClasses = {
-    primary: "bg-blue-500 dark:bg-blue-600",
-    secondary: "bg-gray-500 dark:bg-gray-600",
-    outline: "border border-gray-300 dark:border-gray-600",
+    primary: `bg-[${BrandingColors.hotPink}] dark:bg-[${BrandingColors.hotPink}]`,
+    secondary: `bg-[${BrandingColors.lightPurple}] dark:bg-[${BrandingColors.lightPurple}]`,
+    outline: `border border-[${BrandingColors.teal}] dark:border-[${BrandingColors.teal}]`,
   };
 
   const sizeClasses = {

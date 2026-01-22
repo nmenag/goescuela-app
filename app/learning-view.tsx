@@ -2,18 +2,19 @@ import { Accordion } from "@/components/accordion";
 import { Tabs } from "@/components/tabs";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
+import { BrandingColors } from "@/constants/theme";
 import { getCourseById } from "@/data/mockData";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  Linking,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
+    Linking,
+    ScrollView,
+    StyleSheet,
+    TouchableOpacity,
 } from "react-native";
 
 const COLORS = {
-  primary: "#FAE0F0",
+  primary: BrandingColors.hotPink,
   background: "#FFFFFF",
   text: "#1F2937",
   textLight: "#6B7280",

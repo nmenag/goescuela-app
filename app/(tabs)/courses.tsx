@@ -1,13 +1,14 @@
 import { CourseCard } from "@/components/course-card";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
+import { BrandingColors } from "@/constants/theme";
 import { mockCourses } from "@/data/mockData";
 import { useRouter } from "expo-router";
 import React from "react";
 import { ScrollView, StyleSheet } from "react-native";
 
 const COLORS = {
-  primary: "#FAE0F0",
+  primary: BrandingColors.hotPink,
   background: "#FFFFFF",
   text: "#1F2937",
   textLight: "#6B7280",

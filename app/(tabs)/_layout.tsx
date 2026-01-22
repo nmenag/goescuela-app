@@ -4,10 +4,11 @@ import React from "react";
 import { StyleSheet } from "react-native";
 
 import { HapticTab } from "@/components/haptic-tab";
+import { BrandingColors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
 const COLORS = {
-  primary: "#FAE0F0",
+  primary: BrandingColors.hotPink,
   text: "#1F2937",
   textLight: "#6B7280",
   border: "#E5E7EB",
