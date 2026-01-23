@@ -1,14 +1,14 @@
-import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
-import { BrandingColors } from "@/constants/theme";
-import React, { useState } from "react";
-import { ScrollView, StyleSheet, TouchableOpacity } from "react-native";
+import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
+import { BrandingColors } from '@/constants/theme';
+import React, { useState } from 'react';
+import { ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 
 const COLORS = {
   primary: BrandingColors.hotPink,
-  text: "#1F2937",
-  textLight: "#6B7280",
-  border: "#E5E7EB",
+  text: '#1F2937',
+  textLight: '#6B7280',
+  border: '#E5E7EB',
 };
 
 interface TabItem {
@@ -37,24 +37,14 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, defaultTabId }) => {
         {tabs.map((tab) => (
           <TouchableOpacity
             key={tab.id}
-            style={[
-              styles.tabButton,
-              activeTab === tab.id && styles.tabButtonActive,
-            ]}
+            style={[styles.tabButton, activeTab === tab.id && styles.tabButtonActive]}
             onPress={() => setActiveTab(tab.id)}
             activeOpacity={0.7}
           >
-            <ThemedText
-              style={[
-                styles.tabLabel,
-                activeTab === tab.id && styles.tabLabelActive,
-              ]}
-            >
+            <ThemedText style={[styles.tabLabel, activeTab === tab.id && styles.tabLabelActive]}>
               {tab.label}
             </ThemedText>
-            {activeTab === tab.id && (
-              <ThemedView style={styles.activeIndicator} />
-            )}
+            {activeTab === tab.id && <ThemedView style={styles.activeIndicator} />}
           </TouchableOpacity>
         ))}
       </ScrollView>
@@ -79,8 +69,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 12,
     minHeight: 48,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   tabButtonActive: {
     borderBottomWidth: 3,
@@ -88,18 +78,18 @@ const styles = StyleSheet.create({
   },
   tabLabel: {
     fontSize: 14,
-    fontWeight: "500",
+    fontWeight: '500',
     color: COLORS.textLight,
   },
   tabLabelActive: {
     color: COLORS.primary,
-    fontWeight: "600",
+    fontWeight: '600',
   },
   activeIndicator: {
-    position: "absolute",
+    position: 'absolute',
     bottom: -12,
     height: 3,
-    width: "100%",
+    width: '100%',
     backgroundColor: COLORS.primary,
   },
   content: {

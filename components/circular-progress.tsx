@@ -1,11 +1,11 @@
-import React from "react";
-import { StyleSheet, Text, View } from "react-native";
-import Svg, { Circle } from "react-native-svg";
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import Svg, { Circle } from 'react-native-svg';
 
 const COLORS = {
-  primary: "#FAE0F0",
-  background: "#FFFFFF",
-  border: "#E5E7EB",
+  primary: '#FAE0F0',
+  background: '#FFFFFF',
+  border: '#E5E7EB',
 };
 
 interface CircularProgressBarProps {
@@ -21,7 +21,7 @@ export const CircularProgressBar: React.FC<CircularProgressBarProps> = ({
   strokeWidth,
   progress,
   color = COLORS.primary,
-  backgroundColor = "#E5E7EB",
+  backgroundColor = '#E5E7EB',
 }) => {
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
@@ -29,11 +29,7 @@ export const CircularProgressBar: React.FC<CircularProgressBarProps> = ({
 
   return (
     <View style={[styles.container, { width: size, height: size }]}>
-      <Svg
-        width={size}
-        height={size}
-        style={{ transform: [{ rotate: "-90deg" }] }}
-      >
+      <Svg width={size} height={size} style={{ transform: [{ rotate: '-90deg' }] }}>
         {/* Background circle */}
         <Circle
           cx={size / 2}
@@ -66,17 +62,17 @@ export const CircularProgressBar: React.FC<CircularProgressBarProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   centerText: {
-    position: "absolute",
-    justifyContent: "center",
-    alignItems: "center",
+    position: 'absolute',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   progressText: {
     fontSize: 20,
-    fontWeight: "700",
-    color: "#1F2937",
+    fontWeight: '700',
+    color: '#1F2937',
   },
 });

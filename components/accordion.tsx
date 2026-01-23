@@ -1,26 +1,17 @@
-import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
-import { BrandingColors } from "@/constants/theme";
-import React, { useState } from "react";
-import {
-    LayoutAnimation,
-    Platform,
-    StyleSheet,
-    TouchableOpacity,
-    UIManager,
-} from "react-native";
+import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
+import { BrandingColors } from '@/constants/theme';
+import React, { useState } from 'react';
+import { LayoutAnimation, Platform, StyleSheet, TouchableOpacity, UIManager } from 'react-native';
 
 const COLORS = {
   primary: BrandingColors.hotPink,
-  text: "#1F2937",
-  textLight: "#6B7280",
-  border: "#E5E7EB",
+  text: '#1F2937',
+  textLight: '#6B7280',
+  border: '#E5E7EB',
 };
 
-if (
-  Platform.OS === "android" &&
-  UIManager.setLayoutAnimationEnabledExperimental
-) {
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
@@ -48,34 +39,22 @@ export const Accordion: React.FC<AccordionProps> = ({ items }) => {
       {items.map((item) => (
         <ThemedView key={item.id} style={styles.itemContainer}>
           <TouchableOpacity
-            style={[
-              styles.header,
-              expandedId === item.id && styles.headerExpanded,
-            ]}
+            style={[styles.header, expandedId === item.id && styles.headerExpanded]}
             onPress={() => toggleExpand(item.id)}
             activeOpacity={0.7}
           >
             <ThemedView style={styles.headerLeft}>
               <ThemedText style={styles.title}>{item.title}</ThemedText>
               {item.duration && (
-                <ThemedText style={styles.duration}>
-                  {item.duration} min
-                </ThemedText>
+                <ThemedText style={styles.duration}>{item.duration} min</ThemedText>
               )}
             </ThemedView>
-            <ThemedText
-              style={[
-                styles.chevron,
-                expandedId === item.id && styles.chevronExpanded,
-              ]}
-            >
+            <ThemedText style={[styles.chevron, expandedId === item.id && styles.chevronExpanded]}>
               ›
             </ThemedText>
           </TouchableOpacity>
 
-          {expandedId === item.id && (
-            <ThemedView style={styles.content}>{item.content}</ThemedView>
-          )}
+          {expandedId === item.id && <ThemedView style={styles.content}>{item.content}</ThemedView>}
         </ThemedView>
       ))}
     </ThemedView>
@@ -89,15 +68,15 @@ const styles = StyleSheet.create({
   itemContainer: {
     marginBottom: 8,
     borderRadius: 12,
-    overflow: "hidden",
-    backgroundColor: "#FFFFFF",
+    overflow: 'hidden',
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: COLORS.border,
   },
   header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 14,
     minHeight: 56,
@@ -112,7 +91,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 15,
-    fontWeight: "600",
+    fontWeight: '600',
     color: COLORS.text,
     marginBottom: 4,
   },
@@ -123,14 +102,14 @@ const styles = StyleSheet.create({
   chevron: {
     fontSize: 24,
     color: COLORS.primary,
-    transform: [{ rotate: "0deg" }],
+    transform: [{ rotate: '0deg' }],
   },
   chevronExpanded: {
-    transform: [{ rotate: "90deg" }],
+    transform: [{ rotate: '90deg' }],
   },
   content: {
     paddingHorizontal: 16,
     paddingVertical: 14,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: '#F9FAFB',
   },
 });

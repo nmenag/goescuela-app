@@ -1,22 +1,22 @@
-import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
-import { BrandingColors } from "@/constants/theme";
-import { useAuth } from "@/context/AuthContext";
-import { getCurrentStudent } from "@/data/mockData";
-import React from "react";
-import { ScrollView, StyleSheet, TouchableOpacity } from "react-native";
+import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
+import { BrandingColors } from '@/constants/theme';
+import { useAuth } from '@/context/AuthContext';
+import { getCurrentStudent } from '@/data/mockData';
+import React from 'react';
+import { ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 
 const COLORS = {
   primary: BrandingColors.hotPink,
-  background: "#FFFFFF",
-  text: "#1F2937",
-  textLight: "#6B7280",
-  border: "#E5E7EB",
-  error: "#DC2626",
+  background: '#FFFFFF',
+  text: '#1F2937',
+  textLight: '#6B7280',
+  border: '#E5E7EB',
+  error: '#DC2626',
 };
 
 export default function ProfileScreen() {
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
   const student = getCurrentStudent();
 
   return (
@@ -34,9 +34,7 @@ export default function ProfileScreen() {
         {/* Stats Section */}
         <ThemedView style={styles.statsSection}>
           <ThemedView style={styles.statCard}>
-            <ThemedText style={styles.statValue}>
-              {student.enrolledCourses.length}
-            </ThemedText>
+            <ThemedText style={styles.statValue}>{student.enrolledCourses.length}</ThemedText>
             <ThemedText style={styles.statLabel}>Cursos Inscritos</ThemedText>
           </ThemedView>
           <ThemedView style={styles.statCard}>
@@ -97,10 +95,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   profileHeader: {
-    alignItems: "center",
+    alignItems: 'center',
     paddingVertical: 40,
     paddingHorizontal: 20,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: '#F9FAFB',
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
   },
@@ -109,8 +107,8 @@ const styles = StyleSheet.create({
     height: 100,
     borderRadius: 50,
     backgroundColor: COLORS.primary,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: 16,
   },
   avatar: {
@@ -118,7 +116,7 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: 24,
-    fontWeight: "700",
+    fontWeight: '700',
     color: COLORS.text,
     marginBottom: 4,
   },
@@ -127,7 +125,7 @@ const styles = StyleSheet.create({
     color: COLORS.textLight,
   },
   statsSection: {
-    flexDirection: "row",
+    flexDirection: 'row',
     paddingHorizontal: 20,
     paddingVertical: 24,
     gap: 12,
@@ -137,21 +135,21 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 12,
     borderRadius: 12,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: '#F9FAFB',
     borderWidth: 1,
     borderColor: COLORS.border,
-    alignItems: "center",
+    alignItems: 'center',
   },
   statValue: {
     fontSize: 20,
-    fontWeight: "700",
+    fontWeight: '700',
     color: COLORS.primary,
     marginBottom: 4,
   },
   statLabel: {
     fontSize: 12,
     color: COLORS.textLight,
-    textAlign: "center",
+    textAlign: 'center',
   },
   section: {
     paddingHorizontal: 20,
@@ -159,14 +157,14 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: '700',
     color: COLORS.text,
     marginBottom: 12,
   },
   settingItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingVertical: 14,
     paddingHorizontal: 12,
     borderBottomWidth: 1,
@@ -175,7 +173,7 @@ const styles = StyleSheet.create({
   settingLabel: {
     fontSize: 15,
     color: COLORS.text,
-    fontWeight: "500",
+    fontWeight: '500',
   },
   arrow: {
     fontSize: 20,
@@ -189,13 +187,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     backgroundColor: COLORS.error,
     borderRadius: 12,
-    alignItems: "center",
+    alignItems: 'center',
     minHeight: 48,
-    justifyContent: "center",
+    justifyContent: 'center',
   },
   logoutText: {
     fontSize: 16,
-    fontWeight: "600",
-    color: "#FFFFFF",
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
 });

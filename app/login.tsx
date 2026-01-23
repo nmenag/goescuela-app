@@ -1,32 +1,32 @@
-import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
-import { BrandingColors } from "@/constants/theme";
-import { useAuth } from "@/context/AuthContext";
-import { Eye, EyeOff } from "lucide-react-native";
-import React, { useState } from "react";
+import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
+import { BrandingColors } from '@/constants/theme';
+import { useAuth } from '@/context/AuthContext';
+import { Eye, EyeOff } from 'lucide-react-native';
+import React, { useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    Image,
-    StyleSheet,
-    TextInput,
-    TouchableOpacity,
-    View,
-} from "react-native";
+  ActivityIndicator,
+  Alert,
+  Image,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 const COLORS = {
   primary: BrandingColors.lightPink,
   primaryDark: BrandingColors.hotPink,
-  background: "#FFFFFF",
-  text: "#1F2937",
-  textLight: "#6B7280",
-  border: "#E5E7EB",
-  error: "#DC2626",
+  background: '#FFFFFF',
+  text: '#1F2937',
+  textLight: '#6B7280',
+  border: '#E5E7EB',
+  error: '#DC2626',
 };
 
 export default function LoginScreen() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const { login } = useAuth();
@@ -35,11 +35,11 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       // Demo mode - skip validation and login immediately
-      await login(email || "demo@example.com", password || "demo123");
+      await login(email || 'demo@example.com', password || 'demo123');
     } catch (error) {
       Alert.alert(
-        "Error de Inicio de Sesión",
-        error instanceof Error ? error.message : "Algo salió mal",
+        'Error de Inicio de Sesión',
+        error instanceof Error ? error.message : 'Algo salió mal',
       );
     } finally {
       setLoading(false);
@@ -51,10 +51,7 @@ export default function LoginScreen() {
       <ThemedView style={styles.content}>
         {/* Header */}
         <ThemedView style={styles.header}>
-          <Image
-            source={require("@/assets/images/logo.png")}
-            style={styles.logo}
-          />
+          <Image source={require('@/assets/images/logo.png')} style={styles.logo} />
         </ThemedView>
 
         {/* Login Form */}
@@ -101,9 +98,7 @@ export default function LoginScreen() {
 
           {/* Forgot Password Link */}
           <TouchableOpacity disabled={loading}>
-            <ThemedText style={styles.forgotPassword}>
-              ¿Olvidó la contraseña?
-            </ThemedText>
+            <ThemedText style={styles.forgotPassword}>¿Olvidó la contraseña?</ThemedText>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -128,7 +123,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
-    justifyContent: "center",
+    justifyContent: 'center',
     paddingHorizontal: 20,
   },
   content: {
@@ -136,31 +131,31 @@ const styles = StyleSheet.create({
   },
   header: {
     marginBottom: 40,
-    alignItems: "center",
+    alignItems: 'center',
     backgroundColor: COLORS.background,
   },
   logo: {
     width: 120,
     height: 120,
-    resizeMode: "contain",
+    resizeMode: 'contain',
     marginBottom: 24,
   },
   title: {
     fontSize: 32,
-    fontWeight: "700",
+    fontWeight: '700',
     color: COLORS.text,
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 20,
-    fontWeight: "600",
+    fontWeight: '600',
     color: COLORS.text,
     marginBottom: 12,
   },
   description: {
     fontSize: 14,
     color: COLORS.textLight,
-    textAlign: "center",
+    textAlign: 'center',
     lineHeight: 20,
   },
   formContainer: {
@@ -173,7 +168,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: '600',
     color: COLORS.text,
     marginBottom: 8,
   },
@@ -185,15 +180,15 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     fontSize: 16,
     color: COLORS.text,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: '#F9FAFB',
   },
   passwordInputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     borderWidth: 1,
     borderColor: COLORS.border,
     borderRadius: 12,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: '#F9FAFB',
   },
   passwordInput: {
     flex: 1,
@@ -208,17 +203,17 @@ const styles = StyleSheet.create({
   },
   forgotPassword: {
     fontSize: 14,
-    fontWeight: "500",
+    fontWeight: '500',
     color: COLORS.primary,
-    textAlign: "right",
+    textAlign: 'right',
     marginBottom: 24,
   },
   loginButton: {
     backgroundColor: BrandingColors.hotPink,
     borderRadius: 12,
     paddingVertical: 16,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     marginTop: 12,
     minHeight: 48,
     shadowColor: BrandingColors.hotPink,
@@ -232,30 +227,30 @@ const styles = StyleSheet.create({
   },
   loginButtonText: {
     fontSize: 16,
-    fontWeight: "600",
-    color: "#FFFFFF",
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
   demoSection: {
-    backgroundColor: "#F3E8FF",
+    backgroundColor: '#F3E8FF',
     borderRadius: 12,
     padding: 16,
     marginBottom: 20,
   },
   demoLabel: {
     fontSize: 12,
-    fontWeight: "600",
-    color: "#6D28D9",
+    fontWeight: '600',
+    color: '#6D28D9',
     marginBottom: 8,
   },
   demoText: {
     fontSize: 12,
-    color: "#6D28D9",
+    color: '#6D28D9',
     lineHeight: 18,
   },
   signupSection: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: COLORS.background,
   },
   signupText: {
@@ -264,7 +259,7 @@ const styles = StyleSheet.create({
   },
   signupLink: {
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: '600',
     color: COLORS.primary,
   },
 });

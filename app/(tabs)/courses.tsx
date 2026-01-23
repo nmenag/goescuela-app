@@ -1,17 +1,17 @@
-import { CourseCard } from "@/components/course-card";
-import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
-import { BrandingColors } from "@/constants/theme";
-import { mockCourses } from "@/data/mockData";
-import { useRouter } from "expo-router";
-import React from "react";
-import { ScrollView, StyleSheet } from "react-native";
+import { CourseCard } from '@/components/course-card';
+import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
+import { BrandingColors } from '@/constants/theme';
+import { mockCourses } from '@/data/mockData';
+import { useRouter } from 'expo-router';
+import React from 'react';
+import { ScrollView, StyleSheet } from 'react-native';
 
 const COLORS = {
   primary: BrandingColors.hotPink,
-  background: "#FFFFFF",
-  text: "#1F2937",
-  textLight: "#6B7280",
+  background: '#FFFFFF',
+  text: '#1F2937',
+  textLight: '#6B7280',
 };
 
 export default function CoursesScreen() {
@@ -19,7 +19,7 @@ export default function CoursesScreen() {
 
   const handleCoursePress = (courseId: string) => {
     router.push({
-      pathname: "/learning-view",
+      pathname: '/learning-view',
       params: { courseId },
     });
   };
@@ -28,9 +28,7 @@ export default function CoursesScreen() {
     <ThemedView style={styles.container}>
       <ThemedView style={styles.header}>
         <ThemedText style={styles.title}>Mis Cursos</ThemedText>
-        <ThemedText style={styles.subtitle}>
-          Explora todos los cursos disponibles
-        </ThemedText>
+        <ThemedText style={styles.subtitle}>Explora todos los cursos disponibles</ThemedText>
       </ThemedView>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -63,7 +61,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: "700",
+    fontWeight: '700',
     color: COLORS.text,
     marginBottom: 4,
   },

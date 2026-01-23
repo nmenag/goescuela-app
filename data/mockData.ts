@@ -9,7 +9,7 @@ export interface Lesson {
   resources?: {
     id: string;
     title: string;
-    type: "pdf" | "link" | "document";
+    type: 'pdf' | 'link' | 'document';
     url: string;
   }[];
 }
@@ -32,7 +32,7 @@ export interface Course {
   };
   thumbnail: string;
   category: string;
-  level: "Beginner" | "Intermediate" | "Advanced";
+  level: 'Beginner' | 'Intermediate' | 'Advanced';
   rating: number;
   students: number;
   modules: Module[];
@@ -86,59 +86,59 @@ export interface Student {
 // MOCK STUDENTS
 export const mockStudents: Student[] = [
   {
-    id: "student-1",
-    name: "Sarah Chen",
-    email: "sarah.chen@example.com",
-    avatar: "https://i.pravatar.cc/150?img=1",
-    enrolledCourses: ["course-1", "course-2", "course-3"],
+    id: 'student-1',
+    name: 'Sarah Chen',
+    email: 'sarah.chen@example.com',
+    avatar: 'https://i.pravatar.cc/150?img=1',
+    enrolledCourses: ['course-1', 'course-2', 'course-3'],
     progress: [
       {
-        studentId: "student-1",
-        courseId: "course-1",
+        studentId: 'student-1',
+        courseId: 'course-1',
         progress: 65,
-        completedLessons: ["lesson-1", "lesson-2", "lesson-3"],
-        currentLessonId: "lesson-4",
+        completedLessons: ['lesson-1', 'lesson-2', 'lesson-3'],
+        currentLessonId: 'lesson-4',
         lastAccessed: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
       },
       {
-        studentId: "student-1",
-        courseId: "course-2",
+        studentId: 'student-1',
+        courseId: 'course-2',
         progress: 30,
-        completedLessons: ["lesson-5", "lesson-6"],
-        currentLessonId: "lesson-7",
+        completedLessons: ['lesson-5', 'lesson-6'],
+        currentLessonId: 'lesson-7',
         lastAccessed: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
       },
       {
-        studentId: "student-1",
-        courseId: "course-3",
+        studentId: 'student-1',
+        courseId: 'course-3',
         progress: 90,
-        completedLessons: ["lesson-9", "lesson-10", "lesson-11", "lesson-12"],
-        currentLessonId: "lesson-13",
+        completedLessons: ['lesson-9', 'lesson-10', 'lesson-11', 'lesson-12'],
+        currentLessonId: 'lesson-13',
         lastAccessed: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
       },
     ],
     quizScores: [
       {
-        quizId: "quiz-module-1-1",
-        moduleId: "module-1",
+        quizId: 'quiz-module-1-1',
+        moduleId: 'module-1',
         score: 85,
         completedAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
       },
       {
-        quizId: "quiz-module-1-2",
-        moduleId: "module-2",
+        quizId: 'quiz-module-1-2',
+        moduleId: 'module-2',
         score: 92,
         completedAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
       },
       {
-        quizId: "quiz-module-2-1",
-        moduleId: "module-3",
+        quizId: 'quiz-module-2-1',
+        moduleId: 'module-3',
         score: 78,
         completedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
       },
       {
-        quizId: "quiz-module-3-1",
-        moduleId: "module-5",
+        quizId: 'quiz-module-3-1',
+        moduleId: 'module-5',
         score: 88,
         completedAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
       },
@@ -149,220 +149,215 @@ export const mockStudents: Student[] = [
 // MOCK COURSES
 export const mockCourses: Course[] = [
   {
-    id: "course-1",
-    title: "Ciencias Naturales",
+    id: 'course-1',
+    title: 'Ciencias Naturales',
     description:
-      "Aprende los conceptos fundamentales de ciencias naturales incluyendo biología, química y física.",
+      'Aprende los conceptos fundamentales de ciencias naturales incluyendo biología, química y física.',
     instructor: {
-      id: "instructor-1",
-      name: "Dr. James Wilson",
-      avatar: "https://i.pravatar.cc/150?img=5",
+      id: 'instructor-1',
+      name: 'Dr. James Wilson',
+      avatar: 'https://i.pravatar.cc/150?img=5',
     },
-    thumbnail:
-      "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=300&fit=crop",
-    category: "Ciencias",
-    level: "Beginner",
+    thumbnail: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=300&fit=crop',
+    category: 'Ciencias',
+    level: 'Beginner',
     rating: 4.8,
     students: 12500,
     duration: 20,
     price: 49.99,
     modules: [
       {
-        id: "module-1",
-        title: "Introducción a las Ciencias Naturales",
+        id: 'module-1',
+        title: 'Introducción a las Ciencias Naturales',
         duration: 4,
         lessons: [
           {
-            id: "lesson-1",
-            title: "Conceptos Básicos",
+            id: 'lesson-1',
+            title: 'Conceptos Básicos',
             duration: 45,
-            description:
-              "Aprende los conceptos básicos de las ciencias naturales.",
+            description: 'Aprende los conceptos básicos de las ciencias naturales.',
             resources: [
               {
-                id: "res-1",
-                title: "Guía de Introducción",
-                type: "pdf",
-                url: "https://example.com/intro.pdf",
+                id: 'res-1',
+                title: 'Guía de Introducción',
+                type: 'pdf',
+                url: 'https://example.com/intro.pdf',
               },
             ],
           },
           {
-            id: "lesson-2",
-            title: "El Método Científico",
+            id: 'lesson-2',
+            title: 'El Método Científico',
             duration: 60,
-            description:
-              "Explora el método científico y cómo se usa en la investigación.",
+            description: 'Explora el método científico y cómo se usa en la investigación.',
             resources: [
               {
-                id: "res-3",
-                title: "Guía del Método Científico",
-                type: "pdf",
-                url: "https://example.com/scientific-method.pdf",
+                id: 'res-3',
+                title: 'Guía del Método Científico',
+                type: 'pdf',
+                url: 'https://example.com/scientific-method.pdf',
               },
             ],
           },
           {
-            id: "lesson-3",
-            title: "Mediciones y Unidades",
+            id: 'lesson-3',
+            title: 'Mediciones y Unidades',
             duration: 55,
-            description: "Domina las mediciones y unidades en ciencias.",
+            description: 'Domina las mediciones y unidades en ciencias.',
           },
         ],
       },
       {
-        id: "module-2",
-        title: "Biología Básica",
+        id: 'module-2',
+        title: 'Biología Básica',
         duration: 6,
         lessons: [
           {
-            id: "lesson-4",
-            title: "Células y Organismos",
+            id: 'lesson-4',
+            title: 'Células y Organismos',
             duration: 70,
-            description: "Aprende sobre las células y los organismos vivos.",
+            description: 'Aprende sobre las células y los organismos vivos.',
           },
           {
-            id: "lesson-5",
-            title: "Ecosistemas",
+            id: 'lesson-5',
+            title: 'Ecosistemas',
             duration: 65,
-            description: "Entiende cómo funcionan los ecosistemas.",
+            description: 'Entiende cómo funcionan los ecosistemas.',
           },
         ],
       },
       {
-        id: "module-3",
-        title: "Física Fundamental",
+        id: 'module-3',
+        title: 'Física Fundamental',
         duration: 10,
         lessons: [
           {
-            id: "lesson-6",
-            title: "Movimiento y Fuerzas",
+            id: 'lesson-6',
+            title: 'Movimiento y Fuerzas',
             duration: 80,
-            description: "Estudia el movimiento y las fuerzas en la física.",
+            description: 'Estudia el movimiento y las fuerzas en la física.',
           },
           {
-            id: "lesson-7",
-            title: "Energía y Trabajo",
+            id: 'lesson-7',
+            title: 'Energía y Trabajo',
             duration: 75,
-            description: "Comprende la energía y el trabajo en sistemas físicos.",
+            description: 'Comprende la energía y el trabajo en sistemas físicos.',
           },
         ],
       },
     ],
   },
   {
-    id: "course-2",
-    title: "Inglés",
+    id: 'course-2',
+    title: 'Inglés',
     description:
-      "Aprende inglés desde lo básico hasta nivel intermedio con lecciones prácticas y conversaciones reales.",
+      'Aprende inglés desde lo básico hasta nivel intermedio con lecciones prácticas y conversaciones reales.',
     instructor: {
-      id: "instructor-2",
-      name: "Emma Rodriguez",
-      avatar: "https://i.pravatar.cc/150?img=9",
+      id: 'instructor-2',
+      name: 'Emma Rodriguez',
+      avatar: 'https://i.pravatar.cc/150?img=9',
     },
-    thumbnail:
-      "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400&h=300&fit=crop",
-    category: "Idiomas",
-    level: "Beginner",
+    thumbnail: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400&h=300&fit=crop',
+    category: 'Idiomas',
+    level: 'Beginner',
     rating: 4.7,
     students: 8200,
     duration: 16,
     price: 39.99,
     modules: [
       {
-        id: "module-4",
-        title: "Fundamentos del Inglés",
+        id: 'module-4',
+        title: 'Fundamentos del Inglés',
         duration: 5,
         lessons: [
           {
-            id: "lesson-8",
-            title: "Alfabeto y Pronunciación",
+            id: 'lesson-8',
+            title: 'Alfabeto y Pronunciación',
             duration: 60,
-            description: "Aprende el alfabeto inglés y la pronunciación correcta.",
+            description: 'Aprende el alfabeto inglés y la pronunciación correcta.',
           },
           {
-            id: "lesson-9",
-            title: "Vocabulario Básico",
+            id: 'lesson-9',
+            title: 'Vocabulario Básico',
             duration: 55,
-            description: "Construye tu vocabulario básico en inglés.",
+            description: 'Construye tu vocabulario básico en inglés.',
           },
         ],
       },
       {
-        id: "module-5",
-        title: "Gramática Esencial",
+        id: 'module-5',
+        title: 'Gramática Esencial',
         duration: 11,
         lessons: [
           {
-            id: "lesson-10",
-            title: "Tiempos Verbales",
+            id: 'lesson-10',
+            title: 'Tiempos Verbales',
             duration: 90,
-            description: "Domina los tiempos verbales en inglés.",
+            description: 'Domina los tiempos verbales en inglés.',
           },
           {
-            id: "lesson-11",
-            title: "Construcción de Oraciones",
+            id: 'lesson-11',
+            title: 'Construcción de Oraciones',
             duration: 75,
-            description: "Aprende a construir oraciones correctamente en inglés.",
+            description: 'Aprende a construir oraciones correctamente en inglés.',
           },
         ],
       },
     ],
   },
   {
-    id: "course-3",
-    title: "Prueba",
+    id: 'course-3',
+    title: 'Prueba',
     description:
-      "Un curso de prueba con contenido introductorio para familiarizarse con la plataforma.",
+      'Un curso de prueba con contenido introductorio para familiarizarse con la plataforma.',
     instructor: {
-      id: "instructor-3",
-      name: "Prof. Michael Zhang",
-      avatar: "https://i.pravatar.cc/150?img=3",
+      id: 'instructor-3',
+      name: 'Prof. Michael Zhang',
+      avatar: 'https://i.pravatar.cc/150?img=3',
     },
-    thumbnail:
-      "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=300&fit=crop",
-    category: "General",
-    level: "Beginner",
+    thumbnail: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=300&fit=crop',
+    category: 'General',
+    level: 'Beginner',
     rating: 4.9,
     students: 5400,
     duration: 24,
     price: 59.99,
     modules: [
       {
-        id: "module-6",
-        title: "Módulo 1: Introducción",
+        id: 'module-6',
+        title: 'Módulo 1: Introducción',
         duration: 8,
         lessons: [
           {
-            id: "lesson-12",
-            title: "Bienvenida al Curso",
+            id: 'lesson-12',
+            title: 'Bienvenida al Curso',
             duration: 65,
-            description: "Introducción y descripción general del curso.",
+            description: 'Introducción y descripción general del curso.',
           },
           {
-            id: "lesson-13",
-            title: "Cómo Usar la Plataforma",
+            id: 'lesson-13',
+            title: 'Cómo Usar la Plataforma',
             duration: 85,
-            description: "Aprende a navegar y usar la plataforma de manera efectiva.",
+            description: 'Aprende a navegar y usar la plataforma de manera efectiva.',
           },
         ],
       },
       {
-        id: "module-7",
-        title: "Módulo 2: Contenido Principal",
+        id: 'module-7',
+        title: 'Módulo 2: Contenido Principal',
         duration: 16,
         lessons: [
           {
-            id: "lesson-14",
-            title: "Lección 1",
+            id: 'lesson-14',
+            title: 'Lección 1',
             duration: 75,
-            description: "Primer contenido del módulo principal.",
+            description: 'Primer contenido del módulo principal.',
           },
           {
-            id: "lesson-15",
-            title: "Lección 2",
+            id: 'lesson-15',
+            title: 'Lección 2',
             duration: 90,
-            description: "Segundo contenido del módulo principal.",
+            description: 'Segundo contenido del módulo principal.',
           },
         ],
       },
@@ -372,81 +367,81 @@ export const mockCourses: Course[] = [
 
 // MOCK FEATURED CATEGORIES
 export const mockCategories = [
-  { id: "cat-1", name: "Mobile Development", icon: "phone" },
-  { id: "cat-2", name: "Web Development", icon: "globe" },
-  { id: "cat-3", name: "Design", icon: "palette" },
-  { id: "cat-4", name: "Data Science", icon: "bar-chart-2" },
-  { id: "cat-5", name: "Programming", icon: "code" },
-  { id: "cat-6", name: "Business", icon: "briefcase" },
+  { id: 'cat-1', name: 'Mobile Development', icon: 'phone' },
+  { id: 'cat-2', name: 'Web Development', icon: 'globe' },
+  { id: 'cat-3', name: 'Design', icon: 'palette' },
+  { id: 'cat-4', name: 'Data Science', icon: 'bar-chart-2' },
+  { id: 'cat-5', name: 'Programming', icon: 'code' },
+  { id: 'cat-6', name: 'Business', icon: 'briefcase' },
 ];
 
 // MOCK QUIZZES
 export const mockQuizzes: Quiz[] = [
   {
-    id: "quiz-1",
-    title: "Quiz de Fundamentos de React Native",
-    courseId: "course-1",
+    id: 'quiz-1',
+    title: 'Quiz de Fundamentos de React Native',
+    courseId: 'course-1',
     duration: 15,
     passingScore: 70,
     questions: [
       {
-        id: "q-1",
-        question: "¿Cuál es el propósito principal de React Native?",
+        id: 'q-1',
+        question: '¿Cuál es el propósito principal de React Native?',
         options: [
-          "Construir aplicaciones de escritorio",
-          "Crear aplicaciones móviles multiplataforma",
-          "Gestionar renderizado en el lado del servidor",
-          "Manejar operaciones de base de datos",
+          'Construir aplicaciones de escritorio',
+          'Crear aplicaciones móviles multiplataforma',
+          'Gestionar renderizado en el lado del servidor',
+          'Manejar operaciones de base de datos',
         ],
         correctAnswer: 1,
         explanation:
-          "React Native permite a los desarrolladores construir aplicaciones móviles multiplataforma usando JavaScript.",
+          'React Native permite a los desarrolladores construir aplicaciones móviles multiplataforma usando JavaScript.',
       },
       {
-        id: "q-2",
-        question: "¿Qué empresa creó React Native?",
-        options: ["Google", "Facebook (Meta)", "Netflix", "Twitter"],
+        id: 'q-2',
+        question: '¿Qué empresa creó React Native?',
+        options: ['Google', 'Facebook (Meta)', 'Netflix', 'Twitter'],
         correctAnswer: 1,
-        explanation: "React Native fue creado por Facebook (ahora Meta) en 2015.",
+        explanation: 'React Native fue creado por Facebook (ahora Meta) en 2015.',
       },
       {
-        id: "q-3",
-        question: "¿Cuál es la diferencia entre los componentes View y Text?",
+        id: 'q-3',
+        question: '¿Cuál es la diferencia entre los componentes View y Text?',
         options: [
-          "View muestra texto, Text muestra imágenes",
-          "View es para maquetación, Text es para mostrar contenido de texto",
-          "Son lo mismo",
-          "Text se usa para estilos",
+          'View muestra texto, Text muestra imágenes',
+          'View es para maquetación, Text es para mostrar contenido de texto',
+          'Son lo mismo',
+          'Text se usa para estilos',
         ],
         correctAnswer: 1,
         explanation:
-          "View es un componente contenedor usado para maquetación, mientras que Text es específicamente para mostrar contenido de texto.",
+          'View es un componente contenedor usado para maquetación, mientras que Text es específicamente para mostrar contenido de texto.',
       },
       {
-        id: "q-4",
-        question: "¿Cómo aplicas estilos en React Native?",
+        id: 'q-4',
+        question: '¿Cómo aplicas estilos en React Native?',
         options: [
-          "Usando archivos CSS",
-          "Usando estilos en línea con StyleSheet.create()",
-          "Usando Tailwind CSS",
-          "Usando solo librerías CSS-in-JS",
+          'Usando archivos CSS',
+          'Usando estilos en línea con StyleSheet.create()',
+          'Usando Tailwind CSS',
+          'Usando solo librerías CSS-in-JS',
         ],
         correctAnswer: 1,
         explanation:
-          "React Native usa StyleSheet.create() para definir estilos, similar a CSS pero sin clases.",
+          'React Native usa StyleSheet.create() para definir estilos, similar a CSS pero sin clases.',
       },
       {
-        id: "q-5",
-        question: "¿Cuál es el propósito del componente FlatList?",
+        id: 'q-5',
+        question: '¿Cuál es el propósito del componente FlatList?',
         options: [
-          "Crear maquetaciones de diseño plano",
-          "Renderizar listas grandes eficientemente",
-          "Crear animaciones",
-          "Gestionar estado",
+          'Crear maquetaciones de diseño plano',
+          'Renderizar listas grandes eficientemente',
+          'Crear animaciones',
+          'Gestionar estado',
         ],
         correctAnswer: 1,
         explanation:
-          "FlatList es un componente optimizado para renderizar listas grandes con uso mínimo de memoria.",
+          'FlatList es un componente optimizado para renderizar listas grandes con uso mínimo de memoria.',
       },
     ],
   },
@@ -486,10 +481,7 @@ export const getStudentModuleQuizScore = (
 };
 
 // Helper function to get all quiz scores for a student by course modules
-export const getStudentCourseQuizScores = (
-  studentId: string,
-  courseId: string,
-): QuizScore[] => {
+export const getStudentCourseQuizScores = (studentId: string, courseId: string): QuizScore[] => {
   const course = getCourseById(courseId);
   if (!course) return [];
 
@@ -504,7 +496,5 @@ export const getStudentCourseQuizScores = (
 export const getStudentEnrolledCourses = (studentId: string): Course[] => {
   const student = mockStudents.find((s) => s.id === studentId);
   if (!student) return [];
-  return mockCourses.filter((course) =>
-    student.enrolledCourses.includes(course.id),
-  );
+  return mockCourses.filter((course) => student.enrolledCourses.includes(course.id));
 };

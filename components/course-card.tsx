@@ -1,14 +1,14 @@
-import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
-import { BrandingColors } from "@/constants/theme";
-import React from "react";
-import { Image, StyleSheet, TouchableOpacity } from "react-native";
+import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
+import { BrandingColors } from '@/constants/theme';
+import React from 'react';
+import { Image, StyleSheet, TouchableOpacity } from 'react-native';
 
 const COLORS = {
   primary: BrandingColors.hotPink,
-  text: "#1F2937",
-  textLight: "#6B7280",
-  border: "#E5E7EB",
+  text: '#1F2937',
+  textLight: '#6B7280',
+  border: '#E5E7EB',
 };
 
 interface CourseCardProps {
@@ -18,17 +18,9 @@ interface CourseCardProps {
   onPress?: () => void;
 }
 
-export const CourseCard: React.FC<CourseCardProps> = ({
-  title,
-  thumbnail,
-  onPress,
-}) => {
+export const CourseCard: React.FC<CourseCardProps> = ({ title, thumbnail, onPress }) => {
   return (
-    <TouchableOpacity
-      style={styles.container}
-      onPress={onPress}
-      activeOpacity={0.8}
-    >
+    <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.8}>
       <ThemedView style={styles.card}>
         {/* Thumbnail */}
         <Image source={{ uri: thumbnail }} style={styles.thumbnail} />
@@ -51,30 +43,30 @@ const styles = StyleSheet.create({
   },
   card: {
     borderRadius: 16,
-    overflow: "hidden",
-    shadowColor: "#000",
+    overflow: 'hidden',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 3,
   },
   thumbnail: {
-    width: "100%",
+    width: '100%',
     height: 200,
-    backgroundColor: "#E5E7EB",
+    backgroundColor: '#E5E7EB',
   },
   ratingBadge: {
-    position: "absolute",
+    position: 'absolute',
     top: 12,
     right: 12,
-    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 8,
   },
   ratingText: {
     fontSize: 12,
-    fontWeight: "600",
+    fontWeight: '600',
     color: COLORS.text,
   },
   content: {
@@ -82,7 +74,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 15,
-    fontWeight: "600",
+    fontWeight: '600',
     color: COLORS.text,
     marginBottom: 6,
     lineHeight: 21,
@@ -93,9 +85,9 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   footer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   students: {
     fontSize: 12,
@@ -103,7 +95,7 @@ const styles = StyleSheet.create({
   },
   price: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: '700',
     color: COLORS.primary,
   },
 });
