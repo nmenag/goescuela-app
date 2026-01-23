@@ -66,6 +66,13 @@ export interface Quiz {
   passingScore: number; // percentage
 }
 
+export interface QuizScore {
+  quizId: string;
+  moduleId: string;
+  score: number; // 0-100
+  completedAt: string;
+}
+
 export interface Student {
   id: string;
   name: string;
@@ -73,6 +80,7 @@ export interface Student {
   avatar: string;
   enrolledCourses: string[];
   progress: StudentProgress[];
+  quizScores: QuizScore[];
 }
 
 // MOCK STUDENTS
@@ -109,6 +117,32 @@ export const mockStudents: Student[] = [
         lastAccessed: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
       },
     ],
+    quizScores: [
+      {
+        quizId: "quiz-module-1-1",
+        moduleId: "module-1",
+        score: 85,
+        completedAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
+      },
+      {
+        quizId: "quiz-module-1-2",
+        moduleId: "module-2",
+        score: 92,
+        completedAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+      },
+      {
+        quizId: "quiz-module-2-1",
+        moduleId: "module-3",
+        score: 78,
+        completedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+      },
+      {
+        quizId: "quiz-module-3-1",
+        moduleId: "module-5",
+        score: 88,
+        completedAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+      },
+    ],
   },
 ];
 
@@ -116,9 +150,9 @@ export const mockStudents: Student[] = [
 export const mockCourses: Course[] = [
   {
     id: "course-1",
-    title: "React Native Fundamentals",
+    title: "Ciencias Naturales",
     description:
-      "Learn the basics of building mobile applications with React Native. Perfect for beginners.",
+      "Aprende los conceptos fundamentales de ciencias naturales incluyendo biología, química y física.",
     instructor: {
       id: "instructor-1",
       name: "Dr. James Wilson",
@@ -126,7 +160,7 @@ export const mockCourses: Course[] = [
     },
     thumbnail:
       "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=300&fit=crop",
-    category: "Mobile Development",
+    category: "Ciencias",
     level: "Beginner",
     rating: 4.8,
     students: 12500,
@@ -135,88 +169,82 @@ export const mockCourses: Course[] = [
     modules: [
       {
         id: "module-1",
-        title: "Getting Started with React Native",
+        title: "Introducción a las Ciencias Naturales",
         duration: 4,
         lessons: [
           {
             id: "lesson-1",
-            title: "Introduction & Setup",
+            title: "Conceptos Básicos",
             duration: 45,
             description:
-              "Learn what React Native is and set up your development environment.",
+              "Aprende los conceptos básicos de las ciencias naturales.",
             resources: [
               {
                 id: "res-1",
-                title: "Setup Guide",
+                title: "Guía de Introducción",
                 type: "pdf",
-                url: "https://example.com/setup.pdf",
-              },
-              {
-                id: "res-2",
-                title: "Node.js Download",
-                type: "link",
-                url: "https://nodejs.org",
+                url: "https://example.com/intro.pdf",
               },
             ],
           },
           {
             id: "lesson-2",
-            title: "Core Components",
+            title: "El Método Científico",
             duration: 60,
             description:
-              "Explore the fundamental building blocks of React Native.",
+              "Explora el método científico y cómo se usa en la investigación.",
             resources: [
               {
                 id: "res-3",
-                title: "Components Cheat Sheet",
+                title: "Guía del Método Científico",
                 type: "pdf",
-                url: "https://example.com/components.pdf",
+                url: "https://example.com/scientific-method.pdf",
               },
             ],
           },
           {
             id: "lesson-3",
-            title: "Styling & Layout",
+            title: "Mediciones y Unidades",
             duration: 55,
-            description: "Master flexbox and styling in React Native.",
+            description: "Domina las mediciones y unidades en ciencias.",
           },
         ],
       },
       {
         id: "module-2",
-        title: "State Management & Navigation",
+        title: "Biología Básica",
         duration: 6,
         lessons: [
           {
             id: "lesson-4",
-            title: "React Hooks (useState, useEffect)",
+            title: "Células y Organismos",
             duration: 70,
-            description: "Learn how to manage state using hooks.",
+            description: "Aprende sobre las células y los organismos vivos.",
           },
           {
             id: "lesson-5",
-            title: "Navigation Patterns",
+            title: "Ecosistemas",
             duration: 65,
-            description: "Implement tab and stack navigation.",
+            description: "Entiende cómo funcionan los ecosistemas.",
           },
         ],
       },
       {
         id: "module-3",
-        title: "Advanced Topics",
+        title: "Física Fundamental",
         duration: 10,
         lessons: [
           {
             id: "lesson-6",
-            title: "Performance Optimization",
+            title: "Movimiento y Fuerzas",
             duration: 80,
-            description: "Optimize your React Native applications.",
+            description: "Estudia el movimiento y las fuerzas en la física.",
           },
           {
             id: "lesson-7",
-            title: "Testing & Debugging",
+            title: "Energía y Trabajo",
             duration: 75,
-            description: "Write tests and debug your code effectively.",
+            description: "Comprende la energía y el trabajo en sistemas físicos.",
           },
         ],
       },
@@ -224,9 +252,9 @@ export const mockCourses: Course[] = [
   },
   {
     id: "course-2",
-    title: "Web Design Essentials",
+    title: "Inglés",
     description:
-      "Master modern web design principles and create stunning user interfaces.",
+      "Aprende inglés desde lo básico hasta nivel intermedio con lecciones prácticas y conversaciones reales.",
     instructor: {
       id: "instructor-2",
       name: "Emma Rodriguez",
@@ -234,7 +262,7 @@ export const mockCourses: Course[] = [
     },
     thumbnail:
       "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400&h=300&fit=crop",
-    category: "Design",
+    category: "Idiomas",
     level: "Beginner",
     rating: 4.7,
     students: 8200,
@@ -243,39 +271,39 @@ export const mockCourses: Course[] = [
     modules: [
       {
         id: "module-4",
-        title: "Design Fundamentals",
+        title: "Fundamentos del Inglés",
         duration: 5,
         lessons: [
           {
             id: "lesson-8",
-            title: "Color Theory & Typography",
+            title: "Alfabeto y Pronunciación",
             duration: 60,
-            description: "Understand color theory and typography in design.",
+            description: "Aprende el alfabeto inglés y la pronunciación correcta.",
           },
           {
             id: "lesson-9",
-            title: "Layout & Composition",
+            title: "Vocabulario Básico",
             duration: 55,
-            description: "Create balanced and visually appealing layouts.",
+            description: "Construye tu vocabulario básico en inglés.",
           },
         ],
       },
       {
         id: "module-5",
-        title: "Tools & Techniques",
+        title: "Gramática Esencial",
         duration: 11,
         lessons: [
           {
             id: "lesson-10",
-            title: "Figma Mastery",
+            title: "Tiempos Verbales",
             duration: 90,
-            description: "Become proficient in using Figma for design.",
+            description: "Domina los tiempos verbales en inglés.",
           },
           {
             id: "lesson-11",
-            title: "Prototyping & Interaction Design",
+            title: "Construcción de Oraciones",
             duration: 75,
-            description: "Create interactive prototypes and animations.",
+            description: "Aprende a construir oraciones correctamente en inglés.",
           },
         ],
       },
@@ -283,9 +311,9 @@ export const mockCourses: Course[] = [
   },
   {
     id: "course-3",
-    title: "Advanced JavaScript",
+    title: "Prueba",
     description:
-      "Deep dive into JavaScript ES6+, closures, async/await, and advanced patterns.",
+      "Un curso de prueba con contenido introductorio para familiarizarse con la plataforma.",
     instructor: {
       id: "instructor-3",
       name: "Prof. Michael Zhang",
@@ -293,8 +321,8 @@ export const mockCourses: Course[] = [
     },
     thumbnail:
       "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=300&fit=crop",
-    category: "Programming",
-    level: "Advanced",
+    category: "General",
+    level: "Beginner",
     rating: 4.9,
     students: 5400,
     duration: 24,
@@ -302,106 +330,39 @@ export const mockCourses: Course[] = [
     modules: [
       {
         id: "module-6",
-        title: "ES6+ Features",
+        title: "Módulo 1: Introducción",
         duration: 8,
         lessons: [
           {
             id: "lesson-12",
-            title: "Arrow Functions & Destructuring",
+            title: "Bienvenida al Curso",
             duration: 65,
-            description: "Master modern JavaScript syntax.",
+            description: "Introducción y descripción general del curso.",
           },
           {
             id: "lesson-13",
-            title: "Promises & Async/Await",
+            title: "Cómo Usar la Plataforma",
             duration: 85,
-            description: "Handle asynchronous operations effectively.",
+            description: "Aprende a navegar y usar la plataforma de manera efectiva.",
           },
         ],
       },
       {
         id: "module-7",
-        title: "Advanced Patterns",
+        title: "Módulo 2: Contenido Principal",
         duration: 16,
         lessons: [
           {
             id: "lesson-14",
-            title: "Closures & Scope",
+            title: "Lección 1",
             duration: 75,
-            description: "Understand JavaScript scope and closures.",
+            description: "Primer contenido del módulo principal.",
           },
           {
             id: "lesson-15",
-            title: "Design Patterns",
+            title: "Lección 2",
             duration: 90,
-            description: "Learn common JavaScript design patterns.",
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: "course-4",
-    title: "UX/UI Design Bootcamp",
-    description:
-      "Complete guide to UX/UI design for web and mobile applications.",
-    instructor: {
-      id: "instructor-4",
-      name: "Sophia Klein",
-      avatar: "https://i.pravatar.cc/150?img=7",
-    },
-    thumbnail:
-      "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400&h=300&fit=crop",
-    category: "Design",
-    level: "Intermediate",
-    rating: 4.6,
-    students: 3200,
-    duration: 18,
-    modules: [
-      {
-        id: "module-8",
-        title: "UX Principles",
-        duration: 9,
-        lessons: [
-          {
-            id: "lesson-16",
-            title: "User Research & Personas",
-            duration: 70,
-            description: "Learn to conduct user research and create personas.",
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: "course-5",
-    title: "Python for Data Science",
-    description:
-      "Learn Python programming with focus on data science libraries and analysis.",
-    instructor: {
-      id: "instructor-5",
-      name: "Dr. Anil Patel",
-      avatar: "https://i.pravatar.cc/150?img=11",
-    },
-    thumbnail:
-      "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=300&fit=crop",
-    category: "Data Science",
-    level: "Intermediate",
-    rating: 4.8,
-    students: 6800,
-    duration: 22,
-    price: 49.99,
-    modules: [
-      {
-        id: "module-9",
-        title: "Python Basics",
-        duration: 6,
-        lessons: [
-          {
-            id: "lesson-17",
-            title: "Python Syntax & Data Types",
-            duration: 60,
-            description: "Get started with Python fundamentals.",
+            description: "Segundo contenido del módulo principal.",
           },
         ],
       },
@@ -423,69 +384,69 @@ export const mockCategories = [
 export const mockQuizzes: Quiz[] = [
   {
     id: "quiz-1",
-    title: "React Native Basics Quiz",
+    title: "Quiz de Fundamentos de React Native",
     courseId: "course-1",
     duration: 15,
     passingScore: 70,
     questions: [
       {
         id: "q-1",
-        question: "What is the main purpose of React Native?",
+        question: "¿Cuál es el propósito principal de React Native?",
         options: [
-          "To build desktop applications",
-          "To create cross-platform mobile applications",
-          "To manage server-side rendering",
-          "To handle database operations",
+          "Construir aplicaciones de escritorio",
+          "Crear aplicaciones móviles multiplataforma",
+          "Gestionar renderizado en el lado del servidor",
+          "Manejar operaciones de base de datos",
         ],
         correctAnswer: 1,
         explanation:
-          "React Native allows developers to build cross-platform mobile apps using JavaScript.",
+          "React Native permite a los desarrolladores construir aplicaciones móviles multiplataforma usando JavaScript.",
       },
       {
         id: "q-2",
-        question: "Which company created React Native?",
+        question: "¿Qué empresa creó React Native?",
         options: ["Google", "Facebook (Meta)", "Netflix", "Twitter"],
         correctAnswer: 1,
-        explanation: "React Native was created by Facebook (now Meta) in 2015.",
+        explanation: "React Native fue creado por Facebook (ahora Meta) en 2015.",
       },
       {
         id: "q-3",
-        question: "What is the difference between View and Text components?",
+        question: "¿Cuál es la diferencia entre los componentes View y Text?",
         options: [
-          "View displays text, Text displays images",
-          "View is for layout, Text is for displaying text content",
-          "They are the same",
-          "Text is used for styling",
+          "View muestra texto, Text muestra imágenes",
+          "View es para maquetación, Text es para mostrar contenido de texto",
+          "Son lo mismo",
+          "Text se usa para estilos",
         ],
         correctAnswer: 1,
         explanation:
-          "View is a container component used for layout, while Text is specifically for displaying text content.",
+          "View es un componente contenedor usado para maquetación, mientras que Text es específicamente para mostrar contenido de texto.",
       },
       {
         id: "q-4",
-        question: "How do you apply styles in React Native?",
+        question: "¿Cómo aplicas estilos en React Native?",
         options: [
-          "Using CSS files",
-          "Using inline styles with StyleSheet.create()",
-          "Using Tailwind CSS",
-          "Using CSS-in-JS libraries only",
+          "Usando archivos CSS",
+          "Usando estilos en línea con StyleSheet.create()",
+          "Usando Tailwind CSS",
+          "Usando solo librerías CSS-in-JS",
         ],
         correctAnswer: 1,
         explanation:
-          "React Native uses StyleSheet.create() to define styles, similar to CSS but without classes.",
+          "React Native usa StyleSheet.create() para definir estilos, similar a CSS pero sin clases.",
       },
       {
         id: "q-5",
-        question: "What is the purpose of the FlatList component?",
+        question: "¿Cuál es el propósito del componente FlatList?",
         options: [
-          "To create flat design layouts",
-          "To render large lists efficiently",
-          "To create animations",
-          "To manage state",
+          "Crear maquetaciones de diseño plano",
+          "Renderizar listas grandes eficientemente",
+          "Crear animaciones",
+          "Gestionar estado",
         ],
         correctAnswer: 1,
         explanation:
-          "FlatList is an optimized component for rendering large lists with minimal memory usage.",
+          "FlatList es un componente optimizado para renderizar listas grandes con uso mínimo de memoria.",
       },
     ],
   },
@@ -513,6 +474,30 @@ export const getStudentCourseProgress = (
 // Helper function to get quiz by course ID
 export const getQuizByCourseId = (courseId: string): Quiz | undefined => {
   return mockQuizzes.find((quiz) => quiz.courseId === courseId);
+};
+
+// Helper function to get quiz scores for a student by module ID
+export const getStudentModuleQuizScore = (
+  studentId: string,
+  moduleId: string,
+): QuizScore | undefined => {
+  const student = mockStudents.find((s) => s.id === studentId);
+  return student?.quizScores.find((qs) => qs.moduleId === moduleId);
+};
+
+// Helper function to get all quiz scores for a student by course modules
+export const getStudentCourseQuizScores = (
+  studentId: string,
+  courseId: string,
+): QuizScore[] => {
+  const course = getCourseById(courseId);
+  if (!course) return [];
+
+  const student = mockStudents.find((s) => s.id === studentId);
+  if (!student) return [];
+
+  const moduleIds = course.modules.map((m) => m.id);
+  return student.quizScores.filter((qs) => moduleIds.includes(qs.moduleId));
 };
 
 // Helper function to get all enrolled courses for a student

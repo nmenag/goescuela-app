@@ -1,17 +1,15 @@
-import { CategoryCard } from "@/components/category-card";
 import { CourseCard } from "@/components/course-card";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { BrandingColors } from "@/constants/theme";
 import { useAuth } from "@/context/AuthContext";
 import {
-    getCurrentStudent,
-    mockCategories,
-    mockCourses,
+  getCurrentStudent,
+  mockCourses,
 } from "@/data/mockData";
 import { useRouter } from "expo-router";
 import React from "react";
-import { ScrollView, StyleSheet, TouchableOpacity } from "react-native";
+import { FlatList, StyleSheet } from "react-native";
 
 const COLORS = {
   primary: BrandingColors.hotPink,
@@ -28,80 +26,61 @@ export default function HomeScreen() {
 
   const handleCoursePress = (courseId: string) => {
     router.push({
-      pathname: "/course-detail",
+      pathname: "/learning-view",
       params: { courseId },
     });
   };
 
   const renderHeader = () => (
     <ThemedView style={styles.header}>
-      <ThemedText style={styles.greeting}>Good morning 👋</ThemedText>
-      <ThemedText style={styles.name}>{user?.name || "Student"}</ThemedText>
+      <ThemedText style={styles.greeting}>Hola 👋</ThemedText>
+      <ThemedText style={styles.name}>{user?.name || "Estudiante"}</ThemedText>
     </ThemedView>
   );
 
-  const renderFeaturedCategories = () => (
-    <ThemedView style={styles.section}>
-      <ThemedView style={styles.sectionHeader}>
-        <ThemedText style={styles.sectionTitle}>Featured Categories</ThemedText>
-        <TouchableOpacity onPress={() => router.push("/courses")}>
-          <ThemedText style={styles.viewAll}>View all</ThemedText>
-        </TouchableOpacity>
-      </ThemedView>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        scrollEventThrottle={16}
-        style={styles.categoriesScroll}
-      >
-        {mockCategories.map((category) => (
-          <CategoryCard
-            key={category.id}
-            id={category.id}
-            name={category.name}
-            icon={category.icon}
-            onPress={() => router.push("/courses")}
+  const renderAllCourses = () => (
+    <FlatList
+      data={mockCourses}
+      renderItem={({ item }) => (
+        <ThemedView style={styles.courseCardWrapper}>
+          <CourseCard
+            key={item.id}
+            id={item.id}
+            title={item.title}
+            thumbnail={item.thumbnail}
+            onPress={() => handleCoursePress(item.id)}
           />
-        ))}
-      </ScrollView>
-    </ThemedView>
+        </ThemedView>
+      )}
+      keyExtractor={(item) => item.id}
+      scrollEnabled={false}
+      contentContainerStyle={styles.coursesContainer}
+    />
   );
 
-  const renderRecommendedCourses = () => (
-    <ThemedView style={styles.section}>
-      <ThemedView style={styles.sectionHeader}>
-        <ThemedText style={styles.sectionTitle}>Recommended For You</ThemedText>
-        <TouchableOpacity onPress={() => router.push("/courses")}>
-          <ThemedText style={styles.viewAll}>View all</ThemedText>
-        </TouchableOpacity>
-      </ThemedView>
-      {mockCourses.slice(0, 3).map((course) => (
-        <CourseCard
-          key={course.id}
-          id={course.id}
-          title={course.title}
-          instructor={course.instructor.name}
-          thumbnail={course.thumbnail}
-          rating={course.rating}
-          students={course.students}
-          price={course.price}
-          onPress={() => handleCoursePress(course.id)}
-        />
-      ))}
-    </ThemedView>
-  );
+  const renderListHeader = () => renderAllCourses();
 
   return (
     <ThemedView style={styles.container}>
-      <ScrollView
-        style={styles.scrollView}
+      <FlatList
+        data={mockCourses}
+        renderItem={({ item }) => (
+          <ThemedView style={styles.courseCardWrapper}>
+            <CourseCard
+              key={item.id}
+              id={item.id}
+              title={item.title}
+              thumbnail={item.thumbnail}
+              onPress={() => handleCoursePress(item.id)}
+            />
+          </ThemedView>
+        )}
+        keyExtractor={(item) => item.id}
+        ListHeaderComponent={renderHeader}
+        contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
         scrollEventThrottle={16}
-      >
-        {renderHeader()}
-        {renderFeaturedCategories()}
-        {renderRecommendedCourses()}
-      </ScrollView>
+      />
     </ThemedView>
   );
 }
@@ -111,11 +90,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
   },
-  scrollView: {
-    flex: 1,
+  listContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
   },
   header: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 0,
     paddingTop: 20,
     paddingBottom: 24,
     backgroundColor: COLORS.background,
@@ -130,28 +110,11 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: COLORS.text,
   },
-  section: {
-    paddingHorizontal: 20,
-    marginBottom: 32,
-  },
-  sectionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+  courseCardWrapper: {
     marginBottom: 16,
   },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: COLORS.text,
-  },
-  viewAll: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: COLORS.primary,
-  },
-  categoriesScroll: {
-    marginHorizontal: -20,
+  coursesContainer: {
     paddingHorizontal: 20,
+    paddingBottom: 20,
   },
 });

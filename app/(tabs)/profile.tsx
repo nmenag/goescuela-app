@@ -37,51 +37,51 @@ export default function ProfileScreen() {
             <ThemedText style={styles.statValue}>
               {student.enrolledCourses.length}
             </ThemedText>
-            <ThemedText style={styles.statLabel}>Courses Enrolled</ThemedText>
+            <ThemedText style={styles.statLabel}>Cursos Inscritos</ThemedText>
           </ThemedView>
           <ThemedView style={styles.statCard}>
             <ThemedText style={styles.statValue}>62%</ThemedText>
-            <ThemedText style={styles.statLabel}>Avg. Progress</ThemedText>
+            <ThemedText style={styles.statLabel}>Progreso Promedio</ThemedText>
           </ThemedView>
         </ThemedView>
 
         {/* Account Settings */}
         <ThemedView style={styles.section}>
-          <ThemedText style={styles.sectionTitle}>Account Settings</ThemedText>
+          <ThemedText style={styles.sectionTitle}>Configuración de Cuenta</ThemedText>
           <TouchableOpacity style={styles.settingItem}>
-            <ThemedText style={styles.settingLabel}>Edit Profile</ThemedText>
+            <ThemedText style={styles.settingLabel}>Editar Perfil</ThemedText>
             <ThemedText style={styles.arrow}>›</ThemedText>
           </TouchableOpacity>
           <TouchableOpacity style={styles.settingItem}>
-            <ThemedText style={styles.settingLabel}>Change Password</ThemedText>
+            <ThemedText style={styles.settingLabel}>Cambiar Contraseña</ThemedText>
             <ThemedText style={styles.arrow}>›</ThemedText>
           </TouchableOpacity>
           <TouchableOpacity style={styles.settingItem}>
-            <ThemedText style={styles.settingLabel}>Notifications</ThemedText>
+            <ThemedText style={styles.settingLabel}>Notificaciones</ThemedText>
             <ThemedText style={styles.arrow}>›</ThemedText>
           </TouchableOpacity>
         </ThemedView>
 
         {/* Help & Support */}
         <ThemedView style={styles.section}>
-          <ThemedText style={styles.sectionTitle}>Help & Support</ThemedText>
+          <ThemedText style={styles.sectionTitle}>Ayuda y Soporte</ThemedText>
           <TouchableOpacity style={styles.settingItem}>
-            <ThemedText style={styles.settingLabel}>Help Center</ThemedText>
+            <ThemedText style={styles.settingLabel}>Centro de Ayuda</ThemedText>
             <ThemedText style={styles.arrow}>›</ThemedText>
           </TouchableOpacity>
           <TouchableOpacity style={styles.settingItem}>
-            <ThemedText style={styles.settingLabel}>Contact Us</ThemedText>
+            <ThemedText style={styles.settingLabel}>Contáctenos</ThemedText>
             <ThemedText style={styles.arrow}>›</ThemedText>
           </TouchableOpacity>
           <TouchableOpacity style={styles.settingItem}>
-            <ThemedText style={styles.settingLabel}>About Goescuela</ThemedText>
+            <ThemedText style={styles.settingLabel}>Acerca de Goescuela</ThemedText>
             <ThemedText style={styles.arrow}>›</ThemedText>
           </TouchableOpacity>
         </ThemedView>
 
         {/* Logout Button */}
         <TouchableOpacity style={styles.logoutButton} onPress={logout}>
-          <ThemedText style={styles.logoutText}>Sign Out</ThemedText>
+          <ThemedText style={styles.logoutText}>Cerrar Sesión</ThemedText>
         </TouchableOpacity>
       </ScrollView>
     </ThemedView>

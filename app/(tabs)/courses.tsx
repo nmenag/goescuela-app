@@ -19,7 +19,7 @@ export default function CoursesScreen() {
 
   const handleCoursePress = (courseId: string) => {
     router.push({
-      pathname: "/course-detail",
+      pathname: "/learning-view",
       params: { courseId },
     });
   };
@@ -27,9 +27,9 @@ export default function CoursesScreen() {
   return (
     <ThemedView style={styles.container}>
       <ThemedView style={styles.header}>
-        <ThemedText style={styles.title}>My Courses</ThemedText>
+        <ThemedText style={styles.title}>Mis Cursos</ThemedText>
         <ThemedText style={styles.subtitle}>
-          Explore all available courses
+          Explora todos los cursos disponibles
         </ThemedText>
       </ThemedView>
 
@@ -40,11 +40,7 @@ export default function CoursesScreen() {
               key={course.id}
               id={course.id}
               title={course.title}
-              instructor={course.instructor.name}
               thumbnail={course.thumbnail}
-              rating={course.rating}
-              students={course.students}
-              price={course.price}
               onPress={() => handleCoursePress(course.id)}
             />
           ))}

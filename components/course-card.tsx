@@ -14,21 +14,13 @@ const COLORS = {
 interface CourseCardProps {
   id: string;
   title: string;
-  instructor: string;
   thumbnail: string;
-  rating: number;
-  students: number;
-  price?: number;
   onPress?: () => void;
 }
 
 export const CourseCard: React.FC<CourseCardProps> = ({
   title,
-  instructor,
   thumbnail,
-  rating,
-  students,
-  price,
   onPress,
 }) => {
   return (
@@ -41,28 +33,11 @@ export const CourseCard: React.FC<CourseCardProps> = ({
         {/* Thumbnail */}
         <Image source={{ uri: thumbnail }} style={styles.thumbnail} />
 
-        {/* Rating Badge */}
-        <ThemedView style={styles.ratingBadge}>
-          <ThemedText style={styles.ratingText}>⭐ {rating}</ThemedText>
-        </ThemedView>
-
         {/* Content */}
         <ThemedView style={styles.content}>
           <ThemedText style={styles.title} numberOfLines={2}>
             {title}
           </ThemedText>
-
-          <ThemedText style={styles.instructor} numberOfLines={1}>
-            {instructor}
-          </ThemedText>
-
-          {/* Footer */}
-          <ThemedView style={styles.footer}>
-            <ThemedText style={styles.students}>
-              {students.toLocaleString()} students
-            </ThemedText>
-            {price && <ThemedText style={styles.price}>${price}</ThemedText>}
-          </ThemedView>
         </ThemedView>
       </ThemedView>
     </TouchableOpacity>

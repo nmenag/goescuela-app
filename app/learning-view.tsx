@@ -1,16 +1,14 @@
 import { Accordion } from "@/components/accordion";
-import { Tabs } from "@/components/tabs";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { BrandingColors } from "@/constants/theme";
-import { getCourseById } from "@/data/mockData";
+import { getCourseById, getCurrentStudent, getStudentCourseProgress, getStudentCourseQuizScores } from "@/data/mockData";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useState } from "react";
+import React from "react";
 import {
-    Linking,
-    ScrollView,
-    StyleSheet,
-    TouchableOpacity,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
 } from "react-native";
 
 const COLORS = {
@@ -25,12 +23,14 @@ export default function LearningViewScreen() {
   const router = useRouter();
   const { courseId } = useLocalSearchParams<{ courseId: string }>();
   const course = getCourseById(courseId || "");
-  const [selectedModule, setSelectedModule] = useState(course?.modules[0]?.id);
+  const student = getCurrentStudent();
+  const progress = getStudentCourseProgress(student.id, courseId || "");
+  const quizScores = getStudentCourseQuizScores(student.id, courseId || "");
 
   if (!course) {
     return (
       <ThemedView style={styles.container}>
-        <ThemedText>Course not found</ThemedText>
+        <ThemedText>Curso no encontrado</ThemedText>
       </ThemedView>
     );
   }
@@ -56,136 +56,104 @@ export default function LearningViewScreen() {
             <ThemedText style={styles.lessonIcon}>▶</ThemedText>
           </TouchableOpacity>
         ))}
+        <ThemedView style={styles.quizButton}>
+          <TouchableOpacity style={styles.quizButtonContent}>
+            <ThemedText style={styles.quizButtonText}>Quiz del Módulo</ThemedText>
+          </TouchableOpacity>
+        </ThemedView>
       </ThemedView>
     ),
   }));
 
-  const overviewTab = (
-    <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false}>
-      <ThemedView style={styles.overviewSection}>
-        <ThemedText style={styles.overviewTitle}>About This Course</ThemedText>
-        <ThemedText style={styles.overviewText}>
-          {course.description}
-        </ThemedText>
+  const getQuizScoreForModule = (moduleId: string) => {
+    return quizScores.find((qs) => qs.moduleId === moduleId);
+  };
 
-        <ThemedText style={[styles.overviewTitle, { marginTop: 20 }]}>
-          Course Details
-        </ThemedText>
-        <ThemedView style={styles.detailRow}>
-          <ThemedText style={styles.detailLabel}>Level:</ThemedText>
-          <ThemedText style={styles.detailValue}>{course.level}</ThemedText>
-        </ThemedView>
-        <ThemedView style={styles.detailRow}>
-          <ThemedText style={styles.detailLabel}>Duration:</ThemedText>
-          <ThemedText style={styles.detailValue}>
-            {course.duration} hours
-          </ThemedText>
-        </ThemedView>
-        <ThemedView style={styles.detailRow}>
-          <ThemedText style={styles.detailLabel}>Modules:</ThemedText>
-          <ThemedText style={styles.detailValue}>
-            {course.modules.length}
-          </ThemedText>
-        </ThemedView>
-        <ThemedView style={styles.detailRow}>
-          <ThemedText style={styles.detailLabel}>Students:</ThemedText>
-          <ThemedText style={styles.detailValue}>
-            {course.students.toLocaleString()}
-          </ThemedText>
-        </ThemedView>
-
-        <ThemedText style={[styles.overviewTitle, { marginTop: 20 }]}>
-          Instructor
-        </ThemedText>
-        <ThemedView style={styles.instructorCard}>
-          <ThemedText style={styles.instructorName}>
-            {course.instructor.name}
-          </ThemedText>
-        </ThemedView>
-      </ThemedView>
-    </ScrollView>
-  );
-
-  const resourcesTab = (
-    <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false}>
-      <ThemedView style={styles.resourcesSection}>
-        <ThemedText style={styles.resourcesTitle}>Course Materials</ThemedText>
-
-        {course.modules.map((module) =>
-          module.lessons.map((lesson) =>
-            lesson.resources ? (
-              <ThemedView key={lesson.id} style={styles.resourceGroup}>
-                <ThemedText style={styles.lessonResourceTitle}>
-                  {lesson.title}
-                </ThemedText>
-                {lesson.resources.map((resource) => (
-                  <TouchableOpacity
-                    key={resource.id}
-                    style={styles.resourceItem}
-                    onPress={() => {
-                      if (resource.type === "link" || resource.type === "pdf") {
-                        Linking.openURL(resource.url);
-                      }
-                    }}
-                    activeOpacity={0.7}
-                  >
-                    <ThemedText style={styles.resourceIcon}>
-                      {resource.type === "pdf" ? "📄" : "🔗"}
-                    </ThemedText>
-                    <ThemedView style={styles.resourceInfo}>
-                      <ThemedText style={styles.resourceTitle}>
-                        {resource.title}
-                      </ThemedText>
-                      <ThemedText style={styles.resourceType}>
-                        {resource.type.toUpperCase()}
-                      </ThemedText>
-                    </ThemedView>
-                    <ThemedText style={styles.downloadIcon}>⬇</ThemedText>
-                  </TouchableOpacity>
-                ))}
-              </ThemedView>
-            ) : null,
-          ),
-        )}
-
-        {course.modules.every((m) => m.lessons.every((l) => !l.resources)) && (
-          <ThemedText style={styles.noResources}>
-            No resources available yet
-          </ThemedText>
-        )}
-      </ThemedView>
-    </ScrollView>
-  );
-
-  return (
-    <ThemedView style={styles.container}>
+  const renderHeader = () => (
+    <ThemedView>
       {/* Header with Back Button */}
       <ThemedView style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} activeOpacity={0.7}>
-          <ThemedText style={styles.backButton}>← Back</ThemedText>
+          <ThemedText style={styles.backButton}>← Atrás</ThemedText>
         </TouchableOpacity>
         <ThemedText style={styles.headerTitle} numberOfLines={1}>
           {course.title}
         </ThemedText>
       </ThemedView>
 
-      {/* Video Player Placeholder */}
-      <ThemedView style={styles.videoPlayer}>
-        <ThemedText style={styles.videoIcon}>▶️</ThemedText>
-        <ThemedText style={styles.videoText}>Video Player</ThemedText>
+      {/* Grade Section */}
+      <ThemedView style={styles.gradeSection}>
+        <ThemedView style={styles.gradeCard}>
+          <ThemedText style={styles.gradeLabel}>Tu Progreso</ThemedText>
+          <ThemedText style={styles.gradeValue}>
+            {progress ? Math.round(progress.progress) : 0}%
+          </ThemedText>
+          <ThemedView style={styles.gradeBar}>
+            <ThemedView
+              style={[
+                styles.gradeProgress,
+                { width: `${progress ? progress.progress : 0}%` }
+              ]}
+            />
+          </ThemedView>
+        </ThemedView>
       </ThemedView>
 
-      {/* Tabs Section */}
-      <Tabs
-        tabs={[
-          {
-            id: "curriculum",
-            label: "Curriculum",
-            content: <Accordion items={accordionItems} />,
-          },
-          { id: "overview", label: "Overview", content: overviewTab },
-          { id: "resources", label: "Resources", content: resourcesTab },
-        ]}
+      {/* Modules and Grades Container */}
+      <ThemedView style={styles.modulesAndGradesContainer}>
+        {/* Modules Section */}
+        <ThemedView style={styles.modulesColumn}>
+          <ThemedText style={styles.modulesTitle}>Módulos</ThemedText>
+        </ThemedView>
+
+        {/* Quiz Grades Section */}
+        {quizScores.length > 0 && (
+          <ThemedView style={styles.gradesColumn}>
+            <ThemedText style={styles.gradesTitle}>Calificaciones de Quiz</ThemedText>
+          </ThemedView>
+        )}
+      </ThemedView>
+    </ThemedView>
+  );
+
+  return (
+    <ThemedView style={styles.container}>
+      <FlatList
+        data={accordionItems}
+        renderItem={({ item, index }) => (
+          <ThemedView style={styles.moduleRowContainer}>
+            {/* Module */}
+            <ThemedView style={styles.moduleColumn}>
+              <ThemedView style={styles.accordionWrapper}>
+                <Accordion items={[item]} />
+              </ThemedView>
+            </ThemedView>
+
+            {/* Quiz Grade for this Module */}
+            {quizScores.length > 0 && (
+              <ThemedView style={styles.quizGradeColumn}>
+                {(() => {
+                  const moduleQuizScore = getQuizScoreForModule(item.id);
+                  return moduleQuizScore ? (
+                    <ThemedView style={styles.quizGradeCard}>
+                      <ThemedText style={styles.quizGradeValue}>{moduleQuizScore.score}</ThemedText>
+                      <ThemedText style={styles.quizGradeLabel}>/ 100</ThemedText>
+                    </ThemedView>
+                  ) : (
+                    <ThemedView style={styles.quizGradeCardEmpty}>
+                      <ThemedText style={styles.quizGradeValueEmpty}>-</ThemedText>
+                    </ThemedView>
+                  );
+                })()}
+              </ThemedView>
+            )}
+          </ThemedView>
+        )}
+        keyExtractor={(item) => item.id}
+        ListHeaderComponent={renderHeader}
+        contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
+        scrollEventThrottle={16}
       />
     </ThemedView>
   );
@@ -197,10 +165,14 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
     paddingTop: 50,
   },
+  listContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 20,
+  },
   header: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 16,
+    paddingHorizontal: 0,
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
@@ -210,6 +182,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: COLORS.primary,
     marginRight: 12,
+    paddingHorizontal: 16,
   },
   headerTitle: {
     flex: 1,
@@ -217,26 +190,126 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: COLORS.text,
   },
-  videoPlayer: {
-    height: 200,
-    backgroundColor: "#1F2937",
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 12,
-    marginHorizontal: 16,
-    marginVertical: 16,
+  gradeSection: {
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    backgroundColor: "#F9FAFB",
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
   },
-  videoIcon: {
-    fontSize: 48,
+  gradeCard: {
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  gradeLabel: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: COLORS.textLight,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
     marginBottom: 8,
   },
-  videoText: {
+  gradeValue: {
+    fontSize: 32,
+    fontWeight: "700",
+    color: COLORS.primary,
+    marginBottom: 12,
+  },
+  gradeBar: {
+    height: 8,
+    backgroundColor: "#E5E7EB",
+    borderRadius: 4,
+    overflow: "hidden",
+  },
+  gradeProgress: {
+    height: "100%",
+    backgroundColor: COLORS.primary,
+    borderRadius: 4,
+  },
+  modulesSection: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  modulesAndGradesContainer: {
+    flexDirection: "row",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    alignItems: "center",
+  },
+  modulesColumn: {
+    flex: 1,
+  },
+  modulesTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: COLORS.text,
+  },
+  gradesColumn: {
+    marginLeft: 12,
+    alignItems: "flex-end",
+  },
+  gradesTitle: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: COLORS.text,
+  },
+  moduleRowContainer: {
+    flexDirection: "row",
+    marginBottom: 12,
+    alignItems: "flex-start",
+  },
+  moduleColumn: {
+    flex: 1,
+  },
+  quizGradeColumn: {
+    width: 80,
+    marginLeft: 8,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  quizGradeCard: {
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    backgroundColor: COLORS.primary,
+    borderRadius: 8,
+    alignItems: "center",
+    minWidth: 70,
+  },
+  quizGradeCardEmpty: {
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    backgroundColor: "#F3F4F6",
+    borderRadius: 8,
+    alignItems: "center",
+    minWidth: 70,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  quizGradeValue: {
+    fontSize: 20,
+    fontWeight: "700",
     color: "#FFFFFF",
-    fontSize: 14,
+  },
+  quizGradeValueEmpty: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: COLORS.textLight,
+  },
+  quizGradeLabel: {
+    fontSize: 11,
     fontWeight: "500",
+    color: "#FFFFFF",
+  },
+  accordionWrapper: {
+    marginBottom: 12,
   },
   lessonsContainer: {
     gap: 8,
+    paddingTop: 8,
   },
   lessonItem: {
     flexDirection: "row",
@@ -266,107 +339,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: COLORS.primary,
   },
-  tabContent: {
-    flex: 1,
+  quizButton: {
+    marginTop: 12,
+    paddingVertical: 8,
   },
-  overviewSection: {
-    padding: 16,
-  },
-  overviewTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: COLORS.text,
-    marginBottom: 12,
-  },
-  overviewText: {
-    fontSize: 14,
-    color: COLORS.textLight,
-    lineHeight: 20,
-  },
-  detailRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
-  },
-  detailLabel: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: COLORS.text,
-  },
-  detailValue: {
-    fontSize: 14,
-    color: COLORS.primary,
-    fontWeight: "600",
-  },
-  instructorCard: {
-    paddingHorizontal: 12,
+  quizButtonContent: {
+    paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: COLORS.primary,
     borderRadius: 8,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  instructorName: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: COLORS.text,
-  },
-  resourcesSection: {
-    padding: 16,
-  },
-  resourcesTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: COLORS.text,
-    marginBottom: 16,
-  },
-  resourceGroup: {
-    marginBottom: 20,
-  },
-  lessonResourceTitle: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: COLORS.text,
-    marginBottom: 10,
-  },
-  resourceItem: {
-    flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    backgroundColor: "#F9FAFB",
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    marginBottom: 8,
   },
-  resourceIcon: {
-    fontSize: 20,
-    marginRight: 12,
-  },
-  resourceInfo: {
-    flex: 1,
-  },
-  resourceTitle: {
+  quizButtonText: {
     fontSize: 14,
-    fontWeight: "500",
-    color: COLORS.text,
-    marginBottom: 2,
-  },
-  resourceType: {
-    fontSize: 11,
-    color: COLORS.textLight,
-  },
-  downloadIcon: {
-    fontSize: 16,
-    color: COLORS.primary,
-  },
-  noResources: {
-    fontSize: 14,
-    color: COLORS.textLight,
-    textAlign: "center",
-    marginVertical: 40,
+    fontWeight: "600",
+    color: "#FFFFFF",
   },
 });

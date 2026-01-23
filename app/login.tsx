@@ -5,13 +5,13 @@ import { useAuth } from "@/context/AuthContext";
 import { Eye, EyeOff } from "lucide-react-native";
 import React, { useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    Image,
+    StyleSheet,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 const COLORS = {
@@ -38,8 +38,8 @@ export default function LoginScreen() {
       await login(email || "demo@example.com", password || "demo123");
     } catch (error) {
       Alert.alert(
-        "Login Failed",
-        error instanceof Error ? error.message : "Something went wrong",
+        "Error de Inicio de Sesión",
+        error instanceof Error ? error.message : "Algo salió mal",
       );
     } finally {
       setLoading(false);
@@ -60,10 +60,10 @@ export default function LoginScreen() {
         {/* Login Form */}
         <ThemedView style={styles.formContainer}>
           <ThemedView style={styles.inputGroup}>
-            <ThemedText style={styles.label}>Email Address</ThemedText>
+            <ThemedText style={styles.label}>Correo Electrónico</ThemedText>
             <TextInput
               style={styles.input}
-              placeholder="you@example.com"
+              placeholder="tu@ejemplo.com"
               placeholderTextColor={COLORS.textLight}
               keyboardType="email-address"
               autoCapitalize="none"
@@ -74,7 +74,7 @@ export default function LoginScreen() {
           </ThemedView>
 
           <ThemedView style={styles.inputGroup}>
-            <ThemedText style={styles.label}>Password</ThemedText>
+            <ThemedText style={styles.label}>Contraseña</ThemedText>
             <View style={styles.passwordInputContainer}>
               <TextInput
                 style={styles.passwordInput}
@@ -102,7 +102,7 @@ export default function LoginScreen() {
           {/* Forgot Password Link */}
           <TouchableOpacity disabled={loading}>
             <ThemedText style={styles.forgotPassword}>
-              Forgot password?
+              ¿Olvidó la contraseña?
             </ThemedText>
           </TouchableOpacity>
 
@@ -115,7 +115,7 @@ export default function LoginScreen() {
             {loading ? (
               <ActivityIndicator color="white" size="small" />
             ) : (
-              <ThemedText style={styles.loginButtonText}>Sign In</ThemedText>
+              <ThemedText style={styles.loginButtonText}>Iniciar Sesión</ThemedText>
             )}
           </TouchableOpacity>
         </ThemedView>

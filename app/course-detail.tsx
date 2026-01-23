@@ -29,7 +29,7 @@ export default function CourseDetailScreen() {
   if (!course) {
     return (
       <ThemedView style={styles.container}>
-        <ThemedText>Course not found</ThemedText>
+        <ThemedText>Curso no encontrado</ThemedText>
       </ThemedView>
     );
   }
@@ -58,7 +58,7 @@ export default function CourseDetailScreen() {
       {/* Header with Back Button */}
       <ThemedView style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} activeOpacity={0.7}>
-          <ThemedText style={styles.backButton}>← Back</ThemedText>
+          <ThemedText style={styles.backButton}>← Atrás</ThemedText>
         </TouchableOpacity>
       </ThemedView>
 
@@ -69,53 +69,26 @@ export default function CourseDetailScreen() {
         {/* Course Title */}
         <ThemedView style={styles.titleSection}>
           <ThemedText style={styles.title}>{course.title}</ThemedText>
-          <ThemedView style={styles.ratingSection}>
-            <ThemedText style={styles.rating}>⭐ {course.rating}</ThemedText>
-            <ThemedText style={styles.students}>
-              ({course.students.toLocaleString()} students)
-            </ThemedText>
-          </ThemedView>
-        </ThemedView>
-
-        {/* Instructor */}
-        <ThemedView style={styles.instructorSection}>
-          <ThemedText style={styles.sectionLabel}>Instructor</ThemedText>
-          <ThemedView style={styles.instructorCard}>
-            <ThemedText style={styles.instructorName}>
-              {course.instructor.name}
-            </ThemedText>
-            <ThemedText style={styles.instructorRole}>
-              Expert Instructor
-            </ThemedText>
-          </ThemedView>
         </ThemedView>
 
         {/* Course Statistics */}
         <ThemedView style={styles.statsSection}>
           <ThemedView style={styles.statItem}>
-            <ThemedText style={styles.statValue}>{course.duration}h</ThemedText>
-            <ThemedText style={styles.statLabel}>Duration</ThemedText>
-          </ThemedView>
-          <ThemedView style={styles.statItem}>
             <ThemedText style={styles.statValue}>
               {course.modules.length}
             </ThemedText>
-            <ThemedText style={styles.statLabel}>Modules</ThemedText>
+            <ThemedText style={styles.statLabel}>Módulos</ThemedText>
           </ThemedView>
           <ThemedView style={styles.statItem}>
             <ThemedText style={styles.statValue}>{totalLessons}</ThemedText>
-            <ThemedText style={styles.statLabel}>Lessons</ThemedText>
-          </ThemedView>
-          <ThemedView style={styles.statItem}>
-            <ThemedText style={styles.statValue}>{course.level}</ThemedText>
-            <ThemedText style={styles.statLabel}>Level</ThemedText>
+            <ThemedText style={styles.statLabel}>Lecciones</ThemedText>
           </ThemedView>
         </ThemedView>
 
         {/* Progress */}
         {progress && (
           <ThemedView style={styles.progressSection}>
-            <ThemedText style={styles.sectionLabel}>Your Progress</ThemedText>
+            <ThemedText style={styles.sectionLabel}>Tu Progreso</ThemedText>
             <ThemedView style={styles.progressContent}>
               <CircularProgressBar
                 size={120}
@@ -125,11 +98,10 @@ export default function CourseDetailScreen() {
               />
               <ThemedView style={styles.progressInfo}>
                 <ThemedText style={styles.progressText}>
-                  {progress.completedLessons.length} of {totalLessons} lessons
-                  completed
+                  {progress.completedLessons.length} de {totalLessons} lecciones completadas
                 </ThemedText>
                 <ThemedText style={styles.progressPercentage}>
-                  {Math.round(progress.progress)}% Complete
+                  {Math.round(progress.progress)}% Completado
                 </ThemedText>
               </ThemedView>
             </ThemedView>
@@ -138,7 +110,7 @@ export default function CourseDetailScreen() {
 
         {/* Description */}
         <ThemedView style={styles.descriptionSection}>
-          <ThemedText style={styles.sectionLabel}>About This Course</ThemedText>
+          <ThemedText style={styles.sectionLabel}>Acerca de Este Curso</ThemedText>
           <ThemedText style={styles.description}>
             {course.description}
           </ThemedText>
@@ -146,29 +118,29 @@ export default function CourseDetailScreen() {
 
         {/* What You'll Learn */}
         <ThemedView style={styles.learningSection}>
-          <ThemedText style={styles.sectionLabel}>What Learn</ThemedText>
+          <ThemedText style={styles.sectionLabel}>Qué Aprenderás</ThemedText>
           <ThemedView style={styles.learningItem}>
             <ThemedText style={styles.bullet}>✓</ThemedText>
             <ThemedText style={styles.learningText}>
-              Master all core concepts and best practices
+              Domina todos los conceptos principales y mejores prácticas
             </ThemedText>
           </ThemedView>
           <ThemedView style={styles.learningItem}>
             <ThemedText style={styles.bullet}>✓</ThemedText>
             <ThemedText style={styles.learningText}>
-              Build real-world projects from scratch
+              Construye proyectos del mundo real desde cero
             </ThemedText>
           </ThemedView>
           <ThemedView style={styles.learningItem}>
             <ThemedText style={styles.bullet}>✓</ThemedText>
             <ThemedText style={styles.learningText}>
-              Gain hands-on experience with industry tools
+              Obtén experiencia práctica con herramientas de la industria
             </ThemedText>
           </ThemedView>
           <ThemedView style={styles.learningItem}>
             <ThemedText style={styles.bullet}>✓</ThemedText>
             <ThemedText style={styles.learningText}>
-              Complete assignments and earn certification
+              Completa tareas y obtén certificación
             </ThemedText>
           </ThemedView>
         </ThemedView>
@@ -181,7 +153,7 @@ export default function CourseDetailScreen() {
             activeOpacity={0.7}
           >
             <ThemedText style={styles.primaryButtonText}>
-              {progress ? "Continue Learning" : "Start Learning"}
+              {progress ? "Continuar Aprendiendo" : "Comenzar a Aprender"}
             </ThemedText>
           </TouchableOpacity>
 
@@ -191,7 +163,7 @@ export default function CourseDetailScreen() {
             activeOpacity={0.7}
           >
             <ThemedText style={styles.secondaryButtonText}>
-              Take Quiz
+              Hacer Quiz
             </ThemedText>
           </TouchableOpacity>
         </ThemedView>
