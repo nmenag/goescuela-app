@@ -25,6 +25,7 @@ export default function QuizScreen() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState<any>({});
   const [showFeedback, setShowFeedback] = useState(false);
+  const [isCurrentAnswerCorrect, setIsCurrentAnswerCorrect] = useState(false);
   const [score, setScore] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
 
@@ -61,6 +62,33 @@ export default function QuizScreen() {
   const currentQuestion = quiz.questions[currentQuestionIndex];
   const isLastQuestion = currentQuestionIndex === quiz.questions.length - 1;
 
+  const hasAnswered = () => {
+    const currentAns = userAnswers[currentQuestionIndex];
+
+    if (currentQuestion.type === 'multiple-choice' || currentQuestion.type === 'true-false') {
+      if (currentQuestion.allowMultipleAnswers) {
+        // For multiple selection, check if array exists and has at least one item
+        return Array.isArray(currentAns) && currentAns.length > 0;
+      } else {
+        // For single selection
+        return currentAns !== undefined && currentAns !== null && currentAns !== '';
+      }
+    } else if (currentQuestion.type === 'text') {
+      return currentAns !== undefined && currentAns !== null && currentAns.trim() !== '';
+    } else if (currentQuestion.type === 'sequence') {
+      return currentAns !== undefined && Array.isArray(currentAns) && currentAns.length > 0;
+    } else if (currentQuestion.type === 'fill-in-blank') {
+      const blanks = currentQuestion.answers.filter((a) => a.blank_position);
+      if (!currentAns || typeof currentAns !== 'object') return false;
+      // Check if at least one blank is filled
+      return blanks.some((blank) => {
+        const userVal = currentAns[blank.blank_position || 0];
+        return userVal && userVal.trim() !== '';
+      });
+    }
+    return false;
+  };
+
   const handleNext = () => {
     if (showFeedback) {
       if (isLastQuestion) {
@@ -70,6 +98,12 @@ export default function QuizScreen() {
         setShowFeedback(false);
       }
     } else {
+      // Validate that user has answered before checking
+      if (!hasAnswered()) {
+        // You could show an alert or toast here
+        alert('Por favor, selecciona una respuesta antes de continuar.');
+        return;
+      }
       checkAnswer();
       setShowFeedback(true);
     }
@@ -80,9 +114,23 @@ export default function QuizScreen() {
     let isCorrect = false;
 
     if (currentQuestion.type === 'multiple-choice' || currentQuestion.type === 'true-false') {
-      const correctOption = currentQuestion.answers.find((a) => a.is_correct);
-      if (correctOption && currentAns === correctOption.content) {
-        isCorrect = true;
+      if (currentQuestion.allowMultipleAnswers) {
+        // For multiple selection, check if all correct answers are selected and no incorrect ones
+        const correctAnswers = currentQuestion.answers
+          .filter((a) => a.is_correct)
+          .map((a) => a.content);
+        const selectedAnswers = Array.isArray(currentAns) ? currentAns : [];
+
+        // Check if arrays match (all correct selected, no incorrect selected)
+        isCorrect =
+          correctAnswers.length === selectedAnswers.length &&
+          correctAnswers.every((ans) => selectedAnswers.includes(ans));
+      } else {
+        // Single selection
+        const correctOption = currentQuestion.answers.find((a) => a.is_correct);
+        if (correctOption && currentAns === correctOption.content) {
+          isCorrect = true;
+        }
       }
     } else if (currentQuestion.type === 'text') {
       const possibleAnswers = currentQuestion.answers.map((a) => a.content.toLowerCase());
@@ -106,6 +154,9 @@ export default function QuizScreen() {
         return userVal && userVal.toLowerCase() === blank.content.toLowerCase();
       });
     }
+
+    // Store the correctness result
+    setIsCurrentAnswerCorrect(isCorrect);
 
     if (isCorrect) {
       setScore((prev) => prev + (currentQuestion.pointMultiplier === 'double' ? 20 : 10));
@@ -133,10 +184,37 @@ export default function QuizScreen() {
   };
 
   const renderMultipleChoice = () => {
+    const isMultiSelect = currentQuestion.allowMultipleAnswers;
+    const currentAns = userAnswers[currentQuestionIndex];
+    const selectedAnswers = isMultiSelect ? (Array.isArray(currentAns) ? currentAns : []) : null;
+
+    const handleOptionPress = (content: string) => {
+      if (showFeedback) return;
+
+      if (isMultiSelect) {
+        // Toggle selection for multiple choice
+        const current = Array.isArray(currentAns) ? currentAns : [];
+        const newSelection = current.includes(content)
+          ? current.filter((item) => item !== content)
+          : [...current, content];
+        setUserAnswers({ ...userAnswers, [currentQuestionIndex]: newSelection });
+      } else {
+        // Single selection
+        setUserAnswers({ ...userAnswers, [currentQuestionIndex]: content });
+      }
+    };
+
     return (
       <View style={styles.optionsContainer}>
+        {isMultiSelect && (
+          <ThemedText style={styles.multiSelectHint}>
+            Selecciona todas las opciones correctas
+          </ThemedText>
+        )}
         {currentQuestion.answers.map((option, index) => {
-          const isSelected = userAnswers[currentQuestionIndex] === option.content;
+          const isSelected = isMultiSelect
+            ? selectedAnswers?.includes(option.content)
+            : currentAns === option.content;
           let backgroundColor = '#F3F4F6';
           let borderColor = 'transparent';
 
@@ -157,12 +235,18 @@ export default function QuizScreen() {
             <TouchableOpacity
               key={index}
               style={[styles.optionButton, { backgroundColor, borderColor, borderWidth: 1 }]}
-              onPress={() =>
-                !showFeedback &&
-                setUserAnswers({ ...userAnswers, [currentQuestionIndex]: option.content })
-              }
+              onPress={() => handleOptionPress(option.content)}
               disabled={showFeedback}
             >
+              <View style={styles.selectionIndicator}>
+                {isMultiSelect ? (
+                  <View style={[styles.checkbox, isSelected && styles.checkboxSelected]}>
+                    {isSelected && <Check size={16} color="#FFFFFF" />}
+                  </View>
+                ) : (
+                  <View style={[styles.radioButton, isSelected && styles.radioButtonSelected]} />
+                )}
+              </View>
               <ThemedText style={styles.optionText}>{option.content}</ThemedText>
               {showFeedback && option.is_correct && <Check size={20} color={COLORS.correct} />}
               {showFeedback && isSelected && !option.is_correct && (
@@ -370,11 +454,20 @@ export default function QuizScreen() {
         {renderQuestionContent()}
 
         {showFeedback && (
-          <View style={styles.feedbackContainer}>
+          <View
+            style={[
+              styles.feedbackContainer,
+              isCurrentAnswerCorrect ? styles.feedbackCorrect : styles.feedbackIncorrect,
+            ]}
+          >
             <ThemedText style={styles.feedbackMainText}>
-              {currentQuestion.feedback
-                ? currentQuestion.feedback.correct
-                : currentQuestion.feedback_on_correct || '¡Bien hecho!'}
+              {isCurrentAnswerCorrect
+                ? currentQuestion.feedback?.correct ||
+                  currentQuestion.feedback_on_correct ||
+                  '¡Correcto!'
+                : currentQuestion.feedback?.incorrect ||
+                  currentQuestion.feedback_on_incorrect ||
+                  'Incorrecto. Inténtalo de nuevo.'}
             </ThemedText>
           </View>
         )}
@@ -600,8 +693,53 @@ const styles = StyleSheet.create({
     borderLeftWidth: 4,
     borderLeftColor: COLORS.primary,
   },
+  feedbackCorrect: {
+    backgroundColor: '#ECFDF5',
+    borderLeftColor: COLORS.correct,
+  },
+  feedbackIncorrect: {
+    backgroundColor: '#FEF2F2',
+    borderLeftColor: COLORS.incorrect,
+  },
   feedbackMainText: {
     color: '#1E40AF',
     fontSize: 14,
+  },
+  multiSelectHint: {
+    fontSize: 14,
+    color: COLORS.textLight,
+    fontStyle: 'italic',
+    marginBottom: 12,
+  },
+  selectionIndicator: {
+    marginRight: 12,
+  },
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: COLORS.border,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkboxSelected: {
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
+  },
+  radioButton: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: COLORS.border,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  radioButtonSelected: {
+    borderColor: COLORS.primary,
+    backgroundColor: COLORS.primary,
   },
 });

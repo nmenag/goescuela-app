@@ -82,6 +82,7 @@ export interface QuizQuestion {
   feedback?: QuestionFeedback;
   feedback_on_correct?: string;
   feedback_on_incorrect?: string;
+  allowMultipleAnswers?: boolean;
   answers: Answer[];
 }
 
@@ -429,20 +430,35 @@ export const mockQuizzes: Quiz[] = [
     passingScore: 70,
     questions: [
       {
-        title: 'Question text here',
+        title: '¿Cuál es el propósito principal de React Native?',
         type: 'multiple-choice',
+        allowMultipleAnswers: false,
         timer: 30,
         pointMultiplier: 'none',
         b64_image: null,
+        feedback_on_correct:
+          '¡Correcto! React Native permite crear aplicaciones móviles multiplataforma.',
+        feedback_on_incorrect:
+          'Incorrecto. React Native se usa para desarrollo móvil multiplataforma.',
         answers: [
           {
             type: 'text',
-            content: 'Option 1',
+            content: 'Crear aplicaciones móviles multiplataforma',
             is_correct: true,
           },
           {
             type: 'text',
-            content: 'Option 2',
+            content: 'Crear aplicaciones web',
+            is_correct: false,
+          },
+          {
+            type: 'text',
+            content: 'Crear aplicaciones de escritorio',
+            is_correct: false,
+          },
+          {
+            type: 'text',
+            content: 'Crear bases de datos',
             is_correct: false,
           },
         ],
@@ -453,6 +469,8 @@ export const mockQuizzes: Quiz[] = [
         timer: 20,
         pointMultiplier: 'double',
         b64_image: null,
+        feedback_on_correct: '¡Excelente! La respuesta es Verdadero.',
+        feedback_on_incorrect: 'Incorrecto. La respuesta correcta es Verdadero.',
         answers: [
           {
             type: 'text',
@@ -472,6 +490,8 @@ export const mockQuizzes: Quiz[] = [
         timer: 45,
         pointMultiplier: 'none',
         b64_image: null,
+        feedback_on_correct: '¡Perfecto! Tu respuesta es correcta.',
+        feedback_on_incorrect: 'Incorrecto. Las respuestas correctas son: Answer 1 o Answer 2.',
         answers: [
           {
             content: 'Answer 1',
@@ -487,6 +507,8 @@ export const mockQuizzes: Quiz[] = [
         timer: 60,
         pointMultiplier: 'none',
         b64_image: null,
+        feedback_on_correct: '¡Muy bien! Has ordenado los elementos correctamente.',
+        feedback_on_incorrect: 'El orden no es correcto. Revisa la secuencia mostrada abajo.',
         answers: [
           {
             content: 'First item',
@@ -529,25 +551,26 @@ export const mockQuizzes: Quiz[] = [
         ],
       },
       {
-        title: 'Question',
+        title: 'Selecciona todas las respuestas correctas (Múltiple selección)',
         type: 'multiple-choice',
-        feedback_on_correct: 'Well done!',
-        feedback_on_incorrect: "Not quite. Here's the explanation...",
+        allowMultipleAnswers: true,
+        feedback_on_correct: '¡Excelente! Has seleccionado todas las respuestas correctas.',
+        feedback_on_incorrect: 'No del todo. Revisa las opciones correctas mostradas abajo.',
         answers: [
           {
-            content: 'Option  1',
+            content: 'React Native usa JavaScript',
             is_correct: true,
-            feedback: 'This specific choice is right because...',
+            feedback: 'Correcto - React Native utiliza JavaScript.',
           },
           {
-            content: 'Option  2',
+            content: 'React Native permite desarrollo multiplataforma',
             is_correct: true,
-            feedback: 'This specific choice is right because...',
+            feedback: 'Correcto - Puedes crear apps para iOS y Android.',
           },
           {
-            content: 'Option 3',
+            content: 'React Native solo funciona en iOS',
             is_correct: false,
-            feedback: 'This choice is incorrect because...',
+            feedback: 'Incorrecto - Funciona en múltiples plataformas.',
           },
         ],
       },
