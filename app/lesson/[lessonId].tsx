@@ -198,7 +198,14 @@ export default function LessonScreen() {
         <ThemedText style={styles.quizInfo}>
           Esta lección incluye un cuestionario para evaluar tu aprendizaje.
         </ThemedText>
-        <TouchableOpacity style={styles.startButton}>
+        <TouchableOpacity
+          style={styles.startButton}
+          onPress={() => {
+            if (lesson.quizId) {
+              router.push(`/quiz/${lesson.quizId}`);
+            }
+          }}
+        >
           <ThemedText style={styles.startButtonText}>Comenzar Quiz</ThemedText>
         </TouchableOpacity>
       </View>

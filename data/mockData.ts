@@ -54,12 +54,35 @@ export interface StudentProgress {
   lastAccessed: string;
 }
 
+export type QuestionType = 'multiple-choice' | 'true-false' | 'text' | 'sequence' | 'fill-in-blank';
+
+export interface Answer {
+  type?: 'text' | 'image';
+  content: string;
+  is_correct?: boolean;
+  order?: number;
+  blank_position?: number;
+  feedback?: string;
+}
+
+export interface QuestionFeedback {
+  correct?: string;
+  partial?: string;
+  incorrect?: string;
+}
+
 export interface QuizQuestion {
-  id: string;
-  question: string;
-  options: string[];
-  correctAnswer: number;
-  explanation: string;
+  id?: string;
+  title: string;
+  type: QuestionType;
+  timer?: number; // seconds
+  pointMultiplier?: 'none' | 'double';
+  b64_image?: string | null;
+  question_template?: string;
+  feedback?: QuestionFeedback;
+  feedback_on_correct?: string;
+  feedback_on_incorrect?: string;
+  answers: Answer[];
 }
 
 export interface Quiz {
@@ -396,48 +419,142 @@ export const mockCourses: Course[] = [
   },
 ];
 
-// MOCK FEATURED CATEGORIES
-export const mockCategories = [
-  { id: 'cat-1', name: 'Mobile Development', icon: 'phone' },
-  { id: 'cat-2', name: 'Web Development', icon: 'globe' },
-  { id: 'cat-3', name: 'Design', icon: 'palette' },
-  { id: 'cat-4', name: 'Data Science', icon: 'bar-chart-2' },
-  { id: 'cat-5', name: 'Programming', icon: 'code' },
-  { id: 'cat-6', name: 'Business', icon: 'briefcase' },
-];
-
-// MOCK QUIZZES
 export const mockQuizzes: Quiz[] = [
   {
     id: 'quiz-1',
-    title: 'Quiz de Fundamentos de React Native',
+    title: 'Quiz Avanzado de Muestra',
     courseId: 'course-1',
     moduleId: 'module-1',
     duration: 15,
     passingScore: 70,
     questions: [
       {
-        id: 'q-1',
-        question: '¿Cuál es el propósito principal de React Native?',
-        options: [
-          'Construir aplicaciones de escritorio',
-          'Crear aplicaciones móviles multiplataforma',
-          'Gestionar renderizado en el lado del servidor',
-          'Manejar operaciones de base de datos',
+        title: 'Question text here',
+        type: 'multiple-choice',
+        timer: 30,
+        pointMultiplier: 'none',
+        b64_image: null,
+        answers: [
+          {
+            type: 'text',
+            content: 'Option 1',
+            is_correct: true,
+          },
+          {
+            type: 'text',
+            content: 'Option 2',
+            is_correct: false,
+          },
         ],
-        correctAnswer: 1,
-        explanation:
-          'React Native permite a los desarrolladores construir aplicaciones móviles multiplataforma usando JavaScript.',
       },
       {
-        id: 'q-2',
-        question: '¿Qué empresa creó React Native?',
-        options: ['Google', 'Facebook (Meta)', 'Netflix', 'Twitter'],
-        correctAnswer: 1,
-        explanation: 'React Native fue creado por Facebook (ahora Meta) en 2015.',
+        title: 'True or False question?',
+        type: 'true-false',
+        timer: 20,
+        pointMultiplier: 'double',
+        b64_image: null,
+        answers: [
+          {
+            type: 'text',
+            content: 'Verdadero',
+            is_correct: true,
+          },
+          {
+            type: 'text',
+            content: 'Falso',
+            is_correct: false,
+          },
+        ],
+      },
+      {
+        title: 'Type your answer',
+        type: 'text',
+        timer: 45,
+        pointMultiplier: 'none',
+        b64_image: null,
+        answers: [
+          {
+            content: 'Answer 1',
+          },
+          {
+            content: 'Answer 2',
+          },
+        ],
+      },
+      {
+        title: 'Sort in correct order',
+        type: 'sequence',
+        timer: 60,
+        pointMultiplier: 'none',
+        b64_image: null,
+        answers: [
+          {
+            content: 'First item',
+            order: 1,
+          },
+          {
+            content: 'Second item',
+            order: 2,
+          },
+          {
+            content: 'Third item',
+            order: 3,
+          },
+        ],
+      },
+      {
+        title: 'Fill in blanks',
+        type: 'fill-in-blank',
+        timer: 45,
+        pointMultiplier: 'none',
+        question_template: 'The ___ brown ___ jumps over the lazy ___',
+        feedback: {
+          correct: 'Perfect! You completed the sentence correctly.',
+          partial: 'You got some blanks right, but check position 2.',
+          incorrect: 'Try again. Hint: The first blank is an adjective describing speed.',
+        },
+        answers: [
+          {
+            blank_position: 1,
+            content: 'quick',
+          },
+          {
+            blank_position: 2,
+            content: 'fox',
+          },
+          {
+            blank_position: 3,
+            content: 'dog',
+          },
+        ],
+      },
+      {
+        title: 'Question',
+        type: 'multiple-choice',
+        feedback_on_correct: 'Well done!',
+        feedback_on_incorrect: "Not quite. Here's the explanation...",
+        answers: [
+          {
+            content: 'Option  1',
+            is_correct: true,
+            feedback: 'This specific choice is right because...',
+          },
+          {
+            content: 'Option  2',
+            is_correct: true,
+            feedback: 'This specific choice is right because...',
+          },
+          {
+            content: 'Option 3',
+            is_correct: false,
+            feedback: 'This choice is incorrect because...',
+          },
+        ],
       },
     ],
   },
+  // Retaining other quizzes for structure but simplifying content or could remove them if they conflict too much.
+  // Converting old quizzes to new format minimally to avoid type errors.
   {
     id: 'quiz-2',
     title: 'Quiz Avanzado de Componentes',
@@ -447,17 +564,17 @@ export const mockQuizzes: Quiz[] = [
     passingScore: 75,
     questions: [
       {
-        id: 'q-3',
-        question: '¿Cuál es la diferencia entre los componentes View y Text?',
-        options: [
-          'View muestra texto, Text muestra imágenes',
-          'View es para maquetación, Text es para mostrar contenido de texto',
-          'Son lo mismo',
-          'Text se usa para estilos',
+        title: '¿Cuál es la diferencia entre los componentes View y Text?',
+        type: 'multiple-choice',
+        answers: [
+          { content: 'View muestra texto, Text muestra imágenes', is_correct: false },
+          {
+            content: 'View es para maquetación, Text es para mostrar contenido de texto',
+            is_correct: true,
+          },
+          { content: 'Son lo mismo', is_correct: false },
+          { content: 'Text se usa para estilos', is_correct: false },
         ],
-        correctAnswer: 1,
-        explanation:
-          'View es un componente contenedor usado para maquetación, mientras que Text es específicamente para mostrar contenido de texto.',
       },
     ],
   },
@@ -470,17 +587,14 @@ export const mockQuizzes: Quiz[] = [
     passingScore: 60,
     questions: [
       {
-        id: 'q-4',
-        question: '¿Cómo aplicas estilos en React Native?',
-        options: [
-          'Usando archivos CSS',
-          'Usando estilos en línea con StyleSheet.create()',
-          'Usando Tailwind CSS',
-          'Usando solo librerías CSS-in-JS',
+        title: '¿Cómo aplicas estilos en React Native?',
+        type: 'multiple-choice',
+        answers: [
+          { content: 'Usando archivos CSS', is_correct: false },
+          { content: 'Usando estilos en línea con StyleSheet.create()', is_correct: true },
+          { content: 'Usando Tailwind CSS', is_correct: false },
+          { content: 'Usando solo librerías CSS-in-JS', is_correct: false },
         ],
-        correctAnswer: 1,
-        explanation:
-          'React Native usa StyleSheet.create() para definir estilos, similar a CSS pero sin clases.',
       },
     ],
   },
