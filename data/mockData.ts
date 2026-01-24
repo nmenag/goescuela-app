@@ -1,6 +1,6 @@
 // Mock Data for Educational LMS
 
-export type LessonType = 'video' | 'quiz' | 'resource' | 'homework';
+export type LessonType = 'video' | 'quiz' | 'resource' | 'homework' | 'audio';
 
 export interface Lesson {
   id: string;
@@ -11,6 +11,7 @@ export interface Lesson {
 
   // Type specific fields
   videoUrl?: string;
+  audioUrl?: string;
   quizId?: string;
   resourceType?: 'pdf' | 'audio' | 'link';
   resourceUrl?: string;
@@ -223,6 +224,14 @@ export const mockCourses: Course[] = [
             homeworkContent:
               'Realiza una observación de un fenómeno natural en tu entorno y descríbelo.',
             description: 'Tarea práctica de observación.',
+          },
+          {
+            id: 'lesson-audio-1',
+            title: 'Podcast: Historias de la Ciencia',
+            type: 'audio',
+            duration: 25,
+            audioUrl: 'https://example.com/podcast1.mp3',
+            description: 'Escucha este podcast sobre grandes descubrimientos.',
           },
         ],
       },
@@ -537,6 +546,17 @@ export const getStudentCourseQuizScores = (studentId: string, courseId: string):
 
   const moduleIds = course.modules.map((m) => m.id);
   return student.quizScores.filter((qs) => moduleIds.includes(qs.moduleId));
+};
+
+// Helper function to get a lesson by ID
+export const getLessonById = (lessonId: string): Lesson | undefined => {
+  for (const course of mockCourses) {
+    for (const module of course.modules) {
+      const lesson = module.lessons.find((l) => l.id === lessonId);
+      if (lesson) return lesson;
+    }
+  }
+  return undefined;
 };
 
 // Helper function to get all enrolled courses for a student

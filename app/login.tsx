@@ -49,12 +49,10 @@ export default function LoginScreen() {
   return (
     <ThemedView style={styles.container}>
       <ThemedView style={styles.content}>
-        {/* Header */}
         <ThemedView style={styles.header}>
           <Image source={require('@/assets/images/logo.png')} style={styles.logo} />
         </ThemedView>
 
-        {/* Login Form */}
         <ThemedView style={styles.formContainer}>
           <ThemedView style={styles.inputGroup}>
             <ThemedText style={styles.label}>Correo Electrónico</ThemedText>
@@ -96,7 +94,6 @@ export default function LoginScreen() {
             </View>
           </ThemedView>
 
-          {/* Forgot Password Link */}
           <TouchableOpacity disabled={loading}>
             <ThemedText style={styles.forgotPassword}>¿Olvidó la contraseña?</ThemedText>
           </TouchableOpacity>
@@ -204,7 +201,7 @@ const styles = StyleSheet.create({
   forgotPassword: {
     fontSize: 14,
     fontWeight: '500',
-    color: COLORS.primary,
+    color: COLORS.primaryDark,
     textAlign: 'right',
     marginBottom: 24,
   },

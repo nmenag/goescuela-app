@@ -84,7 +84,12 @@ export default function LearningViewScreen() {
       content: (
         <ThemedView style={styles.lessonsContainer}>
           {module.lessons.map((lesson) => (
-            <TouchableOpacity key={lesson.id} style={styles.lessonItem} activeOpacity={0.7}>
+            <TouchableOpacity
+              key={lesson.id}
+              style={styles.lessonItem}
+              activeOpacity={0.7}
+              onPress={() => router.push(`/lesson/${lesson.id}`)}
+            >
               <ThemedView style={styles.lessonIconContainer}>
                 <ThemedText style={styles.lessonTypeIcon}>{getLessonIcon(lesson.type)}</ThemedText>
               </ThemedView>
@@ -243,7 +248,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: COLORS.text,
   },
-  // Tabs
   tabContainer: {
     flexDirection: 'row',
     borderBottomWidth: 1,
@@ -268,7 +272,6 @@ const styles = StyleSheet.create({
   tabTextActive: {
     color: COLORS.tabActive,
   },
-  // Modules
   moduleRowContainer: {
     flexDirection: 'row',
     marginBottom: 12,
@@ -336,7 +339,6 @@ const styles = StyleSheet.create({
     color: '#9CA3AF',
     marginLeft: 8,
   },
-  // Grades
   gradeSection: {
     marginBottom: 24,
   },
