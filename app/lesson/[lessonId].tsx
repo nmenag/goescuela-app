@@ -3,8 +3,11 @@ import { ThemedView } from '@/components/themed-view';
 import { BrandingColors } from '@/constants/theme';
 import { getLessonById, Lesson } from '@/data/mockData';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import React from 'react';
-import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { useVideoPlayer, VideoView } from 'expo-video';
+import * as WebBrowser from 'expo-web-browser';
+import { Pause, Play } from 'lucide-react-native';
+import React, { useEffect, useState } from 'react';
+import { Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 const COLORS = {
   primary: BrandingColors.hotPink,
@@ -14,6 +17,57 @@ const COLORS = {
   border: '#E5E7EB',
   secondaryBackground: '#F3F4F6',
 };
+
+function VideoLesson({ videoUrl, description }: { videoUrl: string; description?: string }) {
+  const player = useVideoPlayer(videoUrl, (player) => {
+    player.loop = true;
+  });
+
+  return (
+    <View style={styles.contentWrapper}>
+      <VideoView style={styles.video} player={player} allowsPictureInPicture />
+      <ThemedText style={styles.description}>{description}</ThemedText>
+    </View>
+  );
+}
+
+function AudioLesson({ audioUrl, description }: { audioUrl: string; description?: string }) {
+  const player = useVideoPlayer(audioUrl);
+  const [isPlaying, setIsPlaying] = useState(player.playing);
+
+  useEffect(() => {
+    const subscription = player.addListener('playingChange', ({ isPlaying }) => {
+      setIsPlaying(isPlaying);
+    });
+    return () => {
+      subscription.remove();
+    };
+  }, [player]);
+
+  return (
+    <View style={styles.contentWrapper}>
+      <View style={styles.audioContainer}>
+        <TouchableOpacity
+          onPress={() => {
+            if (isPlaying) {
+              player.pause();
+            } else {
+              player.play();
+            }
+          }}
+          style={styles.iconButton}
+        >
+          {isPlaying ? (
+            <Pause size={32} color="#FFFFFF" fill="#FFFFFF" />
+          ) : (
+            <Play size={32} color="#FFFFFF" fill="#FFFFFF" />
+          )}
+        </TouchableOpacity>
+      </View>
+      <ThemedText style={styles.description}>{description}</ThemedText>
+    </View>
+  );
+}
 
 export default function LessonScreen() {
   const { lessonId } = useLocalSearchParams<{ lessonId: string }>();
@@ -50,41 +104,47 @@ export default function LessonScreen() {
   };
 
   const renderVideoContent = (lesson: Lesson) => (
-    <View style={styles.contentWrapper}>
-      <View style={styles.mediaPlaceholder}>
-        <ThemedText style={styles.mediaPlaceholderText}>▶ Reproductor de Video</ThemedText>
-        <ThemedText style={styles.mediaUrlText}>{lesson.videoUrl}</ThemedText>
-      </View>
-      <ThemedText style={styles.description}>{lesson.description}</ThemedText>
-    </View>
+    <VideoLesson videoUrl={lesson.videoUrl || ''} description={lesson.description} />
   );
 
   const renderAudioContent = (lesson: Lesson) => (
-    <View style={styles.contentWrapper}>
-      <View style={[styles.mediaPlaceholder, styles.audioPlaceholder]}>
-        <ThemedText style={styles.mediaPlaceholderIcon}>🎧</ThemedText>
-        <ThemedText style={styles.mediaPlaceholderText}>Reproductor de Audio</ThemedText>
-        <ThemedText style={styles.mediaUrlText}>{lesson.audioUrl}</ThemedText>
-      </View>
-      <ThemedText style={styles.description}>{lesson.description}</ThemedText>
-    </View>
+    <AudioLesson audioUrl={lesson.audioUrl || ''} description={lesson.description} />
   );
 
-  const renderResourceContent = (lesson: Lesson) => (
-    <View style={styles.contentWrapper}>
-      <View style={styles.resourceCard}>
-        <ThemedText style={styles.resourceIcon}>📄</ThemedText>
-        <View style={styles.resourceInfo}>
-          <ThemedText style={styles.resourceTitle}>Recurso PDF</ThemedText>
-          <ThemedText style={styles.resourceLink}>{lesson.resourceUrl}</ThemedText>
-        </View>
-        <TouchableOpacity style={styles.openButton}>
-          <ThemedText style={styles.openButtonText}>Abrir</ThemedText>
-        </TouchableOpacity>
+  const renderResourceContent = (lesson: Lesson) => {
+    const handleOpenResource = async () => {
+      if (lesson.resourceUrl) {
+        await WebBrowser.openBrowserAsync(lesson.resourceUrl);
+      }
+    };
+
+    return (
+      <View style={styles.contentWrapper}>
+        {Platform.OS === 'web' && lesson.resourceType === 'pdf' && lesson.resourceUrl ? (
+          <View style={styles.pdfContainer}>
+            <iframe
+              src={lesson.resourceUrl}
+              width="100%"
+              height="600px"
+              style={{ border: 'none', borderRadius: 8 }}
+              title="PDF Viewer"
+            />
+          </View>
+        ) : (
+          <View style={styles.resourceCard}>
+            <ThemedText style={styles.resourceIcon}>📄</ThemedText>
+            <View style={styles.resourceInfo}>
+              <ThemedText style={styles.resourceTitle}>Recurso PDF</ThemedText>
+            </View>
+            <TouchableOpacity style={styles.openButton} onPress={handleOpenResource}>
+              <ThemedText style={styles.openButtonText}>Abrir</ThemedText>
+            </TouchableOpacity>
+          </View>
+        )}
+        <ThemedText style={styles.description}>{lesson.description}</ThemedText>
       </View>
-      <ThemedText style={styles.description}>{lesson.description}</ThemedText>
-    </View>
-  );
+    );
+  };
 
   const renderHomeworkContent = (lesson: Lesson) => (
     <View style={styles.contentWrapper}>
@@ -116,8 +176,6 @@ export default function LessonScreen() {
   return (
     <ThemedView style={styles.container}>
       <Stack.Screen options={{ title: lesson.title, headerBackTitle: 'Atrás' }} />
-
-      {/* Custom Header if needed, otherwise Stack.Screen handles it mostly */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButtonTouch}>
           <ThemedText style={styles.backButton}>← Volver</ThemedText>
@@ -255,7 +313,7 @@ const styles = StyleSheet.create({
   },
   homeworkCard: {
     padding: 20,
-    backgroundColor: '#FFFBEB', // Light yellow for homework
+    backgroundColor: '#FFFBEB',
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#FCD34D',
@@ -311,5 +369,37 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 16,
     fontWeight: '600',
+  },
+  pdfContainer: {
+    width: '100%',
+    height: 600,
+    backgroundColor: '#F3F4F6',
+    borderRadius: 12,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    marginBottom: 16,
+  },
+  video: {
+    width: '100%',
+    height: 220,
+    backgroundColor: '#000',
+    borderRadius: 12,
+  },
+  audioContainer: {
+    width: '100%',
+    height: 220,
+    backgroundColor: '#000',
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  iconButton: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

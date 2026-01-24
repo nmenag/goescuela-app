@@ -65,6 +65,8 @@ export default function LearningViewScreen() {
     switch (type) {
       case 'video':
         return 'Video';
+      case 'audio':
+        return 'Audio';
       case 'quiz':
         return 'Quiz';
       case 'resource':

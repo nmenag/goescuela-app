@@ -1,15 +1,12 @@
-// Mock Data for Educational LMS
-
 export type LessonType = 'video' | 'quiz' | 'resource' | 'homework' | 'audio';
 
 export interface Lesson {
   id: string;
   title: string;
   type: LessonType;
-  duration: number; // in minutes
+  duration: number;
   description?: string;
 
-  // Type specific fields
   videoUrl?: string;
   audioUrl?: string;
   quizId?: string;
@@ -17,7 +14,6 @@ export interface Lesson {
   resourceUrl?: string;
   homeworkContent?: string;
 
-  // Legacy or additional resources attached to this lesson
   resources?: {
     id: string;
     title: string;
@@ -44,18 +40,15 @@ export interface Course {
   };
   thumbnail: string;
   category: string;
-  level: 'Beginner' | 'Intermediate' | 'Advanced';
-  rating: number;
   students: number;
   modules: Module[];
-  duration: number; // total hours
-  price?: number;
+  duration: number;
 }
 
 export interface StudentProgress {
   studentId: string;
   courseId: string;
-  progress: number; // 0-100
+  progress: number;
   completedLessons: string[];
   currentLessonId?: string;
   lastAccessed: string;
@@ -96,7 +89,6 @@ export interface Student {
   quizScores: QuizScore[];
 }
 
-// MOCK STUDENTS
 export const mockStudents: Student[] = [
   {
     id: 'student-1',
@@ -159,7 +151,6 @@ export const mockStudents: Student[] = [
   },
 ];
 
-// MOCK COURSES
 export const mockCourses: Course[] = [
   {
     id: 'course-1',
@@ -173,15 +164,12 @@ export const mockCourses: Course[] = [
     },
     thumbnail: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=300&fit=crop',
     category: 'Ciencias',
-    level: 'Beginner',
-    rating: 4.8,
     students: 12500,
     duration: 20,
-    price: 49.99,
     modules: [
       {
         id: 'module-1',
-        title: 'Introducción a las Ciencias Naturales',
+        title: 'Seres Vivos y su clasificación',
         duration: 4,
         lessons: [
           {
@@ -189,8 +177,9 @@ export const mockCourses: Course[] = [
             title: 'Conceptos Básicos',
             type: 'video',
             duration: 45,
-            description: 'Aprende los conceptos básicos de las ciencias naturales.',
-            videoUrl: 'https://example.com/video1.mp4',
+            description: 'Seres Vivos y su clasificación',
+            videoUrl:
+              'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
             resources: [
               {
                 id: 'res-1',
@@ -212,7 +201,7 @@ export const mockCourses: Course[] = [
             title: 'Lectura: El Método Científico',
             type: 'resource',
             resourceType: 'pdf',
-            resourceUrl: 'https://example.com/scientific-method.pdf',
+            resourceUrl: 'https://ontheline.trincoll.edu/images/bookdown/sample-local-pdf.pdf',
             duration: 20,
             description: 'Lee el documento sobre el método científico.',
           },
@@ -230,7 +219,7 @@ export const mockCourses: Course[] = [
             title: 'Podcast: Historias de la Ciencia',
             type: 'audio',
             duration: 25,
-            audioUrl: 'https://example.com/podcast1.mp3',
+            audioUrl: 'http://thepodcastexchange.ca/s/Porsche-Macan-July-5-2018-1.mp3',
             description: 'Escucha este podcast sobre grandes descubrimientos.',
           },
         ],
@@ -299,11 +288,8 @@ export const mockCourses: Course[] = [
     },
     thumbnail: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400&h=300&fit=crop',
     category: 'Idiomas',
-    level: 'Beginner',
-    rating: 4.7,
     students: 8200,
     duration: 16,
-    price: 39.99,
     modules: [
       {
         id: 'module-4',
@@ -361,11 +347,8 @@ export const mockCourses: Course[] = [
     },
     thumbnail: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=300&fit=crop',
     category: 'General',
-    level: 'Beginner',
-    rating: 4.9,
     students: 5400,
     duration: 24,
-    price: 59.99,
     modules: [
       {
         id: 'module-6',
