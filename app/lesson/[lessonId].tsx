@@ -1,11 +1,17 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BrandingColors } from '@/constants/theme';
-import { getLessonById, Lesson } from '@/data/mockData';
+import {
+  getCourseIdByLessonId,
+  getCurrentStudent,
+  getLessonById,
+  getStudentCourseProgress,
+  Lesson,
+} from '@/data/mockData';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import * as WebBrowser from 'expo-web-browser';
-import { Pause, Play } from 'lucide-react-native';
+import { CheckCircle, Circle, Pause, Play } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
@@ -73,6 +79,32 @@ export default function LessonScreen() {
   const { lessonId } = useLocalSearchParams<{ lessonId: string }>();
   const router = useRouter();
   const lesson = getLessonById(lessonId || '');
+  const student = getCurrentStudent();
+
+  const courseId = getCourseIdByLessonId(lessonId || '') || '';
+  const progress = getStudentCourseProgress(student.id, courseId);
+  // Re-calculate completion status whenever screen is viewed or updated
+  const isLessonCompletedInitial = progress?.completedLessons.includes(lessonId || '') || false;
+
+  const [isCompleted, setIsCompleted] = useState(isLessonCompletedInitial);
+
+  // Update local state if initial state changes (e.g. if navigating back and forth)
+  useEffect(() => {
+    setIsCompleted(progress?.completedLessons.includes(lessonId || '') || false);
+  }, [lessonId, progress]);
+
+  const toggleCompletion = () => {
+    if (progress) {
+      if (isCompleted) {
+        progress.completedLessons = progress.completedLessons.filter((id) => id !== lessonId);
+      } else {
+        if (lessonId && !progress.completedLessons.includes(lessonId)) {
+          progress.completedLessons.push(lessonId);
+        }
+      }
+      setIsCompleted(!isCompleted);
+    }
+  };
 
   if (!lesson) {
     return (
@@ -190,6 +222,28 @@ export default function LessonScreen() {
         </ThemedView>
 
         {renderContent()}
+
+        <View style={styles.completionContainer}>
+          <TouchableOpacity
+            style={[styles.completionButton, isCompleted && styles.completionButtonActive]}
+            onPress={toggleCompletion}
+            activeOpacity={0.7}
+          >
+            {isCompleted ? (
+              <CheckCircle size={24} color="#FFFFFF" style={{ marginRight: 8 }} />
+            ) : (
+              <Circle size={24} color={COLORS.primary} style={{ marginRight: 8 }} />
+            )}
+            <ThemedText
+              style={[
+                styles.completionButtonText,
+                isCompleted && styles.completionButtonTextActive,
+              ]}
+            >
+              {isCompleted ? 'Completada' : 'Marcar como Completada'}
+            </ThemedText>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </ThemedView>
   );
@@ -401,5 +455,33 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  completionContainer: {
+    marginTop: 32,
+    marginBottom: 20,
+    alignItems: 'center',
+  },
+  completionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 30,
+    borderWidth: 2,
+    borderColor: COLORS.primary,
+    backgroundColor: 'transparent',
+    minWidth: 200,
+  },
+  completionButtonActive: {
+    backgroundColor: COLORS.primary,
+  },
+  completionButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.primary,
+  },
+  completionButtonTextActive: {
+    color: '#FFFFFF',
   },
 });

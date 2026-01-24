@@ -548,3 +548,15 @@ export const getStudentEnrolledCourses = (studentId: string): Course[] => {
   if (!student) return [];
   return mockCourses.filter((course) => student.enrolledCourses.includes(course.id));
 };
+
+// Helper function to get course ID by lesson ID
+export const getCourseIdByLessonId = (lessonId: string): string | undefined => {
+  for (const course of mockCourses) {
+    for (const module of course.modules) {
+      if (module.lessons.some((l) => l.id === lessonId)) {
+        return course.id;
+      }
+    }
+  }
+  return undefined;
+};

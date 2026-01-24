@@ -9,6 +9,7 @@ import {
   mockQuizzes,
 } from '@/data/mockData';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { CheckCircle } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { FlatList, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { Accordion } from '../components/accordion';
@@ -104,6 +105,9 @@ export default function LearningViewScreen() {
                   <ThemedText style={styles.lessonDuration}>• {lesson.duration} min</ThemedText>
                 </ThemedView>
               </ThemedView>
+              {progress?.completedLessons.includes(lesson.id) && (
+                <CheckCircle size={20} color={BrandingColors.hotPink} style={{ marginRight: 8 }} />
+              )}
               <ThemedText style={styles.chevronIcon}>›</ThemedText>
             </TouchableOpacity>
           ))}
