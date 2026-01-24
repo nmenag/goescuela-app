@@ -35,8 +35,6 @@ export default function HomeScreen() {
     </ThemedView>
   );
 
-
-
   return (
     <ThemedView style={styles.container}>
       <FlatList

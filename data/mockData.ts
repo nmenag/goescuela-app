@@ -1,11 +1,22 @@
 // Mock Data for Educational LMS
 
+export type LessonType = 'video' | 'quiz' | 'resource' | 'homework';
+
 export interface Lesson {
   id: string;
   title: string;
+  type: LessonType;
   duration: number; // in minutes
+  description?: string;
+
+  // Type specific fields
   videoUrl?: string;
-  description: string;
+  quizId?: string;
+  resourceType?: 'pdf' | 'audio' | 'link';
+  resourceUrl?: string;
+  homeworkContent?: string;
+
+  // Legacy or additional resources attached to this lesson
   resources?: {
     id: string;
     title: string;
@@ -61,6 +72,7 @@ export interface Quiz {
   id: string;
   title: string;
   courseId: string;
+  moduleId: string;
   questions: QuizQuestion[];
   duration: number; // in minutes
   passingScore: number; // percentage
@@ -174,8 +186,10 @@ export const mockCourses: Course[] = [
           {
             id: 'lesson-1',
             title: 'Conceptos Básicos',
+            type: 'video',
             duration: 45,
             description: 'Aprende los conceptos básicos de las ciencias naturales.',
+            videoUrl: 'https://example.com/video1.mp4',
             resources: [
               {
                 id: 'res-1',
@@ -187,23 +201,28 @@ export const mockCourses: Course[] = [
           },
           {
             id: 'lesson-2',
-            title: 'El Método Científico',
-            duration: 60,
-            description: 'Explora el método científico y cómo se usa en la investigación.',
-            resources: [
-              {
-                id: 'res-3',
-                title: 'Guía del Método Científico',
-                type: 'pdf',
-                url: 'https://example.com/scientific-method.pdf',
-              },
-            ],
+            title: 'Quiz de Fundamentos',
+            type: 'quiz',
+            duration: 15,
+            quizId: 'quiz-1',
           },
           {
             id: 'lesson-3',
-            title: 'Mediciones y Unidades',
-            duration: 55,
-            description: 'Domina las mediciones y unidades en ciencias.',
+            title: 'Lectura: El Método Científico',
+            type: 'resource',
+            resourceType: 'pdf',
+            resourceUrl: 'https://example.com/scientific-method.pdf',
+            duration: 20,
+            description: 'Lee el documento sobre el método científico.',
+          },
+          {
+            id: 'lesson-home-1',
+            title: 'Tarea: Observación',
+            type: 'homework',
+            duration: 30,
+            homeworkContent:
+              'Realiza una observación de un fenómeno natural en tu entorno y descríbelo.',
+            description: 'Tarea práctica de observación.',
           },
         ],
       },
@@ -215,12 +234,22 @@ export const mockCourses: Course[] = [
           {
             id: 'lesson-4',
             title: 'Células y Organismos',
+            type: 'video',
             duration: 70,
             description: 'Aprende sobre las células y los organismos vivos.',
           },
           {
+            id: 'lesson-quiz-2',
+            title: 'Evaluación de Biología',
+            type: 'quiz',
+            duration: 10,
+            quizId: 'quiz-3',
+          },
+          {
             id: 'lesson-5',
             title: 'Ecosistemas',
+            type: 'resource',
+            resourceType: 'pdf',
             duration: 65,
             description: 'Entiende cómo funcionan los ecosistemas.',
           },
@@ -234,12 +263,14 @@ export const mockCourses: Course[] = [
           {
             id: 'lesson-6',
             title: 'Movimiento y Fuerzas',
+            type: 'video',
             duration: 80,
             description: 'Estudia el movimiento y las fuerzas en la física.',
           },
           {
             id: 'lesson-7',
             title: 'Energía y Trabajo',
+            type: 'video',
             duration: 75,
             description: 'Comprende la energía y el trabajo en sistemas físicos.',
           },
@@ -273,12 +304,14 @@ export const mockCourses: Course[] = [
           {
             id: 'lesson-8',
             title: 'Alfabeto y Pronunciación',
+            type: 'video',
             duration: 60,
             description: 'Aprende el alfabeto inglés y la pronunciación correcta.',
           },
           {
             id: 'lesson-9',
             title: 'Vocabulario Básico',
+            type: 'video',
             duration: 55,
             description: 'Construye tu vocabulario básico en inglés.',
           },
@@ -292,12 +325,14 @@ export const mockCourses: Course[] = [
           {
             id: 'lesson-10',
             title: 'Tiempos Verbales',
+            type: 'video',
             duration: 90,
             description: 'Domina los tiempos verbales en inglés.',
           },
           {
             id: 'lesson-11',
             title: 'Construcción de Oraciones',
+            type: 'video',
             duration: 75,
             description: 'Aprende a construir oraciones correctamente en inglés.',
           },
@@ -331,12 +366,14 @@ export const mockCourses: Course[] = [
           {
             id: 'lesson-12',
             title: 'Bienvenida al Curso',
+            type: 'video',
             duration: 65,
             description: 'Introducción y descripción general del curso.',
           },
           {
             id: 'lesson-13',
             title: 'Cómo Usar la Plataforma',
+            type: 'video',
             duration: 85,
             description: 'Aprende a navegar y usar la plataforma de manera efectiva.',
           },
@@ -350,12 +387,14 @@ export const mockCourses: Course[] = [
           {
             id: 'lesson-14',
             title: 'Lección 1',
+            type: 'video',
             duration: 75,
             description: 'Primer contenido del módulo principal.',
           },
           {
             id: 'lesson-15',
             title: 'Lección 2',
+            type: 'video',
             duration: 90,
             description: 'Segundo contenido del módulo principal.',
           },
@@ -381,6 +420,7 @@ export const mockQuizzes: Quiz[] = [
     id: 'quiz-1',
     title: 'Quiz de Fundamentos de React Native',
     courseId: 'course-1',
+    moduleId: 'module-1',
     duration: 15,
     passingScore: 70,
     questions: [
@@ -404,6 +444,16 @@ export const mockQuizzes: Quiz[] = [
         correctAnswer: 1,
         explanation: 'React Native fue creado por Facebook (ahora Meta) en 2015.',
       },
+    ],
+  },
+  {
+    id: 'quiz-2',
+    title: 'Quiz Avanzado de Componentes',
+    courseId: 'course-1',
+    moduleId: 'module-1',
+    duration: 20,
+    passingScore: 75,
+    questions: [
       {
         id: 'q-3',
         question: '¿Cuál es la diferencia entre los componentes View y Text?',
@@ -417,6 +467,16 @@ export const mockQuizzes: Quiz[] = [
         explanation:
           'View es un componente contenedor usado para maquetación, mientras que Text es específicamente para mostrar contenido de texto.',
       },
+    ],
+  },
+  {
+    id: 'quiz-3',
+    title: 'Quiz de Estilos y Diseño',
+    courseId: 'course-1',
+    moduleId: 'module-2',
+    duration: 10,
+    passingScore: 60,
+    questions: [
       {
         id: 'q-4',
         question: '¿Cómo aplicas estilos en React Native?',
@@ -429,19 +489,6 @@ export const mockQuizzes: Quiz[] = [
         correctAnswer: 1,
         explanation:
           'React Native usa StyleSheet.create() para definir estilos, similar a CSS pero sin clases.',
-      },
-      {
-        id: 'q-5',
-        question: '¿Cuál es el propósito del componente FlatList?',
-        options: [
-          'Crear maquetaciones de diseño plano',
-          'Renderizar listas grandes eficientemente',
-          'Crear animaciones',
-          'Gestionar estado',
-        ],
-        correctAnswer: 1,
-        explanation:
-          'FlatList es un componente optimizado para renderizar listas grandes con uso mínimo de memoria.',
       },
     ],
   },

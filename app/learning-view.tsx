@@ -6,10 +6,11 @@ import {
   getCurrentStudent,
   getStudentCourseProgress,
   getStudentCourseQuizScores,
+  mockQuizzes,
 } from '@/data/mockData';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React from 'react';
-import { FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { FlatList, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { Accordion } from '../components/accordion';
 
 const COLORS = {
@@ -18,11 +19,15 @@ const COLORS = {
   text: '#1F2937',
   textLight: '#6B7280',
   border: '#E5E7EB',
+  tabActive: BrandingColors.hotPink,
+  tabInactive: '#9CA3AF',
 };
 
 export default function LearningViewScreen() {
   const router = useRouter();
   const { courseId } = useLocalSearchParams<{ courseId: string }>();
+  const [activeTab, setActiveTab] = useState<'modules' | 'grades'>('modules');
+
   const course = getCourseById(courseId || '');
   const student = getCurrentStudent();
   const progress = getStudentCourseProgress(student.id, courseId || '');
@@ -36,37 +41,72 @@ export default function LearningViewScreen() {
     );
   }
 
-  const accordionItems = course.modules.map((module) => ({
-    id: module.id,
-    title: module.title,
-    duration: module.duration,
-    content: (
-      <ThemedView style={styles.lessonsContainer}>
-        {module.lessons.map((lesson) => (
-          <TouchableOpacity key={lesson.id} style={styles.lessonItem} activeOpacity={0.7}>
-            <ThemedView style={styles.lessonInfo}>
-              <ThemedText style={styles.lessonTitle}>{lesson.title}</ThemedText>
-              <ThemedText style={styles.lessonDuration}>⏱ {lesson.duration} min</ThemedText>
-            </ThemedView>
-            <ThemedText style={styles.lessonIcon}>▶</ThemedText>
-          </TouchableOpacity>
-        ))}
-        <ThemedView style={styles.quizButton}>
-          <TouchableOpacity style={styles.quizButtonContent}>
-            <ThemedText style={styles.quizButtonText}>Quiz del Módulo</ThemedText>
-          </TouchableOpacity>
-        </ThemedView>
-      </ThemedView>
-    ),
-  }));
-
-  const getQuizScoreForModule = (moduleId: string) => {
-    return quizScores.find((qs) => qs.moduleId === moduleId);
+  const getQuizTitle = (quizId: string) => {
+    const quiz = mockQuizzes.find((q) => q.id === quizId);
+    return quiz ? quiz.title : `Evaluación ${quizId.split('-').pop()}`;
   };
+
+  const getLessonIcon = (type: string) => {
+    switch (type) {
+      case 'video':
+        return '▶';
+      case 'quiz':
+        return '❓';
+      case 'resource':
+        return '📄';
+      case 'homework':
+        return '📝';
+      default:
+        return '▶';
+    }
+  };
+
+  const getLessonLabel = (type: string) => {
+    switch (type) {
+      case 'video':
+        return 'Video';
+      case 'quiz':
+        return 'Quiz';
+      case 'resource':
+        return 'Recurso';
+      case 'homework':
+        return 'Tarea';
+      default:
+        return 'Lección';
+    }
+  };
+
+  const accordionItems = course.modules.map((module) => {
+    return {
+      id: module.id,
+      title: module.title,
+      duration: module.duration,
+      content: (
+        <ThemedView style={styles.lessonsContainer}>
+          {module.lessons.map((lesson) => (
+            <TouchableOpacity key={lesson.id} style={styles.lessonItem} activeOpacity={0.7}>
+              <ThemedView style={styles.lessonIconContainer}>
+                <ThemedText style={styles.lessonTypeIcon}>{getLessonIcon(lesson.type)}</ThemedText>
+              </ThemedView>
+              <ThemedView style={styles.lessonInfo}>
+                <ThemedText style={styles.lessonTitle}>{lesson.title}</ThemedText>
+                <ThemedView style={styles.lessonMetaContainer}>
+                  <ThemedText style={styles.lessonTypeLabel}>
+                    {getLessonLabel(lesson.type)}
+                  </ThemedText>
+                  <ThemedText style={styles.lessonDuration}>• {lesson.duration} min</ThemedText>
+                </ThemedView>
+              </ThemedView>
+              <ThemedText style={styles.chevronIcon}>›</ThemedText>
+            </TouchableOpacity>
+          ))}
+        </ThemedView>
+      ),
+    };
+  });
 
   const renderHeader = () => (
     <ThemedView>
-      {/* Header with Back Button */}
       <ThemedView style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} activeOpacity={0.7}>
           <ThemedText style={styles.backButton}>← Atrás</ThemedText>
@@ -75,8 +115,6 @@ export default function LearningViewScreen() {
           {course.title}
         </ThemedText>
       </ThemedView>
-
-      {/* Grade Section */}
       <ThemedView style={styles.gradeSection}>
         <ThemedView style={styles.gradeCard}>
           <ThemedText style={styles.gradeLabel}>Tu Progreso</ThemedText>
@@ -90,63 +128,84 @@ export default function LearningViewScreen() {
           </ThemedView>
         </ThemedView>
       </ThemedView>
-
-      {/* Modules and Grades Container */}
-      <ThemedView style={styles.modulesAndGradesContainer}>
-        {/* Modules Section */}
-        <ThemedView style={styles.modulesColumn}>
-          <ThemedText style={styles.modulesTitle}>Módulos</ThemedText>
-        </ThemedView>
-
-        {/* Quiz Grades Section */}
-        {quizScores.length > 0 && (
-          <ThemedView style={styles.gradesColumn}>
-            <ThemedText style={styles.gradesTitle}>Calificaciones de Quiz</ThemedText>
-          </ThemedView>
-        )}
+      <ThemedView style={styles.tabContainer}>
+        <TouchableOpacity
+          style={[styles.tabButton, activeTab === 'modules' && styles.tabButtonActive]}
+          onPress={() => setActiveTab('modules')}
+        >
+          <ThemedText style={[styles.tabText, activeTab === 'modules' && styles.tabTextActive]}>
+            Módulos
+          </ThemedText>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tabButton, activeTab === 'grades' && styles.tabButtonActive]}
+          onPress={() => setActiveTab('grades')}
+        >
+          <ThemedText style={[styles.tabText, activeTab === 'grades' && styles.tabTextActive]}>
+            Calificaciones
+          </ThemedText>
+        </TouchableOpacity>
       </ThemedView>
     </ThemedView>
   );
 
-  return (
-    <ThemedView style={styles.container}>
-      <FlatList
-        data={accordionItems}
-        renderItem={({ item, index }) => (
-          <ThemedView style={styles.moduleRowContainer}>
-            {/* Module */}
-            <ThemedView style={styles.moduleColumn}>
-              <ThemedView style={styles.accordionWrapper}>
-                <Accordion items={[item]} />
-              </ThemedView>
-            </ThemedView>
+  const renderGrades = () => (
+    <ScrollView contentContainerStyle={styles.listContent} showsVerticalScrollIndicator={false}>
+      <ThemedView style={styles.gradesList}>
+        {course.modules.map((module) => {
+          const moduleScores = quizScores.filter((qs) => qs.moduleId === module.id);
+          if (moduleScores.length === 0) return null;
 
-            {/* Quiz Grade for this Module */}
-            {quizScores.length > 0 && (
-              <ThemedView style={styles.quizGradeColumn}>
-                {(() => {
-                  const moduleQuizScore = getQuizScoreForModule(item.id);
-                  return moduleQuizScore ? (
-                    <ThemedView style={styles.quizGradeCard}>
-                      <ThemedText style={styles.quizGradeValue}>{moduleQuizScore.score}</ThemedText>
-                      <ThemedText style={styles.quizGradeLabel}>/ 100</ThemedText>
-                    </ThemedView>
-                  ) : (
-                    <ThemedView style={styles.quizGradeCardEmpty}>
-                      <ThemedText style={styles.quizGradeValueEmpty}>-</ThemedText>
-                    </ThemedView>
-                  );
-                })()}
-              </ThemedView>
-            )}
+          return (
+            <ThemedView key={module.id} style={styles.moduleGradeGroup}>
+              <ThemedText style={styles.moduleGradeTitle}>{module.title}</ThemedText>
+              {moduleScores.map((qs, index) => (
+                <ThemedView key={`${qs.quizId}-${index}`} style={styles.scoreRow}>
+                  <ThemedText style={styles.scoreQuizTitle}>{getQuizTitle(qs.quizId)}</ThemedText>
+                  <ThemedView style={styles.scoreBadge}>
+                    <ThemedText style={styles.scoreValue}>{qs.score}</ThemedText>
+                    <ThemedText style={styles.scoreTotal}>/ 100</ThemedText>
+                  </ThemedView>
+                </ThemedView>
+              ))}
+            </ThemedView>
+          );
+        })}
+        {quizScores.length === 0 && (
+          <ThemedView style={styles.emptyState}>
+            <ThemedText style={styles.emptyStateText}>
+              No hay calificaciones disponibles.
+            </ThemedText>
           </ThemedView>
         )}
-        keyExtractor={(item) => item.id}
-        ListHeaderComponent={renderHeader}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-        scrollEventThrottle={16}
-      />
+      </ThemedView>
+    </ScrollView>
+  );
+
+  return (
+    <ThemedView style={styles.container}>
+      {renderHeader()}
+      <ThemedView style={styles.contentContainer}>
+        {activeTab === 'modules' ? (
+          <FlatList
+            data={accordionItems}
+            renderItem={({ item }) => (
+              <ThemedView style={styles.moduleRowContainer}>
+                <ThemedView style={styles.moduleColumn}>
+                  <ThemedView style={styles.accordionWrapper}>
+                    <Accordion items={[item]} />
+                  </ThemedView>
+                </ThemedView>
+              </ThemedView>
+            )}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+          />
+        ) : (
+          renderGrades()
+        )}
+      </ThemedView>
     </ThemedView>
   );
 }
@@ -157,17 +216,19 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
     paddingTop: 50,
   },
+  contentContainer: {
+    flex: 1,
+  },
   listContent: {
     paddingHorizontal: 16,
     paddingBottom: 20,
+    paddingTop: 16,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 0,
     paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
   },
   backButton: {
     fontSize: 16,
@@ -182,12 +243,102 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: COLORS.text,
   },
-  gradeSection: {
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    backgroundColor: '#F9FAFB',
+  // Tabs
+  tabContainer: {
+    flexDirection: 'row',
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
+    marginBottom: 0,
+  },
+  tabButton: {
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: 'center',
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+  },
+  tabButtonActive: {
+    borderBottomColor: COLORS.tabActive,
+  },
+  tabText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.tabInactive,
+  },
+  tabTextActive: {
+    color: COLORS.tabActive,
+  },
+  // Modules
+  moduleRowContainer: {
+    flexDirection: 'row',
+    marginBottom: 12,
+    alignItems: 'flex-start',
+  },
+  moduleColumn: {
+    flex: 1,
+  },
+  accordionWrapper: {
+    marginBottom: 12,
+  },
+  lessonsContainer: {
+    gap: 8,
+    paddingTop: 8,
+  },
+  lessonItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  lessonInfo: {
+    flex: 1,
+  },
+  lessonTitle: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: COLORS.text,
+    marginBottom: 4,
+  },
+  lessonMetaContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  lessonTypeLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.primary,
+    marginRight: 6,
+  },
+  lessonDuration: {
+    fontSize: 12,
+    color: COLORS.textLight,
+  },
+  lessonIconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#F3F4F6',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  lessonTypeIcon: {
+    fontSize: 14,
+    color: COLORS.text,
+  },
+  chevronIcon: {
+    fontSize: 20,
+    color: '#9CA3AF',
+    marginLeft: 8,
+  },
+  // Grades
+  gradeSection: {
+    marginBottom: 24,
   },
   gradeCard: {
     paddingHorizontal: 16,
@@ -222,129 +373,63 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
     borderRadius: 4,
   },
-  modulesSection: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  modulesAndGradesContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    alignItems: 'center',
-  },
-  modulesColumn: {
+  gradesContainer: {
     flex: 1,
   },
-  modulesTitle: {
-    fontSize: 16,
+  gradesList: {
+    paddingBottom: 20,
+  },
+  moduleGradeGroup: {
+    marginBottom: 20,
+  },
+  moduleGradeTitle: {
+    fontSize: 14,
     fontWeight: '700',
     color: COLORS.text,
+    marginBottom: 10,
+    paddingHorizontal: 4,
   },
-  gradesColumn: {
-    marginLeft: 12,
-    alignItems: 'flex-end',
-  },
-  gradesTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: COLORS.text,
-  },
-  moduleRowContainer: {
-    flexDirection: 'row',
-    marginBottom: 12,
-    alignItems: 'flex-start',
-  },
-  moduleColumn: {
-    flex: 1,
-  },
-  quizGradeColumn: {
-    width: 80,
-    marginLeft: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  quizGradeCard: {
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    backgroundColor: COLORS.primary,
-    borderRadius: 8,
-    alignItems: 'center',
-    minWidth: 70,
-  },
-  quizGradeCardEmpty: {
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    backgroundColor: '#F3F4F6',
-    borderRadius: 8,
-    alignItems: 'center',
-    minWidth: 70,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  quizGradeValue: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  quizGradeValueEmpty: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: COLORS.textLight,
-  },
-  quizGradeLabel: {
-    fontSize: 11,
-    fontWeight: '500',
-    color: '#FFFFFF',
-  },
-  accordionWrapper: {
-    marginBottom: 12,
-  },
-  lessonsContainer: {
-    gap: 8,
-    paddingTop: 8,
-  },
-  lessonItem: {
+  scoreRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 8,
+    backgroundColor: '#fff',
+    padding: 12,
+    borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: COLORS.border,
+    marginBottom: 8,
   },
-  lessonInfo: {
+  scoreQuizTitle: {
     flex: 1,
-  },
-  lessonTitle: {
     fontSize: 14,
-    fontWeight: '500',
     color: COLORS.text,
-    marginBottom: 4,
+    marginRight: 12,
   },
-  lessonDuration: {
-    fontSize: 12,
-    color: COLORS.textLight,
+  scoreBadge: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    backgroundColor: '#f3f4f6',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
   },
-  lessonIcon: {
-    fontSize: 16,
+  scoreValue: {
+    fontSize: 14,
+    fontWeight: '700',
     color: COLORS.primary,
   },
-  quizButton: {
-    marginTop: 12,
-    paddingVertical: 8,
+  scoreTotal: {
+    fontSize: 12,
+    color: COLORS.textLight,
+    marginLeft: 2,
   },
-  quizButtonContent: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: COLORS.primary,
-    borderRadius: 8,
+  emptyState: {
     alignItems: 'center',
+    marginTop: 32,
   },
-  quizButtonText: {
+  emptyStateText: {
+    color: COLORS.textLight,
     fontSize: 14,
-    fontWeight: '600',
-    color: '#FFFFFF',
   },
 });
