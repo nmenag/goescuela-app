@@ -119,6 +119,13 @@ export default function QuizScreen() {
     }
   };
 
+  const handlePrevious = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex((prev) => prev - 1);
+      setShowFeedback(false);
+    }
+  };
+
   const checkAnswer = () => {
     const currentAns = userAnswers[currentQuestionIndex];
     let isCorrect = false;
@@ -387,12 +394,12 @@ export default function QuizScreen() {
                   style={[
                     styles.fillBlankInput,
                     showFeedback &&
-                      (currentQuestion.answers
-                        .find((a) => a.blank_position === index + 1)
-                        ?.content.toLowerCase() ===
+                    (currentQuestion.answers
+                      .find((a) => a.blank_position === index + 1)
+                      ?.content.toLowerCase() ===
                       (userAnswers[currentQuestionIndex]?.[index + 1] || '').toLowerCase()
-                        ? styles.textInputCorrect
-                        : styles.textInputIncorrect),
+                      ? styles.textInputCorrect
+                      : styles.textInputIncorrect),
                   ]}
                   value={userAnswers[currentQuestionIndex]?.[index + 1] || ''}
                   onChangeText={(text) => {
@@ -477,11 +484,11 @@ export default function QuizScreen() {
               <ThemedText style={styles.feedbackMainText}>
                 {isCurrentAnswerCorrect
                   ? currentQuestion.feedback?.correct ||
-                    currentQuestion.feedback_on_correct ||
-                    '¡Correcto!'
+                  currentQuestion.feedback_on_correct ||
+                  '¡Correcto!'
                   : currentQuestion.feedback?.incorrect ||
-                    currentQuestion.feedback_on_incorrect ||
-                    'Incorrecto. Inténtalo de nuevo.'}
+                  currentQuestion.feedback_on_incorrect ||
+                  'Incorrecto. Inténtalo de nuevo.'}
               </ThemedText>
             </View>
           )}
@@ -489,6 +496,15 @@ export default function QuizScreen() {
       </KeyboardAvoidingView>
 
       <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 20) }]}>
+        <TouchableOpacity
+          style={[styles.prevButton, currentQuestionIndex === 0 && styles.prevButtonDisabled]}
+          onPress={handlePrevious}
+          disabled={currentQuestionIndex === 0 || showFeedback}
+        >
+          <ThemedText style={[styles.prevButtonText, currentQuestionIndex === 0 && styles.prevButtonDisabledText]}>
+            Anterior
+          </ThemedText>
+        </TouchableOpacity>
         <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
           <ThemedText style={styles.nextButtonText}>
             {showFeedback ? (isLastQuestion ? 'Finalizar' : 'Siguiente') : 'Comprobar'}
@@ -645,8 +661,31 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
     borderTopColor: COLORS.border,
+    flexDirection: 'row',
+    gap: 12,
+  },
+  prevButton: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: COLORS.primary,
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  prevButtonDisabled: {
+    borderColor: '#E5E7EB',
+    opacity: 0.5,
+  },
+  prevButtonText: {
+    color: COLORS.primary,
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  prevButtonDisabledText: {
+    color: '#9CA3AF',
   },
   nextButton: {
+    flex: 2,
     backgroundColor: COLORS.primary,
     paddingVertical: 16,
     borderRadius: 12,
