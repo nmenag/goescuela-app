@@ -27,6 +27,14 @@ export const Colors = {
   },
 };
 
+export const BrandingColors = {
+  lightPink: '#FAE0F0',
+  lightPurple: '#EAE6FA',
+  teal: '#71C0C4',
+  hotPink: '#ff66c4',
+  black: '#000000',
+};
+
 export const Fonts = Platform.select({
   ios: {
     /** iOS `UIFontDescriptorSystemDesignDefault` */
