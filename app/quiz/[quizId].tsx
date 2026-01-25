@@ -488,7 +488,7 @@ export default function QuizScreen() {
         </ScrollView>
       </KeyboardAvoidingView>
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 20) }]}>
         <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
           <ThemedText style={styles.nextButtonText}>
             {showFeedback ? (isLastQuestion ? 'Finalizar' : 'Siguiente') : 'Comprobar'}

@@ -24,11 +24,13 @@ export default function TabLayout() {
         tabBarInactiveTintColor: COLORS.textLight,
         headerShown: false,
         tabBarButton: HapticTab,
-        tabBarStyle: {
-          ...styles.tabBar,
-          paddingBottom: Math.max(insets.bottom, 8),
-          height: 64 + Math.max(insets.bottom - 8, 0),
-        },
+        tabBarStyle: [
+          styles.tabBar,
+          {
+            paddingBottom: insets.bottom > 0 ? insets.bottom : 12,
+            height: 64 + (insets.bottom > 0 ? insets.bottom - 10 : 0),
+          },
+        ],
         tabBarLabelStyle: styles.tabBarLabel,
       }}
     >
@@ -61,13 +63,16 @@ const styles = StyleSheet.create({
   tabBar: {
     borderTopWidth: 1,
     borderTopColor: COLORS.border,
-    paddingTop: 8,
-    paddingBottom: 8,
-    height: 64,
+    backgroundColor: '#FFFFFF',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   tabBarLabel: {
     fontSize: 11,
-    marginTop: 4,
-    fontWeight: '500',
+    fontWeight: '600',
+    marginBottom: 4,
   },
 });

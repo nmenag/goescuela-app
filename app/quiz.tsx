@@ -271,7 +271,7 @@ export default function QuizScreen() {
         </ScrollView>
 
         {/* Action Buttons */}
-        <ThemedView style={styles.resultsButtons}>
+        <ThemedView style={[styles.resultsButtons, { paddingBottom: Math.max(insets.bottom, 16) }]}>
           <TouchableOpacity style={styles.retakeButton} onPress={handleRetake} activeOpacity={0.7}>
             <ThemedText style={styles.retakeButtonText}>Retake Quiz</ThemedText>
           </TouchableOpacity>
@@ -354,7 +354,7 @@ const IntroScreen = ({
         </ThemedView>
       </ScrollView>
 
-      <ThemedView style={styles.introButtons}>
+      <ThemedView style={[styles.introButtons, { paddingBottom: Math.max(insets.bottom, 16) }]}>
         <TouchableOpacity style={styles.startButton} onPress={onStart} activeOpacity={0.7}>
           <ThemedText style={styles.startButtonText}>Start Quiz</ThemedText>
         </TouchableOpacity>
