@@ -5,19 +5,23 @@ A modern educational mobile application built with React Native and Expo, featur
 ## Features ✨
 
 ### Course Management
+
 - Browse and explore educational courses
 - Track progress across modules and lessons
 - View course details with rich content
 
 ### Interactive Lessons
+
 - Multiple content types: Video, Text, Quiz
 - Progress tracking
 - Seamless navigation between lessons
 
 ### Advanced Quiz System
+
 The app includes a comprehensive quiz system with multiple question types:
 
 #### Question Types
+
 1. **Multiple Choice (Single Select)** - Radio button selection for one correct answer
 2. **Multiple Choice (Multi Select)** - Checkbox selection for multiple correct answers
 3. **True/False** - Binary choice questions
@@ -26,6 +30,7 @@ The app includes a comprehensive quiz system with multiple question types:
 6. **Fill-in-the-Blank** - Complete sentences with missing words
 
 #### Quiz Features
+
 - ✅ Answer validation before proceeding
 - ✅ Immediate feedback (correct/incorrect with explanations)
 - ✅ Visual feedback with color-coded responses
@@ -71,6 +76,7 @@ goescuela-app/
 ## Getting Started 🚀
 
 ### Prerequisites
+
 - Node.js (v16 or higher)
 - npm or yarn
 - Expo CLI
@@ -79,17 +85,20 @@ goescuela-app/
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd goescuela-app
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Start the development server**
+
    ```bash
    npx expo start
    ```
@@ -112,7 +121,7 @@ export const mockCourses: Course[] = [
     title: 'Your Course Title',
     description: 'Course description',
     // ... other fields
-  }
+  },
 ];
 ```
 
@@ -148,17 +157,20 @@ export const BrandingColors = {
 ## Key Components 🔑
 
 ### QuizScreen (`app/quiz/[quizId].tsx`)
+
 - Handles all question types
 - Validates user answers
 - Provides immediate feedback
 - Tracks scoring and progress
 
 ### LessonScreen (`app/lesson/[lessonId].tsx`)
+
 - Displays lesson content (video, text, quiz)
 - Manages lesson navigation
 - Integrates with quiz system
 
 ### CourseScreen (`app/course/[courseId].tsx`)
+
 - Shows course modules and lessons
 - Displays progress indicators
 - Handles course navigation
@@ -166,22 +178,26 @@ export const BrandingColors = {
 ## Quiz Question Type Details 📝
 
 ### Single-Select Multiple Choice
+
 - Uses radio buttons (○)
 - Only one answer can be selected
 - Set `allowMultipleAnswers: false`
 
 ### Multi-Select Multiple Choice
+
 - Uses checkboxes (☐)
 - Multiple answers can be selected
 - Set `allowMultipleAnswers: true`
 - Requires ALL correct answers to be selected
 
 ### Sequence Questions
+
 - Items displayed with up/down arrows
 - Users reorder items to match correct sequence
 - Validates exact order match
 
 ### Fill-in-the-Blank
+
 - Template string with `___` placeholders
 - Multiple input fields for missing words
 - Case-insensitive validation
