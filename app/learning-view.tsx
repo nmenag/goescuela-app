@@ -12,6 +12,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { CheckCircle } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { FlatList, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Accordion } from '../components/accordion';
 
 const COLORS = {
@@ -28,6 +29,7 @@ export default function LearningViewScreen() {
   const router = useRouter();
   const { courseId } = useLocalSearchParams<{ courseId: string }>();
   const [activeTab, setActiveTab] = useState<'modules' | 'grades'>('modules');
+  const insets = useSafeAreaInsets();
 
   const course = getCourseById(courseId || '');
   const student = getCurrentStudent();
@@ -36,7 +38,7 @@ export default function LearningViewScreen() {
 
   if (!course) {
     return (
-      <ThemedView style={styles.container}>
+      <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
         <ThemedText>Curso no encontrado</ThemedText>
       </ThemedView>
     );
@@ -194,7 +196,7 @@ export default function LearningViewScreen() {
   );
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
       {renderHeader()}
       <ThemedView style={styles.contentContainer}>
         {activeTab === 'modules' ? (
@@ -225,7 +227,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
-    paddingTop: 50,
   },
   contentContainer: {
     flex: 1,

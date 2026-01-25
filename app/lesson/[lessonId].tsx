@@ -14,6 +14,7 @@ import * as WebBrowser from 'expo-web-browser';
 import { CheckCircle, Circle, Pause, Play } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const COLORS = {
   primary: BrandingColors.hotPink,
@@ -78,6 +79,7 @@ function AudioLesson({ audioUrl, description }: { audioUrl: string; description?
 export default function LessonScreen() {
   const { lessonId } = useLocalSearchParams<{ lessonId: string }>();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const lesson = getLessonById(lessonId || '');
   const student = getCurrentStudent();
 
@@ -108,7 +110,7 @@ export default function LessonScreen() {
 
   if (!lesson) {
     return (
-      <ThemedView style={styles.container}>
+      <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
         <ThemedText>Lección no encontrada</ThemedText>
       </ThemedView>
     );
@@ -213,7 +215,7 @@ export default function LessonScreen() {
   );
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
       <Stack.Screen options={{ title: lesson.title, headerBackTitle: 'Atrás' }} />
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButtonTouch}>
@@ -262,7 +264,6 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   header: {
-    paddingTop: 60,
     paddingHorizontal: 16,
     paddingBottom: 16,
     borderBottomWidth: 1,

@@ -5,6 +5,7 @@ import { getQuizByCourseId } from '@/data/mockData';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const COLORS = {
   primary: BrandingColors.hotPink,
@@ -22,6 +23,7 @@ export default function QuizScreen() {
   const router = useRouter();
   const { courseId } = useLocalSearchParams<{ courseId: string }>();
   const quiz = getQuizByCourseId(courseId || '');
+  const insets = useSafeAreaInsets();
 
   const [state, setState] = useState<QuizState>('intro');
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -30,7 +32,7 @@ export default function QuizScreen() {
 
   if (!quiz) {
     return (
-      <ThemedView style={styles.container}>
+      <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
         <ThemedText>Quiz not found</ThemedText>
       </ThemedView>
     );
@@ -54,7 +56,8 @@ export default function QuizScreen() {
       // Calculate score
       let correctCount = 0;
       quiz.questions.forEach((question, index) => {
-        if (answers[index] === question.correctAnswer) {
+        const selectedAnswerIndex = answers[index];
+        if (selectedAnswerIndex !== null && question.answers[selectedAnswerIndex]?.is_correct) {
           correctCount++;
         }
       });
@@ -87,7 +90,7 @@ export default function QuizScreen() {
     const isAnswered = answers[currentQuestionIndex] !== null;
 
     return (
-      <ThemedView style={styles.container}>
+      <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
         {/* Header */}
         <ThemedView style={styles.header}>
           <TouchableOpacity onPress={() => router.back()}>
@@ -108,11 +111,11 @@ export default function QuizScreen() {
         {/* Question */}
         <ScrollView style={styles.questionContent} showsVerticalScrollIndicator={false}>
           <ThemedView style={styles.questionContainer}>
-            <ThemedText style={styles.questionText}>{question.question}</ThemedText>
+            <ThemedText style={styles.questionText}>{question.title}</ThemedText>
 
             {/* Options */}
             <ThemedView style={styles.optionsContainer}>
-              {question.options.map((option, index) => (
+              {question.answers.map((option, index) => (
                 <TouchableOpacity
                   key={index}
                   style={[
@@ -133,7 +136,7 @@ export default function QuizScreen() {
                       answers[currentQuestionIndex] === index && styles.optionTextSelected,
                     ]}
                   >
-                    {option}
+                    {option.content}
                   </ThemedText>
                 </TouchableOpacity>
               ))}
@@ -172,7 +175,7 @@ export default function QuizScreen() {
     const totalCorrect = Math.round((score / 100) * quiz.questions.length);
 
     return (
-      <ThemedView style={styles.container}>
+      <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
         {/* Header */}
         <ThemedView style={styles.header}>
           <TouchableOpacity onPress={() => router.back()}>
@@ -233,7 +236,9 @@ export default function QuizScreen() {
           <ThemedView style={styles.reviewSection}>
             <ThemedText style={styles.reviewTitle}>Answer Review</ThemedText>
             {quiz.questions.map((question, index) => {
-              const isCorrect = answers[index] === question.correctAnswer;
+              const selectedAnswerIndex = answers[index];
+              const isCorrect =
+                selectedAnswerIndex !== null && question.answers[selectedAnswerIndex]?.is_correct;
               return (
                 <ThemedView key={index} style={styles.reviewItem}>
                   <ThemedView style={styles.reviewHeader}>
@@ -247,17 +252,17 @@ export default function QuizScreen() {
                       {isCorrect ? '✓ Correct' : '✗ Incorrect'}
                     </ThemedText>
                   </ThemedView>
-                  <ThemedText style={styles.reviewQuestion}>{question.question}</ThemedText>
+                  <ThemedText style={styles.reviewQuestion}>{question.title}</ThemedText>
                   <ThemedText style={styles.reviewAnswer}>
-                    Your answer: {question.options[answers[index] ?? 0]}
+                    Your answer:{' '}
+                    {selectedAnswerIndex !== null
+                      ? question.answers[selectedAnswerIndex].content
+                      : 'No answer'}
                   </ThemedText>
                   {!isCorrect && (
                     <ThemedText style={styles.correctAnswer}>
-                      Correct answer: {question.options[question.correctAnswer]}
+                      Correct answer: {question.answers.find((a) => a.is_correct)?.content}
                     </ThemedText>
-                  )}
-                  {question.explanation && (
-                    <ThemedText style={styles.explanation}>{question.explanation}</ThemedText>
                   )}
                 </ThemedView>
               );
@@ -295,70 +300,73 @@ const IntroScreen = ({
   quiz: any;
   onStart: () => void;
   onBack: () => void;
-}) => (
-  <ThemedView style={styles.container}>
-    <ThemedView style={styles.header}>
-      <TouchableOpacity onPress={onBack}>
-        <ThemedText style={styles.backButton}>← Back</ThemedText>
-      </TouchableOpacity>
-      <ThemedText style={styles.headerTitle}>Quiz</ThemedText>
-      <ThemedView />
-    </ThemedView>
-
-    <ScrollView style={styles.introContent} showsVerticalScrollIndicator={false}>
-      <ThemedView style={styles.introContainer}>
-        <ThemedText style={styles.introIcon}>🧠</ThemedText>
-        <ThemedText style={styles.introTitle}>{quiz.title}</ThemedText>
-        <ThemedText style={styles.introDescription}>
-          Test your knowledge with this interactive quiz. Answer all questions to see your results.
-        </ThemedText>
-
-        <ThemedView style={styles.quizInfo}>
-          <ThemedView style={styles.infoItem}>
-            <ThemedText style={styles.infoLabel}>Questions</ThemedText>
-            <ThemedText style={styles.infoValue}>{quiz.questions.length}</ThemedText>
-          </ThemedView>
-          <ThemedView style={styles.infoItem}>
-            <ThemedText style={styles.infoLabel}>Duration</ThemedText>
-            <ThemedText style={styles.infoValue}>{quiz.duration} min</ThemedText>
-          </ThemedView>
-          <ThemedView style={styles.infoItem}>
-            <ThemedText style={styles.infoLabel}>Passing Score</ThemedText>
-            <ThemedText style={styles.infoValue}>{quiz.passingScore}%</ThemedText>
-          </ThemedView>
-        </ThemedView>
-
-        <ThemedView style={styles.instructions}>
-          <ThemedText style={styles.instructionsTitle}>Instructions:</ThemedText>
-          <ThemedText style={styles.instructionItem}>
-            • Answer all questions to complete the quiz
-          </ThemedText>
-          <ThemedText style={styles.instructionItem}>
-            • You can review your answers before submitting
-          </ThemedText>
-          <ThemedText style={styles.instructionItem}>
-            • Your score will be shown immediately after submission
-          </ThemedText>
-          <ThemedText style={styles.instructionItem}>
-            • You need {quiz.passingScore}% to pass
-          </ThemedText>
-        </ThemedView>
+}) => {
+  const insets = useSafeAreaInsets();
+  return (
+    <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
+      <ThemedView style={styles.header}>
+        <TouchableOpacity onPress={onBack}>
+          <ThemedText style={styles.backButton}>← Back</ThemedText>
+        </TouchableOpacity>
+        <ThemedText style={styles.headerTitle}>Quiz</ThemedText>
+        <ThemedView />
       </ThemedView>
-    </ScrollView>
 
-    <ThemedView style={styles.introButtons}>
-      <TouchableOpacity style={styles.startButton} onPress={onStart} activeOpacity={0.7}>
-        <ThemedText style={styles.startButtonText}>Start Quiz</ThemedText>
-      </TouchableOpacity>
+      <ScrollView style={styles.introContent} showsVerticalScrollIndicator={false}>
+        <ThemedView style={styles.introContainer}>
+          <ThemedText style={styles.introIcon}>🧠</ThemedText>
+          <ThemedText style={styles.introTitle}>{quiz.title}</ThemedText>
+          <ThemedText style={styles.introDescription}>
+            Test your knowledge with this interactive quiz. Answer all questions to see your
+            results.
+          </ThemedText>
+
+          <ThemedView style={styles.quizInfo}>
+            <ThemedView style={styles.infoItem}>
+              <ThemedText style={styles.infoLabel}>Questions</ThemedText>
+              <ThemedText style={styles.infoValue}>{quiz.questions.length}</ThemedText>
+            </ThemedView>
+            <ThemedView style={styles.infoItem}>
+              <ThemedText style={styles.infoLabel}>Duration</ThemedText>
+              <ThemedText style={styles.infoValue}>{quiz.duration} min</ThemedText>
+            </ThemedView>
+            <ThemedView style={styles.infoItem}>
+              <ThemedText style={styles.infoLabel}>Passing Score</ThemedText>
+              <ThemedText style={styles.infoValue}>{quiz.passingScore}%</ThemedText>
+            </ThemedView>
+          </ThemedView>
+
+          <ThemedView style={styles.instructions}>
+            <ThemedText style={styles.instructionsTitle}>Instructions:</ThemedText>
+            <ThemedText style={styles.instructionItem}>
+              • Answer all questions to complete the quiz
+            </ThemedText>
+            <ThemedText style={styles.instructionItem}>
+              • You can review your answers before submitting
+            </ThemedText>
+            <ThemedText style={styles.instructionItem}>
+              • Your score will be shown immediately after submission
+            </ThemedText>
+            <ThemedText style={styles.instructionItem}>
+              • You need {quiz.passingScore}% to pass
+            </ThemedText>
+          </ThemedView>
+        </ThemedView>
+      </ScrollView>
+
+      <ThemedView style={styles.introButtons}>
+        <TouchableOpacity style={styles.startButton} onPress={onStart} activeOpacity={0.7}>
+          <ThemedText style={styles.startButtonText}>Start Quiz</ThemedText>
+        </TouchableOpacity>
+      </ThemedView>
     </ThemedView>
-  </ThemedView>
-);
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
-    paddingTop: 50,
   },
   header: {
     flexDirection: 'row',
@@ -746,13 +754,13 @@ const styles = StyleSheet.create({
     borderTopColor: COLORS.border,
   },
   startButton: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: BrandingColors.hotPink,
     borderRadius: 10,
     paddingVertical: 16,
     alignItems: 'center',
     minHeight: 48,
     justifyContent: 'center',
-    shadowColor: COLORS.primary,
+    shadowColor: BrandingColors.hotPink,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,

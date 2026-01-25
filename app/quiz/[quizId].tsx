@@ -6,6 +6,7 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { ArrowDown, ArrowUp, Check, CheckCircle, X } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const COLORS = {
   primary: BrandingColors.hotPink,
@@ -21,6 +22,7 @@ const COLORS = {
 export default function QuizScreen() {
   const { quizId } = useLocalSearchParams<{ quizId: string }>();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [quiz, setQuiz] = useState<Quiz | undefined>(undefined);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState<any>({});
@@ -53,7 +55,7 @@ export default function QuizScreen() {
 
   if (!quiz) {
     return (
-      <ThemedView style={styles.container}>
+      <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
         <ThemedText>Cargando quiz...</ThemedText>
       </ThemedView>
     );
@@ -416,7 +418,7 @@ export default function QuizScreen() {
 
   if (isFinished) {
     return (
-      <ThemedView style={styles.container}>
+      <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
         <Stack.Screen options={{ title: 'Resultados', headerBackVisible: false }} />
         <View style={styles.resultContainer}>
           <CheckCircle size={64} color={COLORS.correct} style={{ marginBottom: 20 }} />
@@ -431,7 +433,7 @@ export default function QuizScreen() {
   }
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
       <Stack.Screen
         options={{
           title: `Pregunta ${currentQuestionIndex + 1}/${quiz.questions.length}`,
