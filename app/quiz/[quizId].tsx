@@ -5,7 +5,15 @@ import { mockQuizzes, Quiz } from '@/data/mockData';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { ArrowDown, ArrowUp, Check, CheckCircle, X } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const COLORS = {
@@ -441,39 +449,44 @@ export default function QuizScreen() {
         }}
       />
 
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.progressContainer}>
-          <View
-            style={[
-              styles.progressBar,
-              { width: `${((currentQuestionIndex + 1) / quiz.questions.length) * 100}%` },
-            ]}
-          />
-        </View>
-
-        <ThemedText style={styles.questionTitle}>{currentQuestion.title}</ThemedText>
-
-        {renderQuestionContent()}
-
-        {showFeedback && (
-          <View
-            style={[
-              styles.feedbackContainer,
-              isCurrentAnswerCorrect ? styles.feedbackCorrect : styles.feedbackIncorrect,
-            ]}
-          >
-            <ThemedText style={styles.feedbackMainText}>
-              {isCurrentAnswerCorrect
-                ? currentQuestion.feedback?.correct ||
-                  currentQuestion.feedback_on_correct ||
-                  '¡Correcto!'
-                : currentQuestion.feedback?.incorrect ||
-                  currentQuestion.feedback_on_incorrect ||
-                  'Incorrecto. Inténtalo de nuevo.'}
-            </ThemedText>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+      >
+        <ScrollView contentContainerStyle={styles.content}>
+          <View style={styles.progressContainer}>
+            <View
+              style={[
+                styles.progressBar,
+                { width: `${((currentQuestionIndex + 1) / quiz.questions.length) * 100}%` },
+              ]}
+            />
           </View>
-        )}
-      </ScrollView>
+
+          <ThemedText style={styles.questionTitle}>{currentQuestion.title}</ThemedText>
+
+          {renderQuestionContent()}
+
+          {showFeedback && (
+            <View
+              style={[
+                styles.feedbackContainer,
+                isCurrentAnswerCorrect ? styles.feedbackCorrect : styles.feedbackIncorrect,
+              ]}
+            >
+              <ThemedText style={styles.feedbackMainText}>
+                {isCurrentAnswerCorrect
+                  ? currentQuestion.feedback?.correct ||
+                    currentQuestion.feedback_on_correct ||
+                    '¡Correcto!'
+                  : currentQuestion.feedback?.incorrect ||
+                    currentQuestion.feedback_on_incorrect ||
+                    'Incorrecto. Inténtalo de nuevo.'}
+              </ThemedText>
+            </View>
+          )}
+        </ScrollView>
+      </KeyboardAvoidingView>
 
       <View style={styles.footer}>
         <TouchableOpacity style={styles.nextButton} onPress={handleNext}>

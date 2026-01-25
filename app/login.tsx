@@ -8,11 +8,15 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
   StyleSheet,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const COLORS = {
   primary: BrandingColors.lightPink,
@@ -30,6 +34,7 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const { login } = useAuth();
+  const insets = useSafeAreaInsets();
 
   const handleLogin = async () => {
     setLoading(true);
@@ -48,70 +53,82 @@ export default function LoginScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <ThemedView style={styles.content}>
-        <ThemedView style={styles.header}>
-          <Image source={require('@/assets/images/logo.png')} style={styles.logo} />
-        </ThemedView>
-
-        <ThemedView style={styles.formContainer}>
-          <ThemedView style={styles.inputGroup}>
-            <ThemedText style={styles.label}>Correo Electrónico</ThemedText>
-            <TextInput
-              style={styles.input}
-              placeholder="tu@ejemplo.com"
-              placeholderTextColor={COLORS.textLight}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              editable={!loading}
-              value={email}
-              onChangeText={setEmail}
-            />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+      >
+        <ScrollView
+          contentContainerStyle={[
+            styles.scrollContent,
+            { paddingTop: insets.top + 40, paddingBottom: insets.bottom + 40 },
+          ]}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <ThemedView style={styles.header}>
+            <Image source={require('@/assets/images/logo.png')} style={styles.logo} />
           </ThemedView>
 
-          <ThemedView style={styles.inputGroup}>
-            <ThemedText style={styles.label}>Contraseña</ThemedText>
-            <View style={styles.passwordInputContainer}>
+          <ThemedView style={styles.formContainer}>
+            <ThemedView style={styles.inputGroup}>
+              <ThemedText style={styles.label}>Correo Electrónico</ThemedText>
               <TextInput
-                style={styles.passwordInput}
-                placeholder="••••••••"
+                style={styles.input}
+                placeholder="tu@ejemplo.com"
                 placeholderTextColor={COLORS.textLight}
-                secureTextEntry={!showPassword}
+                keyboardType="email-address"
+                autoCapitalize="none"
                 editable={!loading}
-                value={password}
-                onChangeText={setPassword}
+                value={email}
+                onChangeText={setEmail}
               />
-              <TouchableOpacity
-                style={styles.eyeIcon}
-                onPress={() => setShowPassword(!showPassword)}
-                disabled={loading}
-              >
-                {showPassword ? (
-                  <EyeOff size={20} color={COLORS.textLight} />
-                ) : (
-                  <Eye size={20} color={COLORS.textLight} />
-                )}
-              </TouchableOpacity>
-            </View>
+            </ThemedView>
+
+            <ThemedView style={styles.inputGroup}>
+              <ThemedText style={styles.label}>Contraseña</ThemedText>
+              <View style={styles.passwordInputContainer}>
+                <TextInput
+                  style={styles.passwordInput}
+                  placeholder="••••••••"
+                  placeholderTextColor={COLORS.textLight}
+                  secureTextEntry={!showPassword}
+                  editable={!loading}
+                  value={password}
+                  onChangeText={setPassword}
+                />
+                <TouchableOpacity
+                  style={styles.eyeIcon}
+                  onPress={() => setShowPassword(!showPassword)}
+                  disabled={loading}
+                >
+                  {showPassword ? (
+                    <EyeOff size={20} color={COLORS.textLight} />
+                  ) : (
+                    <Eye size={20} color={COLORS.textLight} />
+                  )}
+                </TouchableOpacity>
+              </View>
+            </ThemedView>
+
+            <TouchableOpacity disabled={loading}>
+              <ThemedText style={styles.forgotPassword}>¿Olvidó la contraseña?</ThemedText>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.loginButton, loading && styles.loginButtonDisabled]}
+              onPress={handleLogin}
+              disabled={loading}
+              activeOpacity={0.7}
+            >
+              {loading ? (
+                <ActivityIndicator color="white" size="small" />
+              ) : (
+                <ThemedText style={styles.loginButtonText}>Iniciar Sesión</ThemedText>
+              )}
+            </TouchableOpacity>
           </ThemedView>
-
-          <TouchableOpacity disabled={loading}>
-            <ThemedText style={styles.forgotPassword}>¿Olvidó la contraseña?</ThemedText>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.loginButton, loading && styles.loginButtonDisabled]}
-            onPress={handleLogin}
-            disabled={loading}
-            activeOpacity={0.7}
-          >
-            {loading ? (
-              <ActivityIndicator color="white" size="small" />
-            ) : (
-              <ThemedText style={styles.loginButtonText}>Iniciar Sesión</ThemedText>
-            )}
-          </TouchableOpacity>
-        </ThemedView>
-      </ThemedView>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </ThemedView>
   );
 }
@@ -120,11 +137,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
+  },
+  scrollContent: {
+    flexGrow: 1,
     justifyContent: 'center',
     paddingHorizontal: 20,
-  },
-  content: {
-    backgroundColor: COLORS.background,
   },
   header: {
     marginBottom: 40,

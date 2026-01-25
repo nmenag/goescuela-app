@@ -1,7 +1,7 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack, useRouter } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -14,26 +14,24 @@ function RootLayoutContent() {
   const colorScheme = useColorScheme();
   const { isAuthenticated } = useAuth();
   const router = useRouter();
-  const navigationRef = useRef(false);
+
+  const segments = useSegments();
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (isAuthenticated && !navigationRef.current) {
-        navigationRef.current = true;
-        router.replace('/(tabs)');
-      } else if (!isAuthenticated && navigationRef.current) {
-        navigationRef.current = false;
-        router.replace('/login');
-      }
-    }, 0);
+    const inAuthGroup = segments[0] === '(tabs)';
 
-    return () => clearTimeout(timer);
-  }, [isAuthenticated, router]);
+    if (!isAuthenticated && inAuthGroup) {
+      router.replace('/login');
+    } else if (isAuthenticated && segments[0] === 'login') {
+      router.replace('/(tabs)');
+    }
+  }, [isAuthenticated, segments]);
 
   return (
     <SafeAreaProvider>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="index" options={{ headerShown: false }} />
           <Stack.Screen
             name="login"
             options={{
@@ -44,7 +42,6 @@ function RootLayoutContent() {
             name="(tabs)"
             options={{
               headerShown: false,
-              // animationEnabled: true,
             }}
           />
           <Stack.Screen name="learning-view" options={{ headerShown: false }} />
