@@ -6,6 +6,7 @@ import { mockCourses } from '@/data/mockData';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const COLORS = {
   primary: BrandingColors.hotPink,
@@ -16,6 +17,7 @@ const COLORS = {
 
 export default function CoursesScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const handleCoursePress = (courseId: string) => {
     router.push({
@@ -26,7 +28,7 @@ export default function CoursesScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <ThemedView style={styles.header}>
+      <ThemedView style={[styles.header, { paddingTop: insets.top + 20 }]}>
         <ThemedText style={styles.title}>Mis Cursos</ThemedText>
         <ThemedText style={styles.subtitle}>Explora todos los cursos disponibles</ThemedText>
       </ThemedView>

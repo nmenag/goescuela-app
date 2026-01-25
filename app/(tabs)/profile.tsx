@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { getCurrentStudent } from '@/data/mockData';
 import React from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const COLORS = {
   primary: BrandingColors.hotPink,
@@ -18,9 +19,10 @@ const COLORS = {
 export default function ProfileScreen() {
   const { logout } = useAuth();
   const student = getCurrentStudent();
+  const insets = useSafeAreaInsets();
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Profile Header */}
         <ThemedView style={styles.profileHeader}>

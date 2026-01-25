@@ -7,6 +7,7 @@ import { mockCourses } from '@/data/mockData';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { FlatList, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const COLORS = {
   primary: BrandingColors.hotPink,
@@ -19,6 +20,7 @@ const COLORS = {
 export default function HomeScreen() {
   const router = useRouter();
   const { user } = useAuth();
+  const insets = useSafeAreaInsets();
   // const student = getCurrentStudent();
 
   const handleCoursePress = (courseId: string) => {
@@ -29,7 +31,7 @@ export default function HomeScreen() {
   };
 
   const renderHeader = () => (
-    <ThemedView style={styles.header}>
+    <ThemedView style={[styles.header, { paddingTop: insets.top + 20 }]}>
       <ThemedText style={styles.greeting}>Hola 👋</ThemedText>
       <ThemedText style={styles.name}>{user?.name || 'Estudiante'}</ThemedText>
     </ThemedView>
