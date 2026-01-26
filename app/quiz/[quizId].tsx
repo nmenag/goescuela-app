@@ -394,12 +394,12 @@ export default function QuizScreen() {
                   style={[
                     styles.fillBlankInput,
                     showFeedback &&
-                    (currentQuestion.answers
-                      .find((a) => a.blank_position === index + 1)
-                      ?.content.toLowerCase() ===
+                      (currentQuestion.answers
+                        .find((a) => a.blank_position === index + 1)
+                        ?.content.toLowerCase() ===
                       (userAnswers[currentQuestionIndex]?.[index + 1] || '').toLowerCase()
-                      ? styles.textInputCorrect
-                      : styles.textInputIncorrect),
+                        ? styles.textInputCorrect
+                        : styles.textInputIncorrect),
                   ]}
                   value={userAnswers[currentQuestionIndex]?.[index + 1] || ''}
                   onChangeText={(text) => {
@@ -484,11 +484,11 @@ export default function QuizScreen() {
               <ThemedText style={styles.feedbackMainText}>
                 {isCurrentAnswerCorrect
                   ? currentQuestion.feedback?.correct ||
-                  currentQuestion.feedback_on_correct ||
-                  '¡Correcto!'
+                    currentQuestion.feedback_on_correct ||
+                    '¡Correcto!'
                   : currentQuestion.feedback?.incorrect ||
-                  currentQuestion.feedback_on_incorrect ||
-                  'Incorrecto. Inténtalo de nuevo.'}
+                    currentQuestion.feedback_on_incorrect ||
+                    'Incorrecto. Inténtalo de nuevo.'}
               </ThemedText>
             </View>
           )}
@@ -501,7 +501,12 @@ export default function QuizScreen() {
           onPress={handlePrevious}
           disabled={currentQuestionIndex === 0 || showFeedback}
         >
-          <ThemedText style={[styles.prevButtonText, currentQuestionIndex === 0 && styles.prevButtonDisabledText]}>
+          <ThemedText
+            style={[
+              styles.prevButtonText,
+              currentQuestionIndex === 0 && styles.prevButtonDisabledText,
+            ]}
+          >
             Anterior
           </ThemedText>
         </TouchableOpacity>

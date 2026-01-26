@@ -116,7 +116,7 @@ export interface Student {
 export const mockStudents: Student[] = [
   {
     id: 'student-1',
-    name: 'Sarah Chen',
+    name: 'Alejo',
     email: 'sarah.chen@example.com',
     avatar: 'https://i.pravatar.cc/150?img=1',
     enrolledCourses: ['course-1', 'course-2', 'course-3'],
