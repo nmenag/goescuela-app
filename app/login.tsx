@@ -21,7 +21,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 const COLORS = {
   primary: BrandingColors.lightPink,
   primaryDark: BrandingColors.hotPink,
-  background: '#FFFFFF',
+  background: BrandingColors.lightPink,
   text: '#1F2937',
   textLight: '#6B7280',
   border: '#E5E7EB',

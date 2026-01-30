@@ -9,7 +9,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const COLORS = {
   primary: BrandingColors.hotPink,
-  background: '#FFFFFF',
+  background: BrandingColors.lightPink,
   text: '#1F2937',
   textLight: '#6B7280',
   border: '#E5E7EB',
@@ -31,6 +31,11 @@ export default function ProfileScreen() {
           </ThemedView>
           <ThemedText style={styles.name}>{student.name}</ThemedText>
           <ThemedText style={styles.email}>{student.email}</ThemedText>
+          <ThemedView style={styles.schoolInfo}>
+            <ThemedText style={styles.schoolText}>{student.school}</ThemedText>
+            <ThemedText style={styles.dot}>•</ThemedText>
+            <ThemedText style={styles.schoolText}>{student.grade}</ThemedText>
+          </ThemedView>
         </ThemedView>
 
         {/* Stats Section */}
@@ -40,8 +45,16 @@ export default function ProfileScreen() {
             <ThemedText style={styles.statLabel}>Cursos Inscritos</ThemedText>
           </ThemedView>
           <ThemedView style={styles.statCard}>
-            <ThemedText style={styles.statValue}>62%</ThemedText>
-            <ThemedText style={styles.statLabel}>Progreso Promedio</ThemedText>
+            <ThemedText style={styles.statValue}>
+              {student.quizScores.length > 0
+                ? Math.round(
+                    student.quizScores.reduce((acc, curr) => acc + curr.score, 0) /
+                      student.quizScores.length,
+                  )
+                : 0}
+              %
+            </ThemedText>
+            <ThemedText style={styles.statLabel}>Promedio General</ThemedText>
           </ThemedView>
         </ThemedView>
 
@@ -100,7 +113,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 40,
     paddingHorizontal: 20,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
   },
@@ -123,7 +136,20 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   email: {
+    color: COLORS.textLight,
+    marginBottom: 8,
+  },
+  schoolInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  schoolText: {
     fontSize: 14,
+    color: COLORS.primary,
+    fontWeight: '600',
+  },
+  dot: {
     color: COLORS.textLight,
   },
   statsSection: {
@@ -137,7 +163,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 12,
     borderRadius: 12,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: COLORS.border,
     alignItems: 'center',

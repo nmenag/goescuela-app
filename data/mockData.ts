@@ -33,6 +33,7 @@ export interface Course {
   id: string;
   title: string;
   description: string;
+  sequential?: boolean; // If true, lessons must be completed in order
   instructor: {
     id: string;
     name: string;
@@ -109,6 +110,8 @@ export interface Student {
   email: string;
   avatar: string;
   enrolledCourses: string[];
+  school: string;
+  grade: string;
   progress: StudentProgress[];
   quizScores: QuizScore[];
 }
@@ -119,6 +122,8 @@ export const mockStudents: Student[] = [
     name: 'Alejo',
     email: 'sarah.chen@example.com',
     avatar: 'https://i.pravatar.cc/150?img=1',
+    school: 'Colegio San José',
+    grade: '10° Grado',
     enrolledCourses: ['course-1', 'course-2', 'course-3'],
     progress: [
       {
@@ -179,6 +184,7 @@ export const mockCourses: Course[] = [
   {
     id: 'course-1',
     title: 'Ciencias Naturales',
+    sequential: true,
     description:
       'Aprende los conceptos fundamentales de ciencias naturales incluyendo biología, química y física.',
     instructor: {
@@ -361,58 +367,58 @@ export const mockCourses: Course[] = [
   },
   {
     id: 'course-3',
-    title: 'Prueba',
+    title: 'Lenguaje y Comunicación',
     description:
-      'Un curso de prueba con contenido introductorio para familiarizarse con la plataforma.',
+      'Mejora tus habilidades de lectura, escritura y comunicación efectiva con este curso integral.',
     instructor: {
       id: 'instructor-3',
-      name: 'Prof. Michael Zhang',
+      name: 'Lic. Ana Martínez',
       avatar: 'https://i.pravatar.cc/150?img=3',
     },
-    thumbnail: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=300&fit=crop',
-    category: 'General',
-    students: 5400,
+    thumbnail: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=400&h=300&fit=crop',
+    category: 'Humanidades',
+    students: 6500,
     duration: 24,
     modules: [
       {
         id: 'module-6',
-        title: 'Módulo 1: Introducción',
+        title: 'Comunicación Efectiva',
         duration: 8,
         lessons: [
           {
             id: 'lesson-12',
-            title: 'Bienvenida al Curso',
+            title: 'Elementos de la Comunicación',
             type: 'video',
-            duration: 65,
-            description: 'Introducción y descripción general del curso.',
+            duration: 45,
+            description: 'Aprende los elementos fundamentales del proceso comunicativo.',
           },
           {
             id: 'lesson-13',
-            title: 'Cómo Usar la Plataforma',
+            title: 'Técnicas de Expresión Oral',
             type: 'video',
-            duration: 85,
-            description: 'Aprende a navegar y usar la plataforma de manera efectiva.',
+            duration: 60,
+            description: 'Mejora tu capacidad de hablar en público y expresar ideas.',
           },
         ],
       },
       {
         id: 'module-7',
-        title: 'Módulo 2: Contenido Principal',
+        title: 'Comprensión Lectora',
         duration: 16,
         lessons: [
           {
             id: 'lesson-14',
-            title: 'Lección 1',
+            title: 'Análisis de Textos',
             type: 'video',
-            duration: 75,
-            description: 'Primer contenido del módulo principal.',
+            duration: 55,
+            description: 'Estrategias para analizar y comprender textos complejos.',
           },
           {
             id: 'lesson-15',
-            title: 'Lección 2',
+            title: 'Tipos de Textos',
             type: 'video',
-            duration: 90,
-            description: 'Segundo contenido del módulo principal.',
+            duration: 50,
+            description: 'Identifica y comprende diferentes tipos de textos literarios y no literarios.',
           },
         ],
       },
@@ -696,4 +702,23 @@ export const getCourseIdByLessonId = (lessonId: string): string | undefined => {
     }
   }
   return undefined;
+};
+
+// Helper function to get adjacent lessons (previous and next)
+export const getAdjacentLessons = (lessonId: string) => {
+  const courseId = getCourseIdByLessonId(lessonId);
+  if (!courseId) return { prev: null, next: null };
+
+  const course = getCourseById(courseId);
+  if (!course) return { prev: null, next: null };
+
+  const allLessons = course.modules.flatMap((m) => m.lessons);
+  const currentIndex = allLessons.findIndex((l) => l.id === lessonId);
+
+  if (currentIndex === -1) return { prev: null, next: null };
+
+  return {
+    prev: currentIndex > 0 ? allLessons[currentIndex - 1] : null,
+    next: currentIndex < allLessons.length - 1 ? allLessons[currentIndex + 1] : null,
+  };
 };

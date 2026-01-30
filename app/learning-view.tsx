@@ -6,10 +6,11 @@ import {
   getCurrentStudent,
   getStudentCourseProgress,
   getStudentCourseQuizScores,
+  getAdjacentLessons,
   mockQuizzes,
 } from '@/data/mockData';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { CheckCircle } from 'lucide-react-native';
+import { CheckCircle, Lock } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { FlatList, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -17,7 +18,7 @@ import { Accordion } from '../components/accordion';
 
 const COLORS = {
   primary: BrandingColors.hotPink,
-  background: '#FFFFFF',
+  background: BrandingColors.lightPink,
   text: '#1F2937',
   textLight: '#6B7280',
   border: '#E5E7EB',
@@ -87,32 +88,76 @@ export default function LearningViewScreen() {
       title: module.title,
       duration: module.duration,
       content: (
-        <ThemedView style={styles.lessonsContainer}>
-          {module.lessons.map((lesson) => (
-            <TouchableOpacity
-              key={lesson.id}
-              style={styles.lessonItem}
-              activeOpacity={0.7}
-              onPress={() => router.push(`/lesson/${lesson.id}`)}
-            >
-              <ThemedView style={styles.lessonIconContainer}>
-                <ThemedText style={styles.lessonTypeIcon}>{getLessonIcon(lesson.type)}</ThemedText>
-              </ThemedView>
-              <ThemedView style={styles.lessonInfo}>
-                <ThemedText style={styles.lessonTitle}>{lesson.title}</ThemedText>
-                <ThemedView style={styles.lessonMetaContainer}>
-                  <ThemedText style={styles.lessonTypeLabel}>
-                    {getLessonLabel(lesson.type)}
+        <ThemedView style={styles.horizontalSection}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.lessonsHorizontalContainer}
+          >
+            {module.lessons.map((lesson) => {
+              const isLocked =
+                course.sequential &&
+                (() => {
+                  const { prev } = getAdjacentLessons(lesson.id);
+                  if (prev && !progress?.completedLessons.includes(prev.id)) {
+                    return true;
+                  }
+                  return false;
+                })();
+
+              return (
+                <TouchableOpacity
+                  key={lesson.id}
+                  style={[styles.circularLessonItem, isLocked && styles.circularLessonItemLocked]}
+                  activeOpacity={isLocked ? 1 : 0.7}
+                  onPress={() => !isLocked && router.push(`/lesson/${lesson.id}`)}
+                  disabled={isLocked}
+                >
+                  <ThemedView
+                    style={[
+                      styles.circularLessonIcon,
+                      progress?.completedLessons.includes(lesson.id) &&
+                        styles.circularLessonCompleted,
+                      isLocked && styles.circularLessonIconLocked,
+                    ]}
+                  >
+                    {isLocked ? (
+                      <Lock size={20} color={COLORS.textLight} />
+                    ) : (
+                      <>
+                        <ThemedText
+                          style={[
+                            styles.lessonTypeIcon,
+                            progress?.completedLessons.includes(lesson.id) &&
+                              styles.circularLessonTextCompleted,
+                          ]}
+                        >
+                          {getLessonIcon(lesson.type)}
+                        </ThemedText>
+                        {progress?.completedLessons.includes(lesson.id) && (
+                          <ThemedView style={styles.circularCheckBadge}>
+                            <CheckCircle size={14} color="#FFFFFF" fill={BrandingColors.hotPink} />
+                          </ThemedView>
+                        )}
+                      </>
+                    )}
+                  </ThemedView>
+                  <ThemedText
+                    style={[
+                      styles.circularLessonTitle,
+                      isLocked && styles.circularLessonTitleLocked,
+                    ]}
+                    numberOfLines={1}
+                  >
+                    {lesson.title}
                   </ThemedText>
-                  <ThemedText style={styles.lessonDuration}>• {lesson.duration} min</ThemedText>
-                </ThemedView>
-              </ThemedView>
-              {progress?.completedLessons.includes(lesson.id) && (
-                <CheckCircle size={20} color={BrandingColors.hotPink} style={{ marginRight: 8 }} />
-              )}
-              <ThemedText style={styles.chevronIcon}>›</ThemedText>
-            </TouchableOpacity>
-          ))}
+                  <ThemedText style={styles.circularLessonLabel}>
+                    {isLocked ? 'Bloqueado' : getLessonLabel(lesson.type)}
+                  </ThemedText>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
         </ThemedView>
       ),
     };
@@ -290,55 +335,70 @@ const styles = StyleSheet.create({
   accordionWrapper: {
     marginBottom: 12,
   },
-  lessonsContainer: {
-    gap: 8,
-    paddingTop: 8,
-  },
-  lessonItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 12,
+  horizontalSection: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 8,
+    borderRadius: 16,
+    paddingVertical: 12,
+    marginBottom: 8,
     borderWidth: 1,
     borderColor: '#E5E7EB',
   },
-  lessonInfo: {
-    flex: 1,
+  lessonsHorizontalContainer: {
+    paddingHorizontal: 12,
+    paddingVertical: 16,
+    gap: 20,
+    backgroundColor: 'transparent',
   },
-  lessonTitle: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: COLORS.text,
-    marginBottom: 4,
-  },
-  lessonMetaContainer: {
-    flexDirection: 'row',
+  circularLessonItem: {
     alignItems: 'center',
+    width: 80,
   },
-  lessonTypeLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: COLORS.primary,
-    marginRight: 6,
-  },
-  lessonDuration: {
-    fontSize: 12,
-    color: COLORS.textLight,
-  },
-  lessonIconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#F3F4F6',
+  circularLessonIcon: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginBottom: 8,
+    borderWidth: 2,
+    borderColor: '#E5E7EB',
+    position: 'relative',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  circularLessonCompleted: {
+    borderColor: BrandingColors.hotPink,
+    backgroundColor: BrandingColors.lightPink,
+  },
+  circularLessonTextCompleted: {
+    color: BrandingColors.hotPink,
+  },
+  circularCheckBadge: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    padding: 2,
+  },
+  circularLessonTitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.text,
+    textAlign: 'center',
+    width: '100%',
+  },
+  circularLessonLabel: {
+    fontSize: 10,
+    color: COLORS.textLight,
+    marginTop: 2,
   },
   lessonTypeIcon: {
-    fontSize: 14,
+    fontSize: 18,
     color: COLORS.text,
   },
   chevronIcon: {
@@ -440,5 +500,15 @@ const styles = StyleSheet.create({
   emptyStateText: {
     color: COLORS.textLight,
     fontSize: 14,
+  },
+  circularLessonItemLocked: {
+    opacity: 0.7,
+  },
+  circularLessonIconLocked: {
+    backgroundColor: '#F3F4F6',
+    borderColor: '#E5E7EB',
+  },
+  circularLessonTitleLocked: {
+    color: COLORS.textLight,
   },
 });

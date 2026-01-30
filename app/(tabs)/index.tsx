@@ -5,13 +5,14 @@ import { BrandingColors } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
 import { mockCourses } from '@/data/mockData';
 import { useRouter } from 'expo-router';
+import { Download } from 'lucide-react-native';
 import React from 'react';
-import { FlatList, StyleSheet } from 'react-native';
+import { FlatList, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const COLORS = {
   primary: BrandingColors.hotPink,
-  background: '#FFFFFF',
+  background: BrandingColors.lightPink,
   text: '#1F2937',
   textLight: '#6B7280',
   border: '#E5E7EB',
@@ -21,7 +22,6 @@ export default function HomeScreen() {
   const router = useRouter();
   const { user } = useAuth();
   const insets = useSafeAreaInsets();
-  // const student = getCurrentStudent();
 
   const handleCoursePress = (courseId: string) => {
     router.push({
@@ -31,33 +31,53 @@ export default function HomeScreen() {
   };
 
   const renderHeader = () => (
-    <ThemedView style={[styles.header, { paddingTop: insets.top + 20 }]}>
-      <ThemedText style={styles.greeting}>Hola 👋</ThemedText>
-      <ThemedText style={styles.name}>{user?.name || 'Estudiante'}</ThemedText>
+    <ThemedView style={[styles.header, { paddingTop: insets.top + 10 }]}>
+      <ThemedView style={styles.headerTop}>
+        <ThemedView>
+          <ThemedText style={styles.greeting}>Hola 👋</ThemedText>
+          <ThemedText style={styles.name}>{user?.name || 'Estudiante'}</ThemedText>
+        </ThemedView>
+        <TouchableOpacity style={styles.syncButton} onPress={() => alert('Sincronizando...')}>
+          <Download size={22} color={COLORS.primary} />
+        </TouchableOpacity>
+      </ThemedView>
+
+      <ThemedView style={styles.logoContainer}>
+        <Image
+          source={require('@/assets/images/logo.png')}
+          style={styles.logo}
+          resizeMode="contain"
+        />
+      </ThemedView>
     </ThemedView>
   );
 
   return (
     <ThemedView style={styles.container}>
-      <FlatList
-        data={mockCourses}
-        renderItem={({ item }) => (
-          <ThemedView style={styles.courseCardWrapper}>
-            <CourseCard
-              key={item.id}
-              id={item.id}
-              title={item.title}
-              thumbnail={item.thumbnail}
-              onPress={() => handleCoursePress(item.id)}
-            />
-          </ThemedView>
-        )}
-        keyExtractor={(item) => item.id}
-        ListHeaderComponent={renderHeader}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-        scrollEventThrottle={16}
-      />
+      {renderHeader()}
+      <ThemedView style={styles.horizontalSection}>
+        <FlatList
+          horizontal
+          data={mockCourses}
+          renderItem={({ item }) => (
+            <ThemedView style={styles.courseCardWrapper}>
+              <CourseCard
+                key={item.id}
+                id={item.id}
+                title={item.title}
+                thumbnail={item.thumbnail}
+                onPress={() => handleCoursePress(item.id)}
+              />
+            </ThemedView>
+          )}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.listContent}
+          showsHorizontalScrollIndicator={false}
+          scrollEventThrottle={16}
+          snapToInterval={280 + 16}
+          decelerationRate="fast"
+        />
+      </ThemedView>
     </ThemedView>
   );
 }
@@ -70,12 +90,42 @@ const styles = StyleSheet.create({
   listContent: {
     paddingHorizontal: 20,
     paddingBottom: 20,
+    paddingTop: 0,
   },
   header: {
-    paddingHorizontal: 0,
+    paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 24,
     backgroundColor: COLORS.background,
+  },
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+  },
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: 10,
+    backgroundColor: 'transparent',
+  },
+  logo: {
+    width: 250,
+    height: 200,
+  },
+  horizontalSection: {
+    marginHorizontal: 0,
+    paddingVertical: 10,
+  },
+  syncButton: {
+    padding: 10,
+    borderRadius: 20,
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   greeting: {
     fontSize: 14,
@@ -88,10 +138,7 @@ const styles = StyleSheet.create({
     color: COLORS.text,
   },
   courseCardWrapper: {
-    marginBottom: 16,
-  },
-  coursesContainer: {
-    paddingHorizontal: 20,
-    paddingBottom: 20,
+    width: 280,
+    marginRight: 16,
   },
 });
