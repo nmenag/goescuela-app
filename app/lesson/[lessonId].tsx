@@ -95,12 +95,10 @@ export default function LessonScreen() {
 
   const courseId = getCourseIdByLessonId(lessonId || '') || '';
   const progress = getStudentCourseProgress(student.id, courseId);
-  // Re-calculate completion status whenever screen is viewed or updated
   const isLessonCompletedInitial = progress?.completedLessons.includes(lessonId || '') || false;
 
   const [isCompleted, setIsCompleted] = useState(isLessonCompletedInitial);
 
-  // Update local state if initial state changes (e.g. if navigating back and forth)
   useEffect(() => {
     setIsCompleted(progress?.completedLessons.includes(lessonId || '') || false);
   }, [lessonId, progress]);

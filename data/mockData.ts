@@ -418,7 +418,8 @@ export const mockCourses: Course[] = [
             title: 'Tipos de Textos',
             type: 'video',
             duration: 50,
-            description: 'Identifica y comprende diferentes tipos de textos literarios y no literarios.',
+            description:
+              'Identifica y comprende diferentes tipos de textos literarios y no literarios.',
           },
         ],
       },

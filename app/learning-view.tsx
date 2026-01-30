@@ -10,11 +10,19 @@ import {
   mockQuizzes,
 } from '@/data/mockData';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { CheckCircle, Lock } from 'lucide-react-native';
+import {
+  CheckCircle,
+  Lock,
+  PlayCircle,
+  Video,
+  FileText,
+  BookOpen,
+  Mic,
+  HelpCircle,
+} from 'lucide-react-native';
 import React, { useState } from 'react';
-import { FlatList, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import { FlatList, ScrollView, StyleSheet, TouchableOpacity, View, Dimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Accordion } from '../components/accordion';
 
 const COLORS = {
   primary: BrandingColors.hotPink,
@@ -50,18 +58,20 @@ export default function LearningViewScreen() {
     return quiz ? quiz.title : `Evaluación ${quizId.split('-').pop()}`;
   };
 
-  const getLessonIcon = (type: string) => {
+  const getLessonIconComponent = (type: string, color: string, size: number) => {
     switch (type) {
       case 'video':
-        return '▶';
+        return <Video size={size} color={color} />;
       case 'quiz':
-        return '❓';
+        return <HelpCircle size={size} color={color} />;
       case 'resource':
-        return '📄';
+        return <FileText size={size} color={color} />;
       case 'homework':
-        return '📝';
+        return <BookOpen size={size} color={color} />;
+      case 'audio':
+        return <Mic size={size} color={color} />;
       default:
-        return '▶';
+        return <PlayCircle size={size} color={color} />;
     }
   };
 
@@ -72,7 +82,7 @@ export default function LearningViewScreen() {
       case 'audio':
         return 'Audio';
       case 'quiz':
-        return 'Quiz';
+        return 'Cuestionario';
       case 'resource':
         return 'Recurso';
       case 'homework':
@@ -82,86 +92,81 @@ export default function LearningViewScreen() {
     }
   };
 
-  const accordionItems = course.modules.map((module) => {
-    return {
-      id: module.id,
-      title: module.title,
-      duration: module.duration,
-      content: (
-        <ThemedView style={styles.horizontalSection}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.lessonsHorizontalContainer}
-          >
-            {module.lessons.map((lesson) => {
-              const isLocked =
-                course.sequential &&
-                (() => {
-                  const { prev } = getAdjacentLessons(lesson.id);
-                  if (prev && !progress?.completedLessons.includes(prev.id)) {
-                    return true;
-                  }
-                  return false;
-                })();
+  const renderModules = () => {
+    let globalLessonIndex = 0;
 
-              return (
-                <TouchableOpacity
-                  key={lesson.id}
-                  style={[styles.circularLessonItem, isLocked && styles.circularLessonItemLocked]}
-                  activeOpacity={isLocked ? 1 : 0.7}
-                  onPress={() => !isLocked && router.push(`/lesson/${lesson.id}`)}
-                  disabled={isLocked}
-                >
+    return (
+      <ScrollView
+        contentContainerStyle={styles.modulesScrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {course.modules.map((module, moduleIndex) => (
+          <ThemedView key={module.id} style={styles.moduleSection}>
+            <ThemedView style={styles.moduleHeaderContainer}>
+              <ThemedText style={styles.moduleHeaderTitle}>UNIDAD {moduleIndex + 1}</ThemedText>
+              <ThemedText style={styles.moduleHeaderSubtitle}>{module.title}</ThemedText>
+            </ThemedView>
+
+            <ThemedView style={styles.lessonsPathContainer}>
+              {module.lessons.map((lesson) => {
+                const currentIndex = globalLessonIndex++;
+                const isCompleted = progress?.completedLessons.includes(lesson.id);
+                const isLocked =
+                  course.sequential &&
+                  (() => {
+                    const { prev } = getAdjacentLessons(lesson.id);
+                    if (prev && !progress?.completedLessons.includes(prev.id)) {
+                      return true;
+                    }
+                    return false;
+                  })();
+                const isCurrent = !isCompleted && !isLocked
+                const xOffset = Math.sin(currentIndex) * 70;
+
+                return (
                   <ThemedView
+                    key={lesson.id}
                     style={[
-                      styles.circularLessonIcon,
-                      progress?.completedLessons.includes(lesson.id) &&
-                        styles.circularLessonCompleted,
-                      isLocked && styles.circularLessonIconLocked,
+                      styles.lessonNodeRow,
+                      {
+                        transform: [{ translateX: xOffset }],
+                      },
                     ]}
                   >
-                    {isLocked ? (
-                      <Lock size={20} color={COLORS.textLight} />
-                    ) : (
-                      <>
-                        <ThemedText
-                          style={[
-                            styles.lessonTypeIcon,
-                            progress?.completedLessons.includes(lesson.id) &&
-                              styles.circularLessonTextCompleted,
-                          ]}
-                        >
-                          {getLessonIcon(lesson.type)}
-                        </ThemedText>
-                        {progress?.completedLessons.includes(lesson.id) && (
-                          <ThemedView style={styles.circularCheckBadge}>
-                            <CheckCircle size={14} color="#FFFFFF" fill={BrandingColors.hotPink} />
-                          </ThemedView>
-                        )}
-                      </>
-                    )}
+                    <TouchableOpacity
+                      style={[
+                        styles.circleButton,
+                        isCompleted && styles.circleButtonCompleted,
+                        isCurrent && styles.circleButtonCurrent,
+                        isLocked && styles.circleButtonLocked,
+                      ]}
+                      onPress={() => !isLocked && router.push(`/lesson/${lesson.id}`)}
+                      disabled={isLocked}
+                      activeOpacity={0.7}
+                    >
+                      {isCompleted ? (
+                        <CheckCircle size={32} color="#FFFFFF" strokeWidth={4} />
+                      ) : (
+                        getLessonIconComponent(lesson.type, isLocked ? '#9CA3AF' : '#FFFFFF', 32)
+                      )}
+                    </TouchableOpacity>
+                    <ThemedView style={styles.lessonLabelContainer}>
+                      <ThemedText
+                        style={[styles.lessonLabelText, isLocked && styles.lessonLabelLocked]}
+                      >
+                        {lesson.title}
+                      </ThemedText>
+                    </ThemedView>
                   </ThemedView>
-                  <ThemedText
-                    style={[
-                      styles.circularLessonTitle,
-                      isLocked && styles.circularLessonTitleLocked,
-                    ]}
-                    numberOfLines={1}
-                  >
-                    {lesson.title}
-                  </ThemedText>
-                  <ThemedText style={styles.circularLessonLabel}>
-                    {isLocked ? 'Bloqueado' : getLessonLabel(lesson.type)}
-                  </ThemedText>
-                </TouchableOpacity>
-              );
-            })}
-          </ScrollView>
-        </ThemedView>
-      ),
-    };
-  });
+                );
+              })}
+            </ThemedView>
+          </ThemedView>
+        ))}
+        <ThemedView style={{ height: 100 }} />
+      </ScrollView>
+    );
+  };
 
   const renderHeader = () => (
     <ThemedView>
@@ -244,25 +249,7 @@ export default function LearningViewScreen() {
     <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
       {renderHeader()}
       <ThemedView style={styles.contentContainer}>
-        {activeTab === 'modules' ? (
-          <FlatList
-            data={accordionItems}
-            renderItem={({ item }) => (
-              <ThemedView style={styles.moduleRowContainer}>
-                <ThemedView style={styles.moduleColumn}>
-                  <ThemedView style={styles.accordionWrapper}>
-                    <Accordion items={[item]} />
-                  </ThemedView>
-                </ThemedView>
-              </ThemedView>
-            )}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={styles.listContent}
-            showsVerticalScrollIndicator={false}
-          />
-        ) : (
-          renderGrades()
-        )}
+        {activeTab === 'modules' ? renderModules() : renderGrades()}
       </ThemedView>
     </ThemedView>
   );
@@ -324,87 +311,92 @@ const styles = StyleSheet.create({
   tabTextActive: {
     color: COLORS.tabActive,
   },
-  moduleRowContainer: {
-    flexDirection: 'row',
-    marginBottom: 12,
-    alignItems: 'flex-start',
-  },
-  moduleColumn: {
-    flex: 1,
-  },
-  accordionWrapper: {
-    marginBottom: 12,
-  },
-  horizontalSection: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    paddingVertical: 12,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-  },
-  lessonsHorizontalContainer: {
-    paddingHorizontal: 12,
-    paddingVertical: 16,
-    gap: 20,
-    backgroundColor: 'transparent',
-  },
-  circularLessonItem: {
+  modulesScrollContent: {
+    paddingVertical: 24,
     alignItems: 'center',
-    width: 80,
   },
-  circularLessonIcon: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+  moduleSection: {
+    width: '100%',
+    alignItems: 'center',
+    marginBottom: 32,
+  },
+  moduleHeaderContainer: {
+    width: '100%',
+    paddingHorizontal: 20,
+    marginBottom: 24,
+    alignItems: 'center',
+  },
+  moduleHeaderTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: COLORS.primary,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  moduleHeaderSubtitle: {
+    fontSize: 16,
+    color: COLORS.text,
+    fontWeight: '600',
+    marginTop: 4,
+  },
+  lessonsPathContainer: {
+    width: '100%',
+    alignItems: 'center',
+    gap: 20,
+  },
+  lessonNodeRow: {
+    width: 120, // Width to accommodate label
+    minHeight: 120,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+    overflow: 'visible',
+  },
+  circleButton: {
+    width: 74,
+    height: 74,
+    borderRadius: 37,
     backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 8,
+    borderBottomWidth: 6,
+    borderBottomColor: '#E5E7EB',
     borderWidth: 2,
     borderColor: '#E5E7EB',
-    position: 'relative',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
   },
-  circularLessonCompleted: {
-    borderColor: BrandingColors.hotPink,
-    backgroundColor: BrandingColors.lightPink,
+  circleButtonCompleted: {
+    backgroundColor: '#FFC107', // Gold/Amber
+    borderColor: '#FFC107',
+    borderBottomColor: '#FFA000',
   },
-  circularLessonTextCompleted: {
-    color: BrandingColors.hotPink,
+  circleButtonCurrent: {
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
+    borderBottomColor: '#C2185B',
   },
-  circularCheckBadge: {
-    position: 'absolute',
-    top: -2,
-    right: -2,
+  circleButtonLocked: {
+    backgroundColor: '#E5E7EB',
+    borderColor: '#D1D5DB',
+    borderBottomColor: '#9CA3AF',
+  },
+  lessonLabelContainer: {
+    marginTop: 8,
     backgroundColor: '#FFFFFF',
-    borderRadius: 10,
-    padding: 2,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    maxWidth: 120,
   },
-  circularLessonTitle: {
-    fontSize: 12,
-    fontWeight: '600',
+  lessonLabelText: {
+    fontSize: 11,
+    fontWeight: '700',
     color: COLORS.text,
     textAlign: 'center',
-    width: '100%',
   },
-  circularLessonLabel: {
-    fontSize: 10,
+  lessonLabelLocked: {
     color: COLORS.textLight,
-    marginTop: 2,
-  },
-  lessonTypeIcon: {
-    fontSize: 18,
-    color: COLORS.text,
-  },
-  chevronIcon: {
-    fontSize: 20,
-    color: '#9CA3AF',
-    marginLeft: 8,
   },
   gradeSection: {
     marginBottom: 24,
@@ -500,15 +492,5 @@ const styles = StyleSheet.create({
   emptyStateText: {
     color: COLORS.textLight,
     fontSize: 14,
-  },
-  circularLessonItemLocked: {
-    opacity: 0.7,
-  },
-  circularLessonIconLocked: {
-    backgroundColor: '#F3F4F6',
-    borderColor: '#E5E7EB',
-  },
-  circularLessonTitleLocked: {
-    color: COLORS.textLight,
   },
 });

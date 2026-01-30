@@ -47,10 +47,8 @@ export default function QuizScreen() {
   useEffect(() => {
     if (quiz && quiz.questions[currentQuestionIndex]) {
       const question = quiz.questions[currentQuestionIndex];
-      // Initialize sequence answer if needed
       if (question.type === 'sequence') {
         setUserAnswers((prev: any) => {
-          // Only initialize if not already set
           if (!prev[currentQuestionIndex]) {
             const initialOrder = [...question.answers].sort(() => Math.random() - 0.5);
             return { ...prev, [currentQuestionIndex]: initialOrder };
@@ -77,10 +75,8 @@ export default function QuizScreen() {
 
     if (currentQuestion.type === 'multiple-choice' || currentQuestion.type === 'true-false') {
       if (currentQuestion.allowMultipleAnswers) {
-        // For multiple selection, check if array exists and has at least one item
         return Array.isArray(currentAns) && currentAns.length > 0;
       } else {
-        // For single selection
         return currentAns !== undefined && currentAns !== null && currentAns !== '';
       }
     } else if (currentQuestion.type === 'text') {
@@ -90,7 +86,6 @@ export default function QuizScreen() {
     } else if (currentQuestion.type === 'fill-in-blank') {
       const blanks = currentQuestion.answers.filter((a) => a.blank_position);
       if (!currentAns || typeof currentAns !== 'object') return false;
-      // Check if at least one blank is filled
       return blanks.some((blank) => {
         const userVal = currentAns[blank.blank_position || 0];
         return userVal && userVal.trim() !== '';
@@ -394,12 +389,12 @@ export default function QuizScreen() {
                   style={[
                     styles.fillBlankInput,
                     showFeedback &&
-                      (currentQuestion.answers
-                        .find((a) => a.blank_position === index + 1)
-                        ?.content.toLowerCase() ===
+                    (currentQuestion.answers
+                      .find((a) => a.blank_position === index + 1)
+                      ?.content.toLowerCase() ===
                       (userAnswers[currentQuestionIndex]?.[index + 1] || '').toLowerCase()
-                        ? styles.textInputCorrect
-                        : styles.textInputIncorrect),
+                      ? styles.textInputCorrect
+                      : styles.textInputIncorrect),
                   ]}
                   value={userAnswers[currentQuestionIndex]?.[index + 1] || ''}
                   onChangeText={(text) => {
@@ -484,11 +479,11 @@ export default function QuizScreen() {
               <ThemedText style={styles.feedbackMainText}>
                 {isCurrentAnswerCorrect
                   ? currentQuestion.feedback?.correct ||
-                    currentQuestion.feedback_on_correct ||
-                    '¡Correcto!'
+                  currentQuestion.feedback_on_correct ||
+                  '¡Correcto!'
                   : currentQuestion.feedback?.incorrect ||
-                    currentQuestion.feedback_on_incorrect ||
-                    'Incorrecto. Inténtalo de nuevo.'}
+                  currentQuestion.feedback_on_incorrect ||
+                  'Incorrecto. Inténtalo de nuevo.'}
               </ThemedText>
             </View>
           )}
