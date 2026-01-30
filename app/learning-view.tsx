@@ -120,7 +120,7 @@ export default function LearningViewScreen() {
                     }
                     return false;
                   })();
-                const isCurrent = !isCompleted && !isLocked
+                const isCurrent = !isCompleted && !isLocked;
                 const xOffset = Math.sin(currentIndex) * 70;
 
                 return (

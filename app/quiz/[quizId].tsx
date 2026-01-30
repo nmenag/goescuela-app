@@ -3,7 +3,7 @@ import { ThemedView } from '@/components/themed-view';
 import { BrandingColors } from '@/constants/theme';
 import { mockQuizzes, Quiz } from '@/data/mockData';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { ArrowDown, ArrowUp, Check, CheckCircle, X } from 'lucide-react-native';
+import { Check, CheckCircle, GripVertical, X } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import {
   KeyboardAvoidingView,
@@ -15,6 +15,10 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import DraggableFlatList, {
+  RenderItemParams,
+  ScaleDecorator,
+} from 'react-native-draggable-flatlist';
 
 const COLORS = {
   primary: BrandingColors.hotPink,
@@ -307,56 +311,51 @@ export default function QuizScreen() {
   const renderSequence = () => {
     const currentOrder = userAnswers[currentQuestionIndex] || currentQuestion.answers;
 
-    const moveItem = (fromIndex: number, direction: 'up' | 'down') => {
-      if (showFeedback) return;
-      const newOrder = [...currentOrder];
-      const toIndex = direction === 'up' ? fromIndex - 1 : fromIndex + 1;
+    const renderItem = ({ item, drag, isActive, getIndex }: RenderItemParams<any>) => {
+      const index = getIndex();
+      return (
+        <ScaleDecorator>
+          <TouchableOpacity
+            onLongPress={showFeedback ? undefined : drag}
+            disabled={showFeedback}
+            delayLongPress={100}
+            activeOpacity={1}
+            style={[
+              styles.sequenceItem,
+              isActive && styles.sequenceItemActive,
+              showFeedback && isActive && { backgroundColor: '#F3F4F6', elevation: 0 },
+            ]}
+          >
+            <View style={styles.sequenceNumber}>
+              <ThemedText style={styles.sequenceNumberText}>{(index || 0) + 1}</ThemedText>
+            </View>
+            <ThemedText style={styles.sequenceText}>{item.content}</ThemedText>
 
-      if (toIndex >= 0 && toIndex < newOrder.length) {
-        const item = newOrder[fromIndex];
-        newOrder.splice(fromIndex, 1);
-        newOrder.splice(toIndex, 0, item);
-        setUserAnswers({ ...userAnswers, [currentQuestionIndex]: newOrder });
-      }
+            {!showFeedback && (
+              <TouchableOpacity onPressIn={drag} style={styles.dragHandle}>
+                <GripVertical size={24} color={COLORS.textLight} />
+              </TouchableOpacity>
+            )}
+          </TouchableOpacity>
+        </ScaleDecorator>
+      );
     };
 
     return (
       <View style={styles.optionsContainer}>
         <ThemedText style={styles.sequenceInstructions}>
-          Usa las flechas para ordenar los elementos correctamente
+          {showFeedback
+            ? 'Orden correcto:'
+            : 'Mantén presionado y arrastra para ordenar los elementos'}
         </ThemedText>
-        {currentOrder.map((item: any, index: number) => (
-          <View key={index} style={styles.sequenceItem}>
-            <View style={styles.sequenceNumber}>
-              <ThemedText style={styles.sequenceNumberText}>{index + 1}</ThemedText>
-            </View>
-            <ThemedText style={styles.sequenceText}>{item.content}</ThemedText>
-            {!showFeedback && (
-              <View style={styles.sequenceControls}>
-                <TouchableOpacity
-                  onPress={() => moveItem(index, 'up')}
-                  disabled={index === 0}
-                  style={[styles.arrowButton, index === 0 && styles.arrowButtonDisabled]}
-                >
-                  <ArrowUp size={20} color={index === 0 ? '#E5E7EB' : COLORS.primary} />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => moveItem(index, 'down')}
-                  disabled={index === currentOrder.length - 1}
-                  style={[
-                    styles.arrowButton,
-                    index === currentOrder.length - 1 && styles.arrowButtonDisabled,
-                  ]}
-                >
-                  <ArrowDown
-                    size={20}
-                    color={index === currentOrder.length - 1 ? '#E5E7EB' : COLORS.primary}
-                  />
-                </TouchableOpacity>
-              </View>
-            )}
-          </View>
-        ))}
+
+        <DraggableFlatList
+          data={currentOrder}
+          onDragEnd={({ data }) => setUserAnswers({ ...userAnswers, [currentQuestionIndex]: data })}
+          keyExtractor={(item) => item.content}
+          renderItem={renderItem}
+          scrollEnabled={false}
+        />
 
         {showFeedback && (
           <View style={styles.feedbackBox}>
@@ -389,12 +388,12 @@ export default function QuizScreen() {
                   style={[
                     styles.fillBlankInput,
                     showFeedback &&
-                    (currentQuestion.answers
-                      .find((a) => a.blank_position === index + 1)
-                      ?.content.toLowerCase() ===
+                      (currentQuestion.answers
+                        .find((a) => a.blank_position === index + 1)
+                        ?.content.toLowerCase() ===
                       (userAnswers[currentQuestionIndex]?.[index + 1] || '').toLowerCase()
-                      ? styles.textInputCorrect
-                      : styles.textInputIncorrect),
+                        ? styles.textInputCorrect
+                        : styles.textInputIncorrect),
                   ]}
                   value={userAnswers[currentQuestionIndex]?.[index + 1] || ''}
                   onChangeText={(text) => {
@@ -479,11 +478,11 @@ export default function QuizScreen() {
               <ThemedText style={styles.feedbackMainText}>
                 {isCurrentAnswerCorrect
                   ? currentQuestion.feedback?.correct ||
-                  currentQuestion.feedback_on_correct ||
-                  '¡Correcto!'
+                    currentQuestion.feedback_on_correct ||
+                    '¡Correcto!'
                   : currentQuestion.feedback?.incorrect ||
-                  currentQuestion.feedback_on_incorrect ||
-                  'Incorrecto. Inténtalo de nuevo.'}
+                    currentQuestion.feedback_on_incorrect ||
+                    'Incorrecto. Inténtalo de nuevo.'}
               </ThemedText>
             </View>
           )}
@@ -598,6 +597,14 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: 10,
   },
+  sequenceItemActive: {
+    backgroundColor: '#E0E7FF',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    shadowOffset: { width: 0, height: 2 },
+  },
   sequenceNumber: {
     width: 32,
     height: 32,
@@ -617,17 +624,8 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     flex: 1,
   },
-  sequenceControls: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  arrowButton: {
+  dragHandle: {
     padding: 8,
-    borderRadius: 8,
-    backgroundColor: '#FFFFFF',
-  },
-  arrowButtonDisabled: {
-    opacity: 0.3,
   },
   fillBlankContainer: {
     marginBottom: 20,
