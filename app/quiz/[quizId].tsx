@@ -428,7 +428,18 @@ export default function QuizScreen() {
   if (isFinished) {
     return (
       <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
-        <Stack.Screen options={{ title: 'Resultados', headerBackVisible: false }} />
+        <Stack.Screen
+          options={{
+            headerShown: true,
+            title: 'Resultados',
+            headerBackVisible: false,
+            headerRight: () => (
+              <TouchableOpacity onPress={() => router.back()} style={{ padding: 4 }}>
+                <X size={24} color={COLORS.text} />
+              </TouchableOpacity>
+            ),
+          }}
+        />
         <View style={styles.resultContainer}>
           <CheckCircle size={64} color={COLORS.correct} style={{ marginBottom: 20 }} />
           <ThemedText style={styles.resultTitle}>¡Quiz Completado!</ThemedText>
@@ -445,8 +456,14 @@ export default function QuizScreen() {
     <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
       <Stack.Screen
         options={{
+          headerShown: true,
           title: `Pregunta ${currentQuestionIndex + 1}/${quiz.questions.length}`,
-          headerBackTitle: 'Salir',
+          headerBackVisible: false,
+          headerRight: () => (
+            <TouchableOpacity onPress={() => router.back()} style={{ padding: 4 }}>
+              <X size={24} color={COLORS.text} />
+            </TouchableOpacity>
+          ),
         }}
       />
 
@@ -493,7 +510,7 @@ export default function QuizScreen() {
         <TouchableOpacity
           style={[styles.prevButton, currentQuestionIndex === 0 && styles.prevButtonDisabled]}
           onPress={handlePrevious}
-          disabled={currentQuestionIndex === 0 || showFeedback}
+          disabled={currentQuestionIndex === 0}
         >
           <ThemedText
             style={[
