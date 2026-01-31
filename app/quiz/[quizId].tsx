@@ -1,7 +1,7 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BrandingColors } from '@/constants/theme';
-import { mockQuizzes, Quiz } from '@/data/mockData';
+import { mockQuizzes, Quiz, QuizQuestion, Answer } from '@/data/mockData';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { Check, CheckCircle, GripVertical, X } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
@@ -31,6 +31,49 @@ const COLORS = {
   secondaryBackground: '#F3F4F6',
 };
 
+// Helper function to evaluate answers
+const evaluateAnswer = (question: QuizQuestion, answer: any): boolean => {
+  if (!answer && answer !== 0) return false;
+
+  if (question.type === 'multiple-choice' || question.type === 'true-false') {
+    if (question.allowMultipleAnswers) {
+      const correctAnswers = question.answers
+        .filter((a: Answer) => a.is_correct)
+        .map((a: Answer) => a.content);
+      const selectedAnswers = Array.isArray(answer) ? answer : [];
+
+      return (
+        correctAnswers.length === selectedAnswers.length &&
+        correctAnswers.every((ans: string) => selectedAnswers.includes(ans))
+      );
+    } else {
+      const correctOption = question.answers.find((a: Answer) => a.is_correct);
+      return correctOption ? answer === correctOption.content : false;
+    }
+  } else if (question.type === 'text') {
+    const possibleAnswers = question.answers.map((a: Answer) => a.content.toLowerCase());
+    return possibleAnswers.includes(String(answer).toLowerCase());
+  } else if (question.type === 'sequence') {
+    const correctOrder = [...question.answers].sort(
+      (a: Answer, b: Answer) => (a.order || 0) - (b.order || 0),
+    );
+    const userOrder = answer || [];
+    if (Array.isArray(userOrder) && userOrder.length === correctOrder.length) {
+      return userOrder.every(
+        (item: any, index: number) => item.content === correctOrder[index].content,
+      );
+    }
+    return false;
+  } else if (question.type === 'fill-in-blank') {
+    const blanks = question.answers.filter((a: Answer) => a.blank_position);
+    return blanks.every((blank: Answer) => {
+      const userVal = (answer || {})[blank.blank_position || 0];
+      return userVal && String(userVal).toLowerCase() === blank.content.toLowerCase();
+    });
+  }
+  return false;
+};
+
 export default function QuizScreen() {
   const { quizId } = useLocalSearchParams<{ quizId: string }>();
   const router = useRouter();
@@ -42,6 +85,7 @@ export default function QuizScreen() {
   const [isCurrentAnswerCorrect, setIsCurrentAnswerCorrect] = useState(false);
   const [score, setScore] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
+  const [isSummary, setIsSummary] = useState(false);
 
   useEffect(() => {
     const foundQuiz = mockQuizzes.find((q) => q.id === quizId);
@@ -101,7 +145,7 @@ export default function QuizScreen() {
   const handleNext = () => {
     if (showFeedback) {
       if (isLastQuestion) {
-        finishQuiz();
+        setIsSummary(true);
       } else {
         setCurrentQuestionIndex((prev) => prev + 1);
         setShowFeedback(false);
@@ -127,59 +171,22 @@ export default function QuizScreen() {
 
   const checkAnswer = () => {
     const currentAns = userAnswers[currentQuestionIndex];
-    let isCorrect = false;
-
-    if (currentQuestion.type === 'multiple-choice' || currentQuestion.type === 'true-false') {
-      if (currentQuestion.allowMultipleAnswers) {
-        // For multiple selection, check if all correct answers are selected and no incorrect ones
-        const correctAnswers = currentQuestion.answers
-          .filter((a) => a.is_correct)
-          .map((a) => a.content);
-        const selectedAnswers = Array.isArray(currentAns) ? currentAns : [];
-
-        // Check if arrays match (all correct selected, no incorrect selected)
-        isCorrect =
-          correctAnswers.length === selectedAnswers.length &&
-          correctAnswers.every((ans) => selectedAnswers.includes(ans));
-      } else {
-        // Single selection
-        const correctOption = currentQuestion.answers.find((a) => a.is_correct);
-        if (correctOption && currentAns === correctOption.content) {
-          isCorrect = true;
-        }
-      }
-    } else if (currentQuestion.type === 'text') {
-      const possibleAnswers = currentQuestion.answers.map((a) => a.content.toLowerCase());
-      if (possibleAnswers.includes((currentAns || '').toLowerCase())) {
-        isCorrect = true;
-      }
-    } else if (currentQuestion.type === 'sequence') {
-      const correctOrder = [...currentQuestion.answers].sort(
-        (a, b) => (a.order || 0) - (b.order || 0),
-      );
-      const userOrder = currentAns || [];
-      if (userOrder.length === correctOrder.length) {
-        isCorrect = userOrder.every(
-          (item: any, index: number) => item.content === correctOrder[index].content,
-        );
-      }
-    } else if (currentQuestion.type === 'fill-in-blank') {
-      const blanks = currentQuestion.answers.filter((a) => a.blank_position);
-      isCorrect = blanks.every((blank) => {
-        const userVal = (currentAns || {})[blank.blank_position || 0];
-        return userVal && userVal.toLowerCase() === blank.content.toLowerCase();
-      });
-    }
-
-    // Store the correctness result
+    const isCorrect = evaluateAnswer(currentQuestion, currentAns);
     setIsCurrentAnswerCorrect(isCorrect);
-
-    if (isCorrect) {
-      setScore((prev) => prev + (currentQuestion.pointMultiplier === 'double' ? 20 : 10));
-    }
   };
 
   const finishQuiz = () => {
+    // Calculate final score
+    let finalScore = 0;
+    quiz.questions.forEach((q, index) => {
+      const ans = userAnswers[index];
+      const isCorrect = evaluateAnswer(q, ans);
+      if (isCorrect) {
+        finalScore += q.pointMultiplier === 'double' ? 20 : 10;
+      }
+    });
+
+    setScore(finalScore);
     setIsFinished(true);
   };
 
@@ -197,6 +204,67 @@ export default function QuizScreen() {
       default:
         return <ThemedText>Unsupported question type</ThemedText>;
     }
+  };
+
+  const renderSummary = () => {
+    return (
+      <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
+        <Stack.Screen
+          options={{
+            headerShown: true,
+            title: 'Resumen del Quiz',
+            headerBackVisible: false,
+            headerRight: () => (
+              <TouchableOpacity onPress={() => router.back()} style={{ padding: 4 }}>
+                <X size={24} color={COLORS.text} />
+              </TouchableOpacity>
+            ),
+          }}
+        />
+        <ScrollView contentContainerStyle={styles.content}>
+          <ThemedText style={styles.questionTitle}>Revisa tus respuestas antes de enviar</ThemedText>
+
+          <View style={{ gap: 12 }}>
+            {quiz.questions.map((q, index) => {
+              const isCorrect = evaluateAnswer(q, userAnswers[index]);
+              return (
+                <View key={index} style={styles.summaryItem}>
+                  <View style={styles.summaryHeader}>
+                    <ThemedText style={styles.summaryQuestionNum}>Pregunta {index + 1}</ThemedText>
+                    {isCorrect ? (
+                      <View style={[styles.statusBadge, { backgroundColor: '#DCFCE7' }]}>
+                        <Check size={14} color={COLORS.correct} />
+                        <ThemedText style={[styles.statusText, { color: COLORS.correct }]}>Correcto</ThemedText>
+                      </View>
+                    ) : (
+                      <View style={[styles.statusBadge, { backgroundColor: '#FEE2E2' }]}>
+                        <X size={14} color={COLORS.incorrect} />
+                        <ThemedText style={[styles.statusText, { color: COLORS.incorrect }]}>Incorrecto</ThemedText>
+                      </View>
+                    )}
+                  </View>
+                  <ThemedText numberOfLines={2} style={styles.summaryQuestionTitle}>
+                    {q.title}
+                  </ThemedText>
+                </View>
+              );
+            })}
+          </View>
+        </ScrollView>
+
+        <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 20) }]}>
+          <TouchableOpacity
+            style={styles.prevButton}
+            onPress={() => setIsSummary(false)}
+          >
+            <ThemedText style={styles.prevButtonText}>Volver</ThemedText>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.nextButton} onPress={finishQuiz}>
+            <ThemedText style={styles.nextButtonText}>Enviar Quiz</ThemedText>
+          </TouchableOpacity>
+        </View>
+      </ThemedView>
+    );
   };
 
   const renderMultipleChoice = () => {
@@ -279,8 +347,7 @@ export default function QuizScreen() {
     const value = userAnswers[currentQuestionIndex] || '';
     let inputStyle = styles.textInput;
     if (showFeedback) {
-      const possibleAnswers = currentQuestion.answers.map((a) => a.content.toLowerCase());
-      const isCorrect = possibleAnswers.includes(value.toLowerCase());
+      const isCorrect = evaluateAnswer(currentQuestion, value);
       inputStyle = isCorrect ? styles.textInputCorrect : styles.textInputIncorrect;
     }
 
@@ -388,12 +455,12 @@ export default function QuizScreen() {
                   style={[
                     styles.fillBlankInput,
                     showFeedback &&
-                      (currentQuestion.answers
-                        .find((a) => a.blank_position === index + 1)
-                        ?.content.toLowerCase() ===
+                    (currentQuestion.answers
+                      .find((a) => a.blank_position === index + 1)
+                      ?.content.toLowerCase() ===
                       (userAnswers[currentQuestionIndex]?.[index + 1] || '').toLowerCase()
-                        ? styles.textInputCorrect
-                        : styles.textInputIncorrect),
+                      ? styles.textInputCorrect
+                      : styles.textInputIncorrect),
                   ]}
                   value={userAnswers[currentQuestionIndex]?.[index + 1] || ''}
                   onChangeText={(text) => {
@@ -452,6 +519,10 @@ export default function QuizScreen() {
     );
   }
 
+  if (isSummary) {
+    return renderSummary();
+  }
+
   return (
     <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
       <Stack.Screen
@@ -495,11 +566,11 @@ export default function QuizScreen() {
               <ThemedText style={styles.feedbackMainText}>
                 {isCurrentAnswerCorrect
                   ? currentQuestion.feedback?.correct ||
-                    currentQuestion.feedback_on_correct ||
-                    '¡Correcto!'
+                  currentQuestion.feedback_on_correct ||
+                  '¡Correcto!'
                   : currentQuestion.feedback?.incorrect ||
-                    currentQuestion.feedback_on_incorrect ||
-                    'Incorrecto. Inténtalo de nuevo.'}
+                  currentQuestion.feedback_on_incorrect ||
+                  'Incorrecto. Inténtalo de nuevo.'}
               </ThemedText>
             </View>
           )}
@@ -810,5 +881,39 @@ const styles = StyleSheet.create({
   radioButtonSelected: {
     borderColor: COLORS.primary,
     backgroundColor: COLORS.primary,
+  },
+  summaryItem: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  summaryHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  summaryQuestionNum: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.textLight,
+  },
+  summaryQuestionTitle: {
+    fontSize: 16,
+    color: COLORS.text,
+  },
+  statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    gap: 4,
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: '600',
   },
 });

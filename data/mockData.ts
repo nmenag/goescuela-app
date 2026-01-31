@@ -518,16 +518,16 @@ export const mockQuizzes: Quiz[] = [
         feedback_on_incorrect: 'El orden no es correcto. Revisa la secuencia mostrada abajo.',
         answers: [
           {
-            content: 'First item',
-            order: 1,
-          },
-          {
             content: 'Second item',
             order: 2,
           },
           {
             content: 'Third item',
             order: 3,
+          },
+          {
+            content: 'First item',
+            order: 1,
           },
         ],
       },
