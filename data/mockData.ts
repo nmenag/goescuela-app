@@ -64,6 +64,7 @@ export interface Answer {
   order?: number;
   blank_position?: number;
   feedback?: string;
+  options?: string[]; // For fill-in-blank with dropdown options
 }
 
 export interface QuestionFeedback {
@@ -71,6 +72,11 @@ export interface QuestionFeedback {
   partial?: string;
   incorrect?: string;
 }
+
+export type ValidationMode = 'auto' | 'manual' | 'none';
+// 'auto': Automatically check answer and show feedback (default)
+// 'manual': Require explicit check/submit but validate answer
+// 'none': No validation, just collect the answer (open-ended)
 
 export interface QuizQuestion {
   id?: string;
@@ -84,6 +90,7 @@ export interface QuizQuestion {
   feedback_on_correct?: string;
   feedback_on_incorrect?: string;
   allowMultipleAnswers?: boolean;
+  validationMode?: ValidationMode; // How to validate the answer (default: 'auto')
   answers: Answer[];
 }
 
@@ -450,6 +457,7 @@ export const mockQuizzes: Quiz[] = [
         timer: 30,
         pointMultiplier: 'none',
         b64_image: null,
+        validationMode: 'auto', // Auto-check answer
         feedback_on_correct:
           '¡Correcto! React Native permite crear aplicaciones móviles multiplataforma.',
         feedback_on_incorrect:
@@ -504,6 +512,7 @@ export const mockQuizzes: Quiz[] = [
         timer: 45,
         pointMultiplier: 'none',
         b64_image: null,
+        validationMode: 'auto', // Auto-check answer
         feedback_on_correct: '¡Perfecto! Tu respuesta es correcta.',
         feedback_on_incorrect: 'Incorrecto. Las respuestas correctas son: Answer 1 o Answer 2.',
         answers: [
@@ -565,9 +574,47 @@ export const mockQuizzes: Quiz[] = [
         ],
       },
       {
+        title: 'Pregunta abierta: ¿Qué aprendiste hoy?',
+        type: 'text',
+        timer: 120,
+        pointMultiplier: 'none',
+        validationMode: 'none', // No validation - open-ended question
+        feedback_on_correct: 'Gracias por tu respuesta.',
+        answers: [
+          {
+            content: '',
+          },
+        ],
+      },
+      {
+        title: 'Complete: React Native uses ___ and renders to ___ components',
+        type: 'fill-in-blank',
+        timer: 60,
+        pointMultiplier: 'none',
+        validationMode: 'auto',
+        question_template: 'React Native uses ___ and renders to ___ components',
+        feedback: {
+          correct: 'Perfect! You know the React Native architecture.',
+          incorrect: 'Not quite. Review the React Native documentation.',
+        },
+        answers: [
+          {
+            blank_position: 1,
+            content: 'JavaScript',
+            options: ['JavaScript', 'TypeScript', 'Python', 'Java'],
+          },
+          {
+            blank_position: 2,
+            content: 'native',
+            options: ['native', 'web', 'hybrid', 'virtual'],
+          },
+        ],
+      },
+      {
         title: 'Selecciona todas las respuestas correctas (Múltiple selección)',
         type: 'multiple-choice',
         allowMultipleAnswers: true,
+        validationMode: 'auto',
         feedback_on_correct: '¡Excelente! Has seleccionado todas las respuestas correctas.',
         feedback_on_incorrect: 'No del todo. Revisa las opciones correctas mostradas abajo.',
         answers: [

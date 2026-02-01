@@ -21,6 +21,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import DraggableFlatList, {
   RenderItemParams,
@@ -40,6 +41,11 @@ const COLORS = {
 
 // Helper function to evaluate answers
 const evaluateAnswer = (question: QuizQuestion, answer: any): boolean => {
+  // If validation mode is 'none', always return true (no validation)
+  if (question.validationMode === 'none') {
+    return true;
+  }
+
   if (!answer && answer !== 0) return false;
 
   if (question.type === 'multiple-choice' || question.type === 'true-false') {
@@ -188,6 +194,13 @@ export default function QuizScreen() {
 
   const checkAnswer = () => {
     const currentAns = userAnswers[currentQuestionIndex];
+
+    // For questions with no validation, always mark as correct
+    if (currentQuestion.validationMode === 'none') {
+      setIsCurrentAnswerCorrect(true);
+      return;
+    }
+
     const isCorrect = evaluateAnswer(currentQuestion, currentAns);
     setIsCurrentAnswerCorrect(isCorrect);
   };
@@ -494,33 +507,67 @@ export default function QuizScreen() {
           {parts.map((part, index) => (
             <React.Fragment key={index}>
               <ThemedText style={styles.fillBlankText}>{part}</ThemedText>
-              {index < parts.length - 1 && (
-                <TextInput
-                  style={[
-                    styles.fillBlankInput,
-                    showFeedback &&
-                      (currentQuestion.answers
-                        .find((a) => a.blank_position === index + 1)
-                        ?.content.toLowerCase() ===
-                      (userAnswers[currentQuestionIndex]?.[index + 1] || '').toLowerCase()
-                        ? styles.textInputCorrect
-                        : styles.textInputIncorrect),
-                  ]}
-                  value={userAnswers[currentQuestionIndex]?.[index + 1] || ''}
-                  onChangeText={(text) => {
-                    const currentAns = userAnswers[currentQuestionIndex] || {};
-                    setUserAnswers({
-                      ...userAnswers,
-                      [currentQuestionIndex]: { ...currentAns, [index + 1]: text },
-                    });
-                  }}
-                  editable={!showFeedback}
-                />
-              )}
+              {index < parts.length - 1 &&
+                (() => {
+                  const blankAnswer = currentQuestion.answers.find(
+                    (a) => a.blank_position === index + 1,
+                  );
+                  const hasOptions = blankAnswer?.options && blankAnswer.options.length > 0;
+
+                  if (hasOptions) {
+                    // Render dropdown picker
+                    return (
+                      <View style={styles.fillBlankPickerContainer}>
+                        <Picker
+                          selectedValue={userAnswers[currentQuestionIndex]?.[index + 1] || ''}
+                          onValueChange={(value: string) => {
+                            const currentAns = userAnswers[currentQuestionIndex] || {};
+                            setUserAnswers({
+                              ...userAnswers,
+                              [currentQuestionIndex]: { ...currentAns, [index + 1]: value },
+                            });
+                          }}
+                          enabled={!showFeedback}
+                          style={styles.fillBlankPicker}
+                        >
+                          <Picker.Item label="Selecciona..." value="" />
+                          {blankAnswer.options!.map((option, optIndex) => (
+                            <Picker.Item key={optIndex} label={option} value={option} />
+                          ))}
+                        </Picker>
+                      </View>
+                    );
+                  } else {
+                    // Render text input
+                    return (
+                      <TextInput
+                        style={[
+                          styles.fillBlankInput,
+                          showFeedback &&
+                            (currentQuestion.answers
+                              .find((a) => a.blank_position === index + 1)
+                              ?.content.toLowerCase() ===
+                            (userAnswers[currentQuestionIndex]?.[index + 1] || '').toLowerCase()
+                              ? styles.textInputCorrect
+                              : styles.textInputIncorrect),
+                        ]}
+                        value={userAnswers[currentQuestionIndex]?.[index + 1] || ''}
+                        onChangeText={(text) => {
+                          const currentAns = userAnswers[currentQuestionIndex] || {};
+                          setUserAnswers({
+                            ...userAnswers,
+                            [currentQuestionIndex]: { ...currentAns, [index + 1]: text },
+                          });
+                        }}
+                        editable={!showFeedback}
+                      />
+                    );
+                  }
+                })()}
             </React.Fragment>
           ))}
         </View>
-        {showFeedback && (
+        {showFeedback && currentQuestion.validationMode !== 'none' && (
           <View style={styles.feedbackBox}>
             <ThemedText style={styles.feedbackLabel}>Respuestas:</ThemedText>
             {currentQuestion.answers
@@ -712,7 +759,7 @@ export default function QuizScreen() {
 
           {renderQuestionContent()}
 
-          {showFeedback && (
+          {showFeedback && currentQuestion.validationMode !== 'none' && (
             <View
               style={[
                 styles.feedbackContainer,
@@ -897,6 +944,19 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 18,
     paddingVertical: 2,
+    color: COLORS.text,
+  },
+  fillBlankPickerContainer: {
+    borderBottomWidth: 2,
+    borderBottomColor: COLORS.primary,
+    minWidth: 120,
+    marginHorizontal: 8,
+    backgroundColor: '#F9FAFB',
+    borderRadius: 4,
+  },
+  fillBlankPicker: {
+    height: 40,
+    fontSize: 16,
     color: COLORS.text,
   },
   footer: {
