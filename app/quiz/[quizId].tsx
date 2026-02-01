@@ -1,7 +1,14 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BrandingColors } from '@/constants/theme';
-import { mockQuizzes, Quiz, QuizQuestion, Answer } from '@/data/mockData';
+import {
+  mockQuizzes,
+  Quiz,
+  QuizQuestion,
+  Answer,
+  getCurrentStudent,
+  QuizScore,
+} from '@/data/mockData';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { Check, CheckCircle, GripVertical, X } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
@@ -115,6 +122,16 @@ export default function QuizScreen() {
     );
   }
 
+  // Calculate attempt information
+  const student = getCurrentStudent();
+  const previousAttempts = student.quizScores.filter((qs) => qs.quizId === quizId);
+  const currentAttemptNumber = previousAttempts.length + 1;
+  const hasMaxAttempts = quiz.maxAttempts !== undefined;
+  const attemptsRemaining = hasMaxAttempts ? quiz.maxAttempts! - previousAttempts.length : null;
+  const isAttemptsExhausted = hasMaxAttempts && attemptsRemaining! <= 0;
+  const bestScore =
+    previousAttempts.length > 0 ? Math.max(...previousAttempts.map((a) => a.score)) : null;
+
   const currentQuestion = quiz.questions[currentQuestionIndex];
   const isLastQuestion = currentQuestionIndex === quiz.questions.length - 1;
 
@@ -186,6 +203,19 @@ export default function QuizScreen() {
       }
     });
 
+    // Save the quiz score with attempt number
+    const newQuizScore: QuizScore = {
+      quizId: quiz.id,
+      moduleId: quiz.moduleId,
+      score: finalScore,
+      completedAt: new Date().toISOString(),
+      attemptNumber: currentAttemptNumber,
+    };
+
+    // In a real app, this would be saved to the backend
+    // For now, we'll just add it to the student's scores in memory
+    student.quizScores.push(newQuizScore);
+
     setScore(finalScore);
     setIsFinished(true);
   };
@@ -221,8 +251,21 @@ export default function QuizScreen() {
             ),
           }}
         />
-        <ScrollView contentContainerStyle={styles.content}>
-          <ThemedText style={styles.questionTitle}>Revisa tus respuestas antes de enviar</ThemedText>
+        <ScrollView
+          contentContainerStyle={styles.summaryContent}
+          showsVerticalScrollIndicator={true}
+        >
+          <ThemedText style={styles.questionTitle}>
+            Revisa tus respuestas antes de enviar
+          </ThemedText>
+
+          {hasMaxAttempts && (
+            <View style={styles.attemptInfoBox}>
+              <ThemedText style={styles.attemptInfoText}>
+                Intento {currentAttemptNumber} de {quiz.maxAttempts}
+              </ThemedText>
+            </View>
+          )}
 
           <View style={{ gap: 12 }}>
             {quiz.questions.map((q, index) => {
@@ -234,12 +277,16 @@ export default function QuizScreen() {
                     {isCorrect ? (
                       <View style={[styles.statusBadge, { backgroundColor: '#DCFCE7' }]}>
                         <Check size={14} color={COLORS.correct} />
-                        <ThemedText style={[styles.statusText, { color: COLORS.correct }]}>Correcto</ThemedText>
+                        <ThemedText style={[styles.statusText, { color: COLORS.correct }]}>
+                          Correcto
+                        </ThemedText>
                       </View>
                     ) : (
                       <View style={[styles.statusBadge, { backgroundColor: '#FEE2E2' }]}>
                         <X size={14} color={COLORS.incorrect} />
-                        <ThemedText style={[styles.statusText, { color: COLORS.incorrect }]}>Incorrecto</ThemedText>
+                        <ThemedText style={[styles.statusText, { color: COLORS.incorrect }]}>
+                          Incorrecto
+                        </ThemedText>
                       </View>
                     )}
                   </View>
@@ -253,10 +300,7 @@ export default function QuizScreen() {
         </ScrollView>
 
         <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 20) }]}>
-          <TouchableOpacity
-            style={styles.prevButton}
-            onPress={() => setIsSummary(false)}
-          >
+          <TouchableOpacity style={styles.prevButton} onPress={() => setIsSummary(false)}>
             <ThemedText style={styles.prevButtonText}>Volver</ThemedText>
           </TouchableOpacity>
           <TouchableOpacity style={styles.nextButton} onPress={finishQuiz}>
@@ -493,6 +537,10 @@ export default function QuizScreen() {
   };
 
   if (isFinished) {
+    const isPassed = score >= quiz.passingScore;
+    const newAttemptsRemaining = hasMaxAttempts ? attemptsRemaining! - 1 : null;
+    const canRetry = !hasMaxAttempts || newAttemptsRemaining! > 0;
+
     return (
       <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
         <Stack.Screen
@@ -508,9 +556,110 @@ export default function QuizScreen() {
           }}
         />
         <View style={styles.resultContainer}>
-          <CheckCircle size={64} color={COLORS.correct} style={{ marginBottom: 20 }} />
-          <ThemedText style={styles.resultTitle}>¡Quiz Completado!</ThemedText>
+          <CheckCircle
+            size={64}
+            color={isPassed ? COLORS.correct : COLORS.incorrect}
+            style={{ marginBottom: 20 }}
+          />
+          <ThemedText style={styles.resultTitle}>
+            {isPassed ? '¡Quiz Completado!' : 'Quiz Completado'}
+          </ThemedText>
           <ThemedText style={styles.resultScore}>Puntuación: {score}</ThemedText>
+
+          {bestScore !== null && bestScore > score && (
+            <ThemedText style={styles.bestScoreText}>Mejor puntuación: {bestScore}</ThemedText>
+          )}
+
+          <View style={styles.resultDetails}>
+            <ThemedText style={styles.resultDetailText}>
+              Puntuación mínima: {quiz.passingScore}
+            </ThemedText>
+            <ThemedText
+              style={[styles.resultDetailText, isPassed ? styles.passedText : styles.failedText]}
+            >
+              {isPassed ? '✓ Aprobado' : '✗ No aprobado'}
+            </ThemedText>
+          </View>
+
+          {hasMaxAttempts && (
+            <View style={styles.attemptInfoBox}>
+              <ThemedText style={styles.attemptInfoText}>
+                Intento {currentAttemptNumber} de {quiz.maxAttempts}
+              </ThemedText>
+              {newAttemptsRemaining !== null && newAttemptsRemaining > 0 && (
+                <ThemedText style={styles.attemptsRemainingText}>
+                  {newAttemptsRemaining}{' '}
+                  {newAttemptsRemaining === 1 ? 'intento restante' : 'intentos restantes'}
+                </ThemedText>
+              )}
+              {newAttemptsRemaining === 0 && (
+                <ThemedText style={styles.noAttemptsText}>No quedan más intentos</ThemedText>
+              )}
+            </View>
+          )}
+
+          <View style={styles.resultButtonsContainer}>
+            {canRetry && !isPassed && (
+              <TouchableOpacity
+                style={styles.retryButton}
+                onPress={() => {
+                  // Reset quiz state
+                  setCurrentQuestionIndex(0);
+                  setUserAnswers({});
+                  setShowFeedback(false);
+                  setIsCurrentAnswerCorrect(false);
+                  setScore(0);
+                  setIsFinished(false);
+                  setIsSummary(false);
+                }}
+              >
+                <ThemedText style={styles.retryButtonText}>Reintentar</ThemedText>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity
+              style={[styles.finishButton, canRetry && !isPassed && { flex: 1 }]}
+              onPress={() => router.back()}
+            >
+              <ThemedText style={styles.finishButtonText}>Volver a la lección</ThemedText>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ThemedView>
+    );
+  }
+
+  // Show blocked screen if attempts are exhausted
+  if (isAttemptsExhausted) {
+    return (
+      <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
+        <Stack.Screen
+          options={{
+            headerShown: true,
+            title: quiz.title,
+            headerBackVisible: false,
+            headerRight: () => (
+              <TouchableOpacity onPress={() => router.back()} style={{ padding: 4 }}>
+                <X size={24} color={COLORS.text} />
+              </TouchableOpacity>
+            ),
+          }}
+        />
+        <View style={styles.resultContainer}>
+          <X size={64} color={COLORS.incorrect} style={{ marginBottom: 20 }} />
+          <ThemedText style={styles.resultTitle}>Intentos Agotados</ThemedText>
+          <ThemedText style={styles.blockedMessage}>
+            Has utilizado todos los intentos disponibles para este quiz.
+          </ThemedText>
+
+          <View style={styles.attemptInfoBox}>
+            <ThemedText style={styles.attemptInfoText}>
+              Intentos utilizados: {quiz.maxAttempts} de {quiz.maxAttempts}
+            </ThemedText>
+            {bestScore !== null && (
+              <ThemedText style={styles.bestScoreText}>Tu mejor puntuación: {bestScore}</ThemedText>
+            )}
+          </View>
+
           <TouchableOpacity style={styles.finishButton} onPress={() => router.back()}>
             <ThemedText style={styles.finishButtonText}>Volver a la lección</ThemedText>
           </TouchableOpacity>
@@ -531,9 +680,16 @@ export default function QuizScreen() {
           title: `Pregunta ${currentQuestionIndex + 1}/${quiz.questions.length}`,
           headerBackVisible: false,
           headerRight: () => (
-            <TouchableOpacity onPress={() => router.back()} style={{ padding: 4 }}>
-              <X size={24} color={COLORS.text} />
-            </TouchableOpacity>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+              {hasMaxAttempts && (
+                <ThemedText style={{ fontSize: 12, color: COLORS.textLight }}>
+                  Intento {currentAttemptNumber}/{quiz.maxAttempts}
+                </ThemedText>
+              )}
+              <TouchableOpacity onPress={() => router.back()} style={{ padding: 4 }}>
+                <X size={24} color={COLORS.text} />
+              </TouchableOpacity>
+            </View>
           ),
         }}
       />
@@ -610,6 +766,11 @@ const styles = StyleSheet.create({
   content: {
     padding: 20,
     paddingBottom: 100,
+  },
+  summaryContent: {
+    padding: 20,
+    paddingBottom: 120, // Extra padding for footer
+    flexGrow: 1,
   },
   progressContainer: {
     height: 6,
@@ -915,5 +1076,82 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: 12,
     fontWeight: '600',
+  },
+  attemptInfoBox: {
+    backgroundColor: '#EFF6FF',
+    borderRadius: 8,
+    padding: 12,
+    marginVertical: 12,
+    borderLeftWidth: 3,
+    borderLeftColor: COLORS.primary,
+  },
+  attemptInfoText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.text,
+    marginBottom: 4,
+  },
+  attemptsRemainingText: {
+    fontSize: 13,
+    color: COLORS.textLight,
+  },
+  noAttemptsText: {
+    fontSize: 13,
+    color: COLORS.incorrect,
+    fontWeight: '600',
+  },
+  bestScoreText: {
+    fontSize: 16,
+    color: COLORS.textLight,
+    marginBottom: 8,
+  },
+  resultDetails: {
+    backgroundColor: '#F3F4F6',
+    borderRadius: 8,
+    padding: 12,
+    marginVertical: 16,
+    width: '100%',
+    alignItems: 'center',
+  },
+  resultDetailText: {
+    fontSize: 14,
+    color: COLORS.text,
+    marginVertical: 2,
+  },
+  passedText: {
+    color: COLORS.correct,
+    fontWeight: '700',
+  },
+  failedText: {
+    color: COLORS.incorrect,
+    fontWeight: '700',
+  },
+  resultButtonsContainer: {
+    flexDirection: 'row',
+    gap: 12,
+    width: '100%',
+    marginTop: 16,
+  },
+  retryButton: {
+    flex: 1,
+    backgroundColor: COLORS.secondaryBackground,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: COLORS.primary,
+    alignItems: 'center',
+  },
+  retryButtonText: {
+    color: COLORS.primary,
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  blockedMessage: {
+    fontSize: 16,
+    color: COLORS.textLight,
+    textAlign: 'center',
+    marginBottom: 20,
+    paddingHorizontal: 20,
   },
 });

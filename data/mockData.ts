@@ -95,6 +95,7 @@ export interface Quiz {
   questions: QuizQuestion[];
   duration: number; // in minutes
   passingScore: number; // percentage
+  maxAttempts?: number; // maximum number of attempts allowed (undefined = unlimited)
 }
 
 export interface QuizScore {
@@ -102,6 +103,7 @@ export interface QuizScore {
   moduleId: string;
   score: number; // 0-100
   completedAt: string;
+  attemptNumber: number; // which attempt this was (1, 2, 3, etc.)
 }
 
 export interface Student {
@@ -157,24 +159,28 @@ export const mockStudents: Student[] = [
         moduleId: 'module-1',
         score: 85,
         completedAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
+        attemptNumber: 1,
       },
       {
         quizId: 'quiz-module-1-2',
         moduleId: 'module-2',
         score: 92,
         completedAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+        attemptNumber: 1,
       },
       {
         quizId: 'quiz-module-2-1',
         moduleId: 'module-3',
         score: 78,
         completedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+        attemptNumber: 2,
       },
       {
         quizId: 'quiz-module-3-1',
         moduleId: 'module-5',
         score: 88,
         completedAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+        attemptNumber: 1,
       },
     ],
   },
@@ -435,6 +441,7 @@ export const mockQuizzes: Quiz[] = [
     moduleId: 'module-1',
     duration: 15,
     passingScore: 70,
+    maxAttempts: 3,
     questions: [
       {
         title: '¿Cuál es el propósito principal de React Native?',
@@ -592,6 +599,7 @@ export const mockQuizzes: Quiz[] = [
     moduleId: 'module-1',
     duration: 20,
     passingScore: 75,
+    maxAttempts: 2,
     questions: [
       {
         title: '¿Cuál es la diferencia entre los componentes View y Text?',
@@ -615,6 +623,7 @@ export const mockQuizzes: Quiz[] = [
     moduleId: 'module-2',
     duration: 10,
     passingScore: 60,
+    // No maxAttempts = unlimited attempts
     questions: [
       {
         title: '¿Cómo aplicas estilos en React Native?',
