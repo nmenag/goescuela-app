@@ -2,9 +2,9 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BrandingColors } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
-import { getCurrentStudent } from '@/data/mockData';
+import { getCurrentStudent, getCourseById, getStudentCourseQuizScores } from '@/data/mockData';
 import React from 'react';
-import { ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const COLORS = {
@@ -56,9 +56,89 @@ export default function ProfileScreen() {
             </ThemedText>
             <ThemedText style={styles.statLabel}>Promedio General</ThemedText>
           </ThemedView>
+          <ThemedView style={styles.statCard}>
+            <ThemedText style={styles.statValue}>{student.quizScores.length}</ThemedText>
+            <ThemedText style={styles.statLabel}>Quizzes Completados</ThemedText>
+          </ThemedView>
         </ThemedView>
 
-        {/* Account Settings */}
+        <ThemedView style={styles.section}>
+          <ThemedText style={styles.sectionTitle}>Mis Calificaciones</ThemedText>
+          {student.enrolledCourses.map((courseId) => {
+            const course = getCourseById(courseId);
+            if (!course) return null;
+
+            const courseProgress = student.progress.find((p) => p.courseId === courseId);
+            const courseQuizScores = getStudentCourseQuizScores(student.id, courseId);
+            const courseAverage =
+              courseQuizScores.length > 0
+                ? Math.round(
+                    courseQuizScores.reduce((acc, curr) => acc + curr.score, 0) /
+                      courseQuizScores.length,
+                  )
+                : 0;
+
+            let gradeLetter = 'N/A';
+            let gradeColor = COLORS.textLight;
+            if (courseAverage >= 90) {
+              gradeLetter = 'A';
+              gradeColor = '#10B981';
+            } else if (courseAverage >= 80) {
+              gradeLetter = 'B';
+              gradeColor = '#3B82F6';
+            } else if (courseAverage >= 70) {
+              gradeLetter = 'C';
+              gradeColor = '#F59E0B';
+            } else if (courseAverage >= 60) {
+              gradeLetter = 'D';
+              gradeColor = '#EF4444';
+            } else if (courseQuizScores.length > 0) {
+              gradeLetter = 'F';
+              gradeColor = '#DC2626';
+            }
+
+            return (
+              <View key={courseId} style={styles.courseGradeCard}>
+                <View style={styles.courseGradeHeader}>
+                  <View style={styles.courseGradeInfo}>
+                    <ThemedText style={styles.courseGradeTitle}>{course.title}</ThemedText>
+                    <ThemedText style={styles.courseGradeSubtitle}>
+                      {courseQuizScores.length} {courseQuizScores.length === 1 ? 'quiz' : 'quizzes'}{' '}
+                      completado{courseQuizScores.length === 1 ? '' : 's'}
+                    </ThemedText>
+                  </View>
+                  <View style={[styles.gradeLetterBadge, { backgroundColor: gradeColor }]}>
+                    <ThemedText style={styles.gradeLetterText}>{gradeLetter}</ThemedText>
+                  </View>
+                </View>
+
+                <View style={styles.courseGradeDetails}>
+                  <View style={styles.courseGradeDetailItem}>
+                    <ThemedText style={styles.courseGradeDetailLabel}>Promedio</ThemedText>
+                    <ThemedText style={[styles.courseGradeDetailValue, { color: gradeColor }]}>
+                      {courseQuizScores.length > 0 ? `${courseAverage}%` : 'N/A'}
+                    </ThemedText>
+                  </View>
+                  <View style={styles.courseGradeDetailItem}>
+                    <ThemedText style={styles.courseGradeDetailLabel}>Progreso</ThemedText>
+                    <ThemedText style={styles.courseGradeDetailValue}>
+                      {courseProgress?.progress || 0}%
+                    </ThemedText>
+                  </View>
+                  <View style={styles.courseGradeDetailItem}>
+                    <ThemedText style={styles.courseGradeDetailLabel}>Mejor nota</ThemedText>
+                    <ThemedText style={styles.courseGradeDetailValue}>
+                      {courseQuizScores.length > 0
+                        ? `${Math.max(...courseQuizScores.map((s) => s.score))}%`
+                        : 'N/A'}
+                    </ThemedText>
+                  </View>
+                </View>
+              </View>
+            );
+          })}
+        </ThemedView>
+
         <ThemedView style={styles.section}>
           <ThemedText style={styles.sectionTitle}>Configuración de Cuenta</ThemedText>
           <TouchableOpacity style={styles.settingItem}>
@@ -157,6 +237,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 24,
     gap: 12,
+    flexWrap: 'wrap',
   },
   statCard: {
     flex: 1,
@@ -223,5 +304,66 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#FFFFFF',
+  },
+  courseGradeCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  courseGradeHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  courseGradeInfo: {
+    flex: 1,
+    marginRight: 12,
+  },
+  courseGradeTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginBottom: 4,
+  },
+  courseGradeSubtitle: {
+    fontSize: 13,
+    color: COLORS.textLight,
+  },
+  gradeLetterBadge: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  gradeLetterText: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  courseGradeDetails: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+  },
+  courseGradeDetailItem: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  courseGradeDetailLabel: {
+    fontSize: 12,
+    color: COLORS.textLight,
+    marginBottom: 4,
+  },
+  courseGradeDetailValue: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.text,
   },
 });
