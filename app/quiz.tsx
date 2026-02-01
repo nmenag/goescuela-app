@@ -9,7 +9,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const COLORS = {
   primary: BrandingColors.hotPink,
-  background: '#FFFFFF',
+  background: BrandingColors.lightPink,
   text: '#1F2937',
   textLight: '#6B7280',
   border: '#E5E7EB',
@@ -17,7 +17,7 @@ const COLORS = {
   error: '#DC2626',
 };
 
-type QuizState = 'intro' | 'questions' | 'results';
+type QuizState = 'intro' | 'questions' | 'review' | 'results';
 
 export default function QuizScreen() {
   const router = useRouter();
@@ -27,7 +27,7 @@ export default function QuizScreen() {
 
   const [state, setState] = useState<QuizState>('intro');
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [answers, setAnswers] = useState<(number | null)[]>([]);
+  const [answers, setAnswers] = useState<any[]>([]);
   const [score, setScore] = useState(0);
 
   if (!quiz) {
@@ -43,28 +43,85 @@ export default function QuizScreen() {
     setAnswers(Array(quiz.questions.length).fill(null));
   };
 
-  const handleSelectAnswer = (answerIndex: number) => {
+  const handleSelectAnswer = (answer: any, type: string) => {
     const newAnswers = [...answers];
-    newAnswers[currentQuestionIndex] = answerIndex;
+
+    // For sequence, answer represents the current ordered indices of questions.answers
+    // For multiple choice, answer represents array of selected indices
+    // For single choice, answer represents selected index
+
+    if (type === 'multiple-choice' && typeof answer === 'number') {
+      // Toggle selection for multiple choice with allowMultipleAnswers
+      const currentSelection = (newAnswers[currentQuestionIndex] as number[]) || [];
+      if (currentSelection.includes(answer)) {
+        newAnswers[currentQuestionIndex] = currentSelection.filter((i) => i !== answer);
+      } else {
+        newAnswers[currentQuestionIndex] = [...currentSelection, answer];
+      }
+    } else {
+      newAnswers[currentQuestionIndex] = answer;
+    }
     setAnswers(newAnswers);
+  };
+
+  const calculateScore = () => {
+    let correctCount = 0;
+    quiz.questions.forEach((question, index) => {
+      const userAnswer = answers[index];
+
+      if (question.type === 'sequence') {
+        // userAnswer should be array of indices in correct order
+        // Compare with questions.answers sorted by 'order'
+        // But mock data logic for verification needs to be robust.
+        // We'll check if the User's order matches the correct 'order' field.
+
+        // Actually simpler:
+        // The mock answer has 'order' property.
+        // userAnswer is array of indices of the *current* permutation.
+        // Wait, simpler approach for sequence: userAnswer is the array of Answer objects in user's order.
+        if (Array.isArray(userAnswer)) {
+          const isCorrect = userAnswer.every((ans, i) => ans.order === i + 1);
+          if (isCorrect) correctCount++;
+        }
+      } else if (question.allowMultipleAnswers) {
+        // userAnswer is array of indices
+        if (Array.isArray(userAnswer)) {
+          const correctIndices = question.answers
+            .map((a, i) => (a.is_correct ? i : -1))
+            .filter((i) => i !== -1);
+
+          const sortedUser = [...userAnswer].sort();
+          const sortedCorrect = [...correctIndices].sort();
+
+          if (
+            sortedUser.length === sortedCorrect.length &&
+            sortedUser.every((val, index) => val === sortedCorrect[index])
+          ) {
+            correctCount++;
+          }
+        }
+      } else {
+        // Single choice
+        if (userAnswer !== null && question.answers[userAnswer]?.is_correct) {
+          correctCount++;
+        }
+      }
+    });
+    return Math.round((correctCount / quiz.questions.length) * 100);
   };
 
   const handleNext = () => {
     if (currentQuestionIndex < quiz.questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
-      // Calculate score
-      let correctCount = 0;
-      quiz.questions.forEach((question, index) => {
-        const selectedAnswerIndex = answers[index];
-        if (selectedAnswerIndex !== null && question.answers[selectedAnswerIndex]?.is_correct) {
-          correctCount++;
-        }
-      });
-      const finalScore = Math.round((correctCount / quiz.questions.length) * 100);
-      setScore(finalScore);
-      setState('results');
+      setState('review');
     }
+  };
+
+  const handleSubmit = () => {
+    const finalScore = calculateScore();
+    setScore(finalScore);
+    setState('results');
   };
 
   const handlePrevious = () => {
@@ -113,33 +170,94 @@ export default function QuizScreen() {
           <ThemedView style={styles.questionContainer}>
             <ThemedText style={styles.questionText}>{question.title}</ThemedText>
 
-            {/* Options */}
+            {/* Options based on type */}
             <ThemedView style={styles.optionsContainer}>
-              {question.answers.map((option, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={[
-                    styles.optionButton,
-                    answers[currentQuestionIndex] === index && styles.optionButtonSelected,
-                  ]}
-                  onPress={() => handleSelectAnswer(index)}
-                  activeOpacity={0.7}
-                >
-                  <ThemedView style={styles.optionCircle}>
-                    {answers[currentQuestionIndex] === index && (
-                      <ThemedText style={styles.optionCheck}>✓</ThemedText>
-                    )}
-                  </ThemedView>
-                  <ThemedText
-                    style={[
-                      styles.optionText,
-                      answers[currentQuestionIndex] === index && styles.optionTextSelected,
-                    ]}
-                  >
-                    {option.content}
-                  </ThemedText>
-                </TouchableOpacity>
-              ))}
+              {question.type === 'sequence'
+                ? // Initializing sequence if null
+                  (() => {
+                    const currentSequence = answers[currentQuestionIndex] || question.answers;
+                    // If we haven't saved a sequence yet, save the default one (or shuffled)
+                    if (!answers[currentQuestionIndex]) {
+                      // We should shuffle really, but checking 'order' is easier if we start shuffled?
+                      // For now let's just use default order
+                      // Ideally we set this in useEffect but here is okay for now
+                    }
+
+                    const handleMove = (fromIndex: number, direction: 'up' | 'down') => {
+                      const list = [...(answers[currentQuestionIndex] || question.answers)];
+                      const toIndex = direction === 'up' ? fromIndex - 1 : fromIndex + 1;
+                      if (toIndex >= 0 && toIndex < list.length) {
+                        [list[fromIndex], list[toIndex]] = [list[toIndex], list[fromIndex]];
+                        handleSelectAnswer(list, 'sequence');
+                      }
+                    };
+
+                    return (answers[currentQuestionIndex] || question.answers).map(
+                      (item: any, index: number) => (
+                        <ThemedView key={index} style={styles.sequenceItem}>
+                          <ThemedText style={styles.optionText}>{item.content}</ThemedText>
+                          <ThemedView style={styles.sequenceControls}>
+                            <TouchableOpacity
+                              onPress={() => handleMove(index, 'up')}
+                              disabled={index === 0}
+                            >
+                              <ThemedText
+                                style={[styles.arrowText, index === 0 && styles.disabledArrow]}
+                              >
+                                ▲
+                              </ThemedText>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                              onPress={() => handleMove(index, 'down')}
+                              disabled={
+                                index ===
+                                (answers[currentQuestionIndex] || question.answers).length - 1
+                              }
+                            >
+                              <ThemedText
+                                style={[
+                                  styles.arrowText,
+                                  index ===
+                                    (answers[currentQuestionIndex] || question.answers).length -
+                                      1 && styles.disabledArrow,
+                                ]}
+                              >
+                                ▼
+                              </ThemedText>
+                            </TouchableOpacity>
+                          </ThemedView>
+                        </ThemedView>
+                      ),
+                    );
+                  })()
+                : question.answers.map((option, index) => {
+                    const isSelected = question.allowMultipleAnswers
+                      ? (answers[currentQuestionIndex] as number[])?.includes(index)
+                      : answers[currentQuestionIndex] === index;
+
+                    return (
+                      <TouchableOpacity
+                        key={index}
+                        style={[styles.optionButton, isSelected && styles.optionButtonSelected]}
+                        onPress={() =>
+                          handleSelectAnswer(
+                            question.allowMultipleAnswers ? index : index,
+                            question.allowMultipleAnswers ? 'multiple-choice' : 'single-choice',
+                          )
+                        }
+                        activeOpacity={0.7}
+                      >
+                        <ThemedView style={styles.optionCircle}>
+                          {isSelected && <ThemedText style={styles.optionCheck}>✓</ThemedText>}
+                        </ThemedView>
+                        <ThemedText
+                          style={[styles.optionText, isSelected && styles.optionTextSelected]}
+                        >
+                          {option.content}
+                        </ThemedText>
+                      </TouchableOpacity>
+                    );
+                  })}
             </ThemedView>
           </ThemedView>
         </ScrollView>
@@ -162,8 +280,54 @@ export default function QuizScreen() {
             activeOpacity={0.7}
           >
             <ThemedText style={styles.nextButtonText}>
-              {currentQuestionIndex === quiz.questions.length - 1 ? 'Submit' : 'Next →'}
+              {currentQuestionIndex === quiz.questions.length - 1 ? 'Review' : 'Next →'}
             </ThemedText>
+          </TouchableOpacity>
+        </ThemedView>
+      </ThemedView>
+    );
+  }
+
+  if (state === 'review') {
+    return (
+      <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
+        <ThemedView style={styles.header}>
+          <TouchableOpacity onPress={() => setState('questions')}>
+            <ThemedText style={styles.backButton}>← Back to Quiz</ThemedText>
+          </TouchableOpacity>
+          <ThemedText style={styles.headerTitle}>Review Answers</ThemedText>
+          <ThemedView />
+        </ThemedView>
+
+        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+          <ThemedView style={styles.reviewList}>
+            {quiz.questions.map((q, i) => (
+              <TouchableOpacity
+                key={i}
+                style={styles.reviewSummaryItem}
+                onPress={() => {
+                  setCurrentQuestionIndex(i);
+                  setState('questions');
+                }}
+              >
+                <ThemedText style={styles.reviewSummaryNum}>{i + 1}</ThemedText>
+                <ThemedView style={styles.reviewSummaryContent}>
+                  <ThemedText style={styles.reviewSummaryTitle} numberOfLines={1}>
+                    {q.title}
+                  </ThemedText>
+                  <ThemedText style={styles.reviewSummaryStatus}>
+                    {answers[i] ? 'Answered' : 'Skipped'}
+                  </ThemedText>
+                </ThemedView>
+                <ThemedText style={styles.arrowText}>›</ThemedText>
+              </TouchableOpacity>
+            ))}
+          </ThemedView>
+        </ScrollView>
+
+        <ThemedView style={styles.footer}>
+          <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+            <ThemedText style={styles.submitButtonText}>Submit Quiz</ThemedText>
           </TouchableOpacity>
         </ThemedView>
       </ThemedView>
@@ -770,5 +934,84 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#FFFFFF',
+  },
+  sequenceItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    backgroundColor: '#F9FAFB',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    marginBottom: 8,
+    justifyContent: 'space-between',
+  },
+  sequenceControls: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  arrowText: {
+    fontSize: 18,
+    color: COLORS.primary,
+    fontWeight: '700',
+  },
+  disabledArrow: {
+    color: COLORS.textLight,
+    opacity: 0.3,
+  },
+  reviewList: {
+    padding: 20,
+  },
+  reviewSummaryItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    marginBottom: 12,
+  },
+  reviewSummaryNum: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: COLORS.primary,
+    color: '#FFF',
+    textAlign: 'center',
+    lineHeight: 32,
+    fontWeight: '700',
+    marginRight: 12,
+  },
+  reviewSummaryContent: {
+    flex: 1,
+  },
+  reviewSummaryTitle: {
+    fontSize: 14,
+    color: COLORS.text,
+    fontWeight: '600',
+  },
+  reviewSummaryStatus: {
+    fontSize: 12,
+    color: COLORS.textLight,
+  },
+  footer: {
+    padding: 20,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+  },
+  submitButton: {
+    backgroundColor: COLORS.primary,
+    padding: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  submitButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 16,
+  },
+  content: {
+    flex: 1,
   },
 });

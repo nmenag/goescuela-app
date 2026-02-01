@@ -20,7 +20,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsAuthenticated(true);
         setUser({
           email: email || 'demo@example.com',
-          name: 'Sarah Chen',
+          name: 'Alejo',
         });
         resolve();
       }, 800);
