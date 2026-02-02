@@ -359,7 +359,7 @@ export default function QuizScreen() {
           let backgroundColor = '#F3F4F6';
           let borderColor = 'transparent';
 
-          if (showFeedback) {
+          if (showFeedback && currentQuestion.validationMode !== 'none') {
             if (option.is_correct) {
               backgroundColor = '#DCFCE7';
               borderColor = COLORS.correct;
@@ -389,10 +389,13 @@ export default function QuizScreen() {
                 )}
               </View>
               <ThemedText style={styles.optionText}>{option.content}</ThemedText>
-              {showFeedback && option.is_correct && <Check size={20} color={COLORS.correct} />}
-              {showFeedback && isSelected && !option.is_correct && (
-                <X size={20} color={COLORS.incorrect} />
+              {showFeedback && currentQuestion.validationMode !== 'none' && option.is_correct && (
+                <Check size={20} color={COLORS.correct} />
               )}
+              {showFeedback &&
+                currentQuestion.validationMode !== 'none' &&
+                isSelected &&
+                !option.is_correct && <X size={20} color={COLORS.incorrect} />}
             </TouchableOpacity>
           );
         })}
@@ -418,7 +421,7 @@ export default function QuizScreen() {
           onChangeText={(text) => setUserAnswers({ ...userAnswers, [currentQuestionIndex]: text })}
           editable={!showFeedback}
         />
-        {showFeedback && (
+        {showFeedback && currentQuestion.validationMode !== 'none' && (
           <View style={styles.feedbackBox}>
             <ThemedText style={styles.feedbackLabel}>Respuestas correctas:</ThemedText>
             {currentQuestion.answers.map((a, i) => (
@@ -529,10 +532,21 @@ export default function QuizScreen() {
                           }}
                           enabled={!showFeedback}
                           style={styles.fillBlankPicker}
+                          mode="dropdown"
+                          dropdownIconColor={COLORS.primary}
                         >
-                          <Picker.Item label="Selecciona..." value="" />
+                          <Picker.Item
+                            label="Selecciona..."
+                            value=""
+                            style={styles.pickerItemPlaceholder}
+                          />
                           {blankAnswer.options!.map((option, optIndex) => (
-                            <Picker.Item key={optIndex} label={option} value={option} />
+                            <Picker.Item
+                              key={optIndex}
+                              label={option}
+                              value={option}
+                              style={styles.pickerItem}
+                            />
                           ))}
                         </Picker>
                       </View>
@@ -544,6 +558,7 @@ export default function QuizScreen() {
                         style={[
                           styles.fillBlankInput,
                           showFeedback &&
+                            currentQuestion.validationMode !== 'none' &&
                             (currentQuestion.answers
                               .find((a) => a.blank_position === index + 1)
                               ?.content.toLowerCase() ===
@@ -759,21 +774,32 @@ export default function QuizScreen() {
 
           {renderQuestionContent()}
 
-          {showFeedback && currentQuestion.validationMode !== 'none' && (
+          {showFeedback && (
             <View
               style={[
                 styles.feedbackContainer,
-                isCurrentAnswerCorrect ? styles.feedbackCorrect : styles.feedbackIncorrect,
+                currentQuestion.validationMode === 'none'
+                  ? { backgroundColor: '#EFF6FF', borderLeftColor: COLORS.primary } // Neutral blue for open questions
+                  : isCurrentAnswerCorrect
+                    ? styles.feedbackCorrect
+                    : styles.feedbackIncorrect,
               ]}
             >
-              <ThemedText style={styles.feedbackMainText}>
-                {isCurrentAnswerCorrect
-                  ? currentQuestion.feedback?.correct ||
-                    currentQuestion.feedback_on_correct ||
-                    '¡Correcto!'
-                  : currentQuestion.feedback?.incorrect ||
-                    currentQuestion.feedback_on_incorrect ||
-                    'Incorrecto. Inténtalo de nuevo.'}
+              <ThemedText
+                style={[
+                  styles.feedbackMainText,
+                  currentQuestion.validationMode === 'none' && { color: COLORS.primary },
+                ]}
+              >
+                {currentQuestion.validationMode === 'none'
+                  ? currentQuestion.feedback_on_correct || 'Respuesta guardada'
+                  : isCurrentAnswerCorrect
+                    ? currentQuestion.feedback?.correct ||
+                      currentQuestion.feedback_on_correct ||
+                      '¡Correcto!'
+                    : currentQuestion.feedback?.incorrect ||
+                      currentQuestion.feedback_on_incorrect ||
+                      'Incorrecto. Inténtalo de nuevo.'}
               </ThemedText>
             </View>
           )}
@@ -949,15 +975,26 @@ const styles = StyleSheet.create({
   fillBlankPickerContainer: {
     borderBottomWidth: 2,
     borderBottomColor: COLORS.primary,
-    minWidth: 120,
-    marginHorizontal: 8,
-    backgroundColor: '#F9FAFB',
-    borderRadius: 4,
+    minWidth: 160, // Increased min-width
+    marginHorizontal: 4,
+    backgroundColor: '#F3F4F6',
+    borderRadius: 8,
+    height: 50,
+    justifyContent: 'center',
+    marginVertical: 4,
   },
   fillBlankPicker: {
-    height: 40,
+    width: '100%',
+    height: 50,
+    color: COLORS.text,
+  },
+  pickerItem: {
     fontSize: 16,
     color: COLORS.text,
+  },
+  pickerItemPlaceholder: {
+    fontSize: 16,
+    color: COLORS.textLight,
   },
   footer: {
     position: 'absolute',
