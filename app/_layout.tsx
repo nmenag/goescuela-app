@@ -20,8 +20,15 @@ function RootLayoutContent() {
   const segments = useSegments();
 
   useEffect(() => {
-    offlineService.init();
-  }, []);
+    const initialize = async () => {
+      await offlineService.init();
+      // Automatically sync important data when user signs in
+      if (isAuthenticated) {
+        offlineService.sync();
+      }
+    };
+    initialize();
+  }, [isAuthenticated]);
 
   useEffect(() => {
     const inAuthGroup = segments[0] === '(tabs)';

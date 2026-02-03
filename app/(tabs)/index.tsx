@@ -9,6 +9,8 @@ import { Download } from 'lucide-react-native';
 import React from 'react';
 import { FlatList, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useOffline } from '@/hooks/useOffline';
+import { ActivityIndicator, Alert } from 'react-native';
 
 const COLORS = {
   primary: BrandingColors.hotPink,
@@ -22,6 +24,16 @@ export default function HomeScreen() {
   const router = useRouter();
   const { user } = useAuth();
   const insets = useSafeAreaInsets();
+  const { sync, isSyncing } = useOffline();
+
+  const handleSync = async () => {
+    const success = await sync();
+    if (success) {
+      Alert.alert('Éxito', 'Los datos se han sincronizado correctamente.');
+    } else {
+      Alert.alert('Aviso', 'No se ha podido sincronizar. Verifica tu conexión a internet.');
+    }
+  };
 
   const handleCoursePress = (courseId: string) => {
     router.push({
@@ -37,8 +49,12 @@ export default function HomeScreen() {
           <ThemedText style={styles.greeting}>Hola 👋</ThemedText>
           <ThemedText style={styles.name}>{user?.name || 'Estudiante'}</ThemedText>
         </ThemedView>
-        <TouchableOpacity style={styles.syncButton} onPress={() => alert('Sincronizando...')}>
-          <Download size={22} color={COLORS.primary} />
+        <TouchableOpacity style={styles.syncButton} onPress={handleSync} disabled={isSyncing}>
+          {isSyncing ? (
+            <ActivityIndicator size="small" color={COLORS.primary} />
+          ) : (
+            <Download size={22} color={COLORS.primary} />
+          )}
         </TouchableOpacity>
       </ThemedView>
 

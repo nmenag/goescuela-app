@@ -1,5 +1,6 @@
 import * as FileSystem from 'expo-file-system/legacy';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { syncService } from './syncService';
 
 const OFFLINE_MAP_KEY = 'goescuela_offline_map';
 
@@ -40,6 +41,9 @@ class OfflineService {
     if (!dirInfo.exists) {
       await FileSystem.makeDirectoryAsync(this.getOfflineFolder(), { intermediates: true });
     }
+    // Initialize sync service (important data)
+    await syncService.init();
+    syncService.setupAutoSync();
   }
 
   private getOfflineFolder(): string {
@@ -130,6 +134,13 @@ class OfflineService {
   private async saveMap(): Promise<void> {
     await AsyncStorage.setItem(OFFLINE_MAP_KEY, JSON.stringify(this.offlineMap));
     this.listeners.forEach((l) => l());
+  }
+
+  /**
+   * Manually trigger a sync of important data
+   */
+  public async sync(): Promise<boolean> {
+    return syncService.syncImportantData();
   }
 }
 

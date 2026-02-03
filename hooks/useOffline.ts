@@ -5,6 +5,7 @@ export function useOffline() {
   const [isInitialized, setIsInitialized] = useState(false);
   const [downloadedResources, setDownloadedResources] = useState<OfflineResource[]>([]);
   const [isDownloading, setIsDownloading] = useState<Record<string, boolean>>({});
+  const [isSyncing, setIsSyncing] = useState(false);
 
   useEffect(() => {
     const init = async () => {
@@ -50,6 +51,15 @@ export function useOffline() {
     return offlineService.getLocalUri(url);
   }, []);
 
+  const sync = useCallback(async () => {
+    setIsSyncing(true);
+    try {
+      return await offlineService.sync();
+    } finally {
+      setIsSyncing(false);
+    }
+  }, []);
+
   return {
     isInitialized,
     downloadedResources,
@@ -58,6 +68,8 @@ export function useOffline() {
     remove,
     isDownloaded,
     getLocalUri,
+    sync,
+    isSyncing,
     // Use this to get either local or remote URI automatically
     getEffectiveUri: (url: string) => getLocalUri(url) || url,
   };

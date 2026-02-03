@@ -5,7 +5,14 @@ import { useAuth } from '@/context/AuthContext';
 import { getCurrentStudent, getCourseById, getStudentCourseQuizScores } from '@/data/mockData';
 import { FileText, Download, LogOut, CheckCircle } from 'lucide-react-native';
 import React from 'react';
-import { ScrollView, StyleSheet, TouchableOpacity, View, Alert } from 'react-native';
+import {
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useOffline } from '@/hooks/useOffline';
 
@@ -22,6 +29,16 @@ export default function ProfileScreen() {
   const { logout } = useAuth();
   const student = getCurrentStudent();
   const insets = useSafeAreaInsets();
+  const { sync, isSyncing } = useOffline();
+
+  const handleSync = async () => {
+    const success = await sync();
+    if (success) {
+      Alert.alert('Éxito', 'Los datos se han sincronizado correctamente.');
+    } else {
+      Alert.alert('Aviso', 'No se ha podido sincronizar. Verifica tu conexión a internet.');
+    }
+  };
 
   const handleLogout = () => {
     Alert.alert('Cerrar Sesión', '¿Estás seguro de que quieres cerrar sesión?', [
@@ -37,11 +54,14 @@ export default function ProfileScreen() {
         <ThemedView style={styles.profileHeader}>
           <TouchableOpacity
             style={styles.headerSyncButton}
-            onPress={() =>
-              Alert.alert('Sincronización', 'Tu contenido se está sincronizando con el servidor.')
-            }
+            onPress={handleSync}
+            disabled={isSyncing}
           >
-            <Download size={20} color={COLORS.primary} />
+            {isSyncing ? (
+              <ActivityIndicator size="small" color={COLORS.primary} />
+            ) : (
+              <Download size={20} color={COLORS.primary} />
+            )}
           </TouchableOpacity>
           <ThemedView style={styles.avatarContainer}>
             <ThemedText style={styles.avatar}>👤</ThemedText>
