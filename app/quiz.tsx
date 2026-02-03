@@ -175,7 +175,6 @@ export default function QuizScreen() {
               {question.type === 'sequence'
                 ? // Initializing sequence if null
                   (() => {
-                    const currentSequence = answers[currentQuestionIndex] || question.answers;
                     // If we haven't saved a sequence yet, save the default one (or shuffled)
                     if (!answers[currentQuestionIndex]) {
                       // We should shuffle really, but checking 'order' is easier if we start shuffled?

@@ -20,12 +20,12 @@ import {
   BookOpen,
   Mic,
   HelpCircle,
+  Download,
 } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useOffline } from '@/hooks/useOffline';
-import { Download } from 'lucide-react-native';
 
 const COLORS = {
   primary: BrandingColors.hotPink,
@@ -78,23 +78,6 @@ export default function LearningViewScreen() {
         return <Mic size={size} color={color} />;
       default:
         return <PlayCircle size={size} color={color} />;
-    }
-  };
-
-  const getLessonLabel = (type: string) => {
-    switch (type) {
-      case 'video':
-        return 'Video';
-      case 'audio':
-        return 'Audio';
-      case 'quiz':
-        return 'Cuestionario';
-      case 'resource':
-        return 'Recurso';
-      case 'homework':
-        return 'Tarea';
-      default:
-        return 'Lección';
     }
   };
 

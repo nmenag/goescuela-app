@@ -31,7 +31,7 @@ function RootLayoutContent() {
     } else if (isAuthenticated && segments[0] === 'login') {
       router.replace('/(tabs)');
     }
-  }, [isAuthenticated, segments]);
+  }, [isAuthenticated, segments, router]);
 
   return (
     <SafeAreaProvider>

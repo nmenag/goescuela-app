@@ -22,6 +22,7 @@ import {
   Download,
   ChevronLeft,
   ChevronRight,
+  Check,
 } from 'lucide-react-native';
 import React, { useEffect, useState, useMemo } from 'react';
 import {
@@ -35,7 +36,6 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useOffline } from '@/hooks/useOffline';
-import { Check } from 'lucide-react-native';
 
 const COLORS = {
   primary: BrandingColors.hotPink,
@@ -110,7 +110,7 @@ export default function LessonScreen() {
   const isLessonCompletedInitial = progress?.completedLessons.includes(lessonId || '') || false;
 
   const [isCompleted, setIsCompleted] = useState(isLessonCompletedInitial);
-  const { download, remove, isDownloaded, isDownloading, getEffectiveUri } = useOffline();
+  const { download, isDownloaded, isDownloading, getEffectiveUri } = useOffline();
 
   useEffect(() => {
     setIsCompleted(progress?.completedLessons.includes(lessonId || '') || false);
