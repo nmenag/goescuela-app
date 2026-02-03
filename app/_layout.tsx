@@ -10,6 +10,7 @@ import '../global.css';
 
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { offlineService } from '@/services/offlineService';
 
 function RootLayoutContent() {
   const colorScheme = useColorScheme();
@@ -17,6 +18,10 @@ function RootLayoutContent() {
   const router = useRouter();
 
   const segments = useSegments();
+
+  useEffect(() => {
+    offlineService.init();
+  }, []);
 
   useEffect(() => {
     const inAuthGroup = segments[0] === '(tabs)';

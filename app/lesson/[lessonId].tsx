@@ -21,9 +21,18 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react-native';
-import React, { useEffect, useState } from 'react';
-import { Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useState, useMemo } from 'react';
+import {
+  Platform,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  ActivityIndicator,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useOffline } from '@/hooks/useOffline';
+import { Check } from 'lucide-react-native';
 
 const COLORS = {
   primary: BrandingColors.hotPink,
@@ -98,10 +107,24 @@ export default function LessonScreen() {
   const isLessonCompletedInitial = progress?.completedLessons.includes(lessonId || '') || false;
 
   const [isCompleted, setIsCompleted] = useState(isLessonCompletedInitial);
+  const { download, remove, isDownloaded, isDownloading, getEffectiveUri } = useOffline();
 
   useEffect(() => {
     setIsCompleted(progress?.completedLessons.includes(lessonId || '') || false);
   }, [lessonId, progress]);
+
+  const lessonResourceUrl = useMemo(() => {
+    if (!lesson) return null;
+    return lesson.videoUrl || lesson.audioUrl || lesson.resourceUrl || null;
+  }, [lesson]);
+
+  const isCurrentDownloaded = lessonResourceUrl ? isDownloaded(lessonResourceUrl) : false;
+  const isCurrentDownloading = lessonResourceUrl ? isDownloading[lessonResourceUrl] : false;
+
+  const handleDownload = async () => {
+    if (!lessonResourceUrl || isCurrentDownloaded) return;
+    await download(lessonResourceUrl);
+  };
 
   const toggleCompletion = () => {
     if (progress) {
@@ -146,17 +169,24 @@ export default function LessonScreen() {
   };
 
   const renderVideoContent = (lesson: Lesson) => (
-    <VideoLesson videoUrl={lesson.videoUrl || ''} description={lesson.description} />
+    <VideoLesson
+      videoUrl={getEffectiveUri(lesson.videoUrl || '')}
+      description={lesson.description}
+    />
   );
 
   const renderAudioContent = (lesson: Lesson) => (
-    <AudioLesson audioUrl={lesson.audioUrl || ''} description={lesson.description} />
+    <AudioLesson
+      audioUrl={getEffectiveUri(lesson.audioUrl || '')}
+      description={lesson.description}
+    />
   );
 
   const renderResourceContent = (lesson: Lesson) => {
+    const effectiveResourceUrl = getEffectiveUri(lesson.resourceUrl || '');
     const handleOpenResource = async () => {
-      if (lesson.resourceUrl) {
-        await WebBrowser.openBrowserAsync(lesson.resourceUrl);
+      if (effectiveResourceUrl) {
+        await WebBrowser.openBrowserAsync(effectiveResourceUrl);
       }
     };
 
@@ -165,7 +195,7 @@ export default function LessonScreen() {
         {Platform.OS === 'web' && lesson.resourceType === 'pdf' && lesson.resourceUrl ? (
           <View style={styles.pdfContainer}>
             <iframe
-              src={lesson.resourceUrl}
+              src={effectiveResourceUrl}
               width="100%"
               height="600px"
               style={{ border: 'none', borderRadius: 8 }}
@@ -227,12 +257,25 @@ export default function LessonScreen() {
       <Stack.Screen options={{ title: lesson.title, headerLeft: () => null }} />
       <View style={styles.header}>
         <View style={{ flex: 1 }} />
-        <TouchableOpacity
-          style={styles.syncButton}
-          onPress={() => alert('Sincronizando contenido...')}
-        >
-          <Download size={20} color={COLORS.primary} />
-        </TouchableOpacity>
+        {lessonResourceUrl && (
+          <TouchableOpacity
+            style={[
+              styles.syncButton,
+              isCurrentDownloaded && styles.syncButtonDownloaded,
+              isCurrentDownloading && styles.syncButtonDownloading,
+            ]}
+            onPress={handleDownload}
+            disabled={isCurrentDownloading || isCurrentDownloaded}
+          >
+            {isCurrentDownloading ? (
+              <ActivityIndicator size="small" color={COLORS.primary} />
+            ) : isCurrentDownloaded ? (
+              <Check size={20} color="#10B981" />
+            ) : (
+              <Download size={20} color={COLORS.primary} />
+            )}
+          </TouchableOpacity>
+        )}
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -312,6 +355,12 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 20,
     backgroundColor: 'rgba(255, 102, 196, 0.1)',
+  },
+  syncButtonDownloaded: {
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+  },
+  syncButtonDownloading: {
+    backgroundColor: 'rgba(255, 102, 196, 0.05)',
   },
   backButtonTouch: {
     alignSelf: 'flex-start',
