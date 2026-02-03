@@ -8,7 +8,9 @@ import {
   getStudentCourseQuizScores,
   getAdjacentLessons,
   mockQuizzes,
+  mockCourses,
 } from '@/data/mockData';
+import { Picker } from '@react-native-picker/picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   CheckCircle,
@@ -44,6 +46,8 @@ export default function LearningViewScreen() {
   const student = getCurrentStudent();
   const progress = getStudentCourseProgress(student.id, courseId || '');
   const quizScores = getStudentCourseQuizScores(student.id, courseId || '');
+
+  const enrolledCourses = mockCourses.filter((c) => student.enrolledCourses.includes(c.id));
 
   if (!course) {
     return (
@@ -171,9 +175,26 @@ export default function LearningViewScreen() {
   const renderHeader = () => (
     <ThemedView>
       <ThemedView style={styles.header}>
-        <ThemedText style={styles.headerTitle} numberOfLines={1}>
-          {course.title}
-        </ThemedText>
+        <View style={styles.pickerWrapper}>
+          <Picker
+            selectedValue={courseId}
+            onValueChange={(itemValue) => {
+              if (itemValue !== courseId) {
+                router.replace({
+                  pathname: '/learning-view',
+                  params: { courseId: itemValue },
+                });
+              }
+            }}
+            style={styles.coursePicker}
+            mode="dropdown"
+            dropdownIconColor={COLORS.primary}
+          >
+            {enrolledCourses.map((c) => (
+              <Picker.Item key={c.id} label={c.title} value={c.id} style={styles.pickerItem} />
+            ))}
+          </Picker>
+        </View>
       </ThemedView>
       <ThemedView style={styles.gradeSection}>
         <ThemedView style={styles.gradeCard}>
@@ -275,6 +296,25 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     fontWeight: '600',
+    color: COLORS.text,
+  },
+  pickerWrapper: {
+    flex: 1,
+    height: 48,
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    overflow: 'hidden',
+  },
+  coursePicker: {
+    width: '100%',
+    height: 48,
+    color: COLORS.text,
+  },
+  pickerItem: {
+    fontSize: 14,
     color: COLORS.text,
   },
   tabContainer: {
