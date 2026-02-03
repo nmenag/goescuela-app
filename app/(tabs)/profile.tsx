@@ -48,9 +48,9 @@ export default function ProfileScreen() {
             <ThemedText style={styles.statValue}>
               {student.quizScores.length > 0
                 ? Math.round(
-                    student.quizScores.reduce((acc, curr) => acc + curr.score, 0) /
-                      student.quizScores.length,
-                  )
+                  student.quizScores.reduce((acc, curr) => acc + curr.score, 0) /
+                  student.quizScores.length,
+                )
                 : 0}
               %
             </ThemedText>
@@ -73,29 +73,12 @@ export default function ProfileScreen() {
             const courseAverage =
               courseQuizScores.length > 0
                 ? Math.round(
-                    courseQuizScores.reduce((acc, curr) => acc + curr.score, 0) /
-                      courseQuizScores.length,
-                  )
+                  courseQuizScores.reduce((acc, curr) => acc + curr.score, 0) /
+                  courseQuizScores.length,
+                )
                 : 0;
 
-            let gradeLetter = 'N/A';
-            let gradeColor = COLORS.textLight;
-            if (courseAverage >= 90) {
-              gradeLetter = 'A';
-              gradeColor = '#10B981';
-            } else if (courseAverage >= 80) {
-              gradeLetter = 'B';
-              gradeColor = '#3B82F6';
-            } else if (courseAverage >= 70) {
-              gradeLetter = 'C';
-              gradeColor = '#F59E0B';
-            } else if (courseAverage >= 60) {
-              gradeLetter = 'D';
-              gradeColor = '#EF4444';
-            } else if (courseQuizScores.length > 0) {
-              gradeLetter = 'F';
-              gradeColor = '#DC2626';
-            }
+
 
             return (
               <View key={courseId} style={styles.courseGradeCard}>
@@ -107,17 +90,11 @@ export default function ProfileScreen() {
                       completado{courseQuizScores.length === 1 ? '' : 's'}
                     </ThemedText>
                   </View>
-                  <View style={[styles.gradeLetterBadge, { backgroundColor: gradeColor }]}>
-                    <ThemedText style={styles.gradeLetterText}>{gradeLetter}</ThemedText>
-                  </View>
                 </View>
 
                 <View style={styles.courseGradeDetails}>
                   <View style={styles.courseGradeDetailItem}>
                     <ThemedText style={styles.courseGradeDetailLabel}>Promedio</ThemedText>
-                    <ThemedText style={[styles.courseGradeDetailValue, { color: gradeColor }]}>
-                      {courseQuizScores.length > 0 ? `${courseAverage}%` : 'N/A'}
-                    </ThemedText>
                   </View>
                   <View style={styles.courseGradeDetailItem}>
                     <ThemedText style={styles.courseGradeDetailLabel}>Progreso</ThemedText>
@@ -332,18 +309,6 @@ const styles = StyleSheet.create({
   courseGradeSubtitle: {
     fontSize: 13,
     color: COLORS.textLight,
-  },
-  gradeLetterBadge: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  gradeLetterText: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#FFFFFF',
   },
   courseGradeDetails: {
     flexDirection: 'row',
