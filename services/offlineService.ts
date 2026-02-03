@@ -15,6 +15,7 @@ export interface OfflineResource {
 class OfflineService {
   private static instance: OfflineService;
   private offlineMap: Record<string, OfflineResource> = {};
+  private listeners: (() => void)[] = [];
 
   private constructor() {}
 
@@ -119,8 +120,16 @@ class OfflineService {
     return Object.values(this.offlineMap);
   }
 
+  public subscribe(listener: () => void): () => void {
+    this.listeners.push(listener);
+    return () => {
+      this.listeners = this.listeners.filter((l) => l !== listener);
+    };
+  }
+
   private async saveMap(): Promise<void> {
     await AsyncStorage.setItem(OFFLINE_MAP_KEY, JSON.stringify(this.offlineMap));
+    this.listeners.forEach((l) => l());
   }
 }
 

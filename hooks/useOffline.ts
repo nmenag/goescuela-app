@@ -13,6 +13,13 @@ export function useOffline() {
       setIsInitialized(true);
     };
     init();
+
+    // Subscribe to changes
+    const unsubscribe = offlineService.subscribe(() => {
+      setDownloadedResources(offlineService.getAllDownloadedResources());
+    });
+
+    return unsubscribe;
   }, []);
 
   const download = useCallback(async (url: string) => {

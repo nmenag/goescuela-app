@@ -181,8 +181,9 @@ export default function ProfileScreen() {
 }
 
 function OfflineContentSection() {
-  const { downloadedResources } = useOffline();
+  const { downloadedResources, isInitialized } = useOffline();
 
+  if (!isInitialized) return null;
   if (downloadedResources.length === 0) return null;
 
   return (

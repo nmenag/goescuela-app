@@ -12,6 +12,8 @@ import {
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import * as WebBrowser from 'expo-web-browser';
+import * as IntentLauncher from 'expo-intent-launcher';
+import * as FileSystem from 'expo-file-system/legacy';
 import {
   CheckCircle,
   Circle,
@@ -29,6 +31,7 @@ import {
   TouchableOpacity,
   View,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useOffline } from '@/hooks/useOffline';
@@ -185,7 +188,26 @@ export default function LessonScreen() {
   const renderResourceContent = (lesson: Lesson) => {
     const effectiveResourceUrl = getEffectiveUri(lesson.resourceUrl || '');
     const handleOpenResource = async () => {
-      if (effectiveResourceUrl) {
+      if (!effectiveResourceUrl) return;
+
+      const isLocal = effectiveResourceUrl.startsWith('file://');
+
+      if (isLocal && Platform.OS === 'android') {
+        try {
+          const contentUri = await FileSystem.getContentUriAsync(effectiveResourceUrl);
+          await IntentLauncher.startActivityAsync('android.intent.action.VIEW', {
+            data: contentUri,
+            flags: 1, // FLAG_GRANT_READ_URI_PERMISSION
+            type: 'application/pdf',
+          });
+        } catch (error) {
+          console.error('Error opening local PDF:', error);
+          Alert.alert(
+            'Error',
+            'No se pudo abrir el PDF local. Asegúrate de tener un lector de PDF instalado.',
+          );
+        }
+      } else {
         await WebBrowser.openBrowserAsync(effectiveResourceUrl);
       }
     };
