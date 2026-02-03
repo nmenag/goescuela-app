@@ -224,11 +224,9 @@ export default function LessonScreen() {
 
   return (
     <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
-      <Stack.Screen options={{ title: lesson.title, headerBackTitle: 'Atrás' }} />
+      <Stack.Screen options={{ title: lesson.title, headerLeft: () => null }} />
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButtonTouch}>
-          <ThemedText style={styles.backButton}>← Volver</ThemedText>
-        </TouchableOpacity>
+        <View style={{ flex: 1 }} />
         <TouchableOpacity
           style={styles.syncButton}
           onPress={() => alert('Sincronizando contenido...')}

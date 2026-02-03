@@ -171,9 +171,6 @@ export default function LearningViewScreen() {
   const renderHeader = () => (
     <ThemedView>
       <ThemedView style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} activeOpacity={0.7}>
-          <ThemedText style={styles.backButton}>← Atrás</ThemedText>
-        </TouchableOpacity>
         <ThemedText style={styles.headerTitle} numberOfLines={1}>
           {course.title}
         </ThemedText>
@@ -271,15 +268,8 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 0,
-    paddingVertical: 12,
-  },
-  backButton: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: COLORS.primary,
-    marginRight: 12,
     paddingHorizontal: 16,
+    paddingVertical: 12,
   },
   headerTitle: {
     flex: 1,

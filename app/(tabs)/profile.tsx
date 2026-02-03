@@ -48,9 +48,9 @@ export default function ProfileScreen() {
             <ThemedText style={styles.statValue}>
               {student.quizScores.length > 0
                 ? Math.round(
-                  student.quizScores.reduce((acc, curr) => acc + curr.score, 0) /
-                  student.quizScores.length,
-                )
+                    student.quizScores.reduce((acc, curr) => acc + curr.score, 0) /
+                      student.quizScores.length,
+                  )
                 : 0}
               %
             </ThemedText>
@@ -73,12 +73,10 @@ export default function ProfileScreen() {
             const courseAverage =
               courseQuizScores.length > 0
                 ? Math.round(
-                  courseQuizScores.reduce((acc, curr) => acc + curr.score, 0) /
-                  courseQuizScores.length,
-                )
+                    courseQuizScores.reduce((acc, curr) => acc + curr.score, 0) /
+                      courseQuizScores.length,
+                  )
                 : 0;
-
-
 
             return (
               <View key={courseId} style={styles.courseGradeCard}>
