@@ -1,9 +1,16 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BrandingColors } from '@/constants/theme';
-import { mockQuizzes, Quiz } from '@/data/mockData';
+import {
+  mockQuizzes,
+  Quiz,
+  QuizQuestion,
+  Answer,
+  getCurrentStudent,
+  QuizScore,
+} from '@/data/mockData';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { ArrowDown, ArrowUp, Check, CheckCircle, X } from 'lucide-react-native';
+import { Check, CheckCircle, GripVertical, X } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import {
   KeyboardAvoidingView,
@@ -14,7 +21,12 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import DraggableFlatList, {
+  RenderItemParams,
+  ScaleDecorator,
+} from 'react-native-draggable-flatlist';
 
 const COLORS = {
   primary: BrandingColors.hotPink,
@@ -25,6 +37,54 @@ const COLORS = {
   correct: '#10B981',
   incorrect: '#EF4444',
   secondaryBackground: '#F3F4F6',
+};
+
+// Helper function to evaluate answers
+const evaluateAnswer = (question: QuizQuestion, answer: any): boolean => {
+  // If validation mode is 'none', always return true (no validation)
+  if (question.validationMode === 'none') {
+    return true;
+  }
+
+  if (!answer && answer !== 0) return false;
+
+  if (question.type === 'multiple-choice' || question.type === 'true-false') {
+    if (question.allowMultipleAnswers) {
+      const correctAnswers = question.answers
+        .filter((a: Answer) => a.is_correct)
+        .map((a: Answer) => a.content);
+      const selectedAnswers = Array.isArray(answer) ? answer : [];
+
+      return (
+        correctAnswers.length === selectedAnswers.length &&
+        correctAnswers.every((ans: string) => selectedAnswers.includes(ans))
+      );
+    } else {
+      const correctOption = question.answers.find((a: Answer) => a.is_correct);
+      return correctOption ? answer === correctOption.content : false;
+    }
+  } else if (question.type === 'text') {
+    const possibleAnswers = question.answers.map((a: Answer) => a.content.toLowerCase());
+    return possibleAnswers.includes(String(answer).toLowerCase());
+  } else if (question.type === 'sequence') {
+    const correctOrder = [...question.answers].sort(
+      (a: Answer, b: Answer) => (a.order || 0) - (b.order || 0),
+    );
+    const userOrder = answer || [];
+    if (Array.isArray(userOrder) && userOrder.length === correctOrder.length) {
+      return userOrder.every(
+        (item: any, index: number) => item.content === correctOrder[index].content,
+      );
+    }
+    return false;
+  } else if (question.type === 'fill-in-blank') {
+    const blanks = question.answers.filter((a: Answer) => a.blank_position);
+    return blanks.every((blank: Answer) => {
+      const userVal = (answer || {})[blank.blank_position || 0];
+      return userVal && String(userVal).toLowerCase() === blank.content.toLowerCase();
+    });
+  }
+  return false;
 };
 
 export default function QuizScreen() {
@@ -38,6 +98,7 @@ export default function QuizScreen() {
   const [isCurrentAnswerCorrect, setIsCurrentAnswerCorrect] = useState(false);
   const [score, setScore] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
+  const [isSummary, setIsSummary] = useState(false);
 
   useEffect(() => {
     const foundQuiz = mockQuizzes.find((q) => q.id === quizId);
@@ -47,10 +108,8 @@ export default function QuizScreen() {
   useEffect(() => {
     if (quiz && quiz.questions[currentQuestionIndex]) {
       const question = quiz.questions[currentQuestionIndex];
-      // Initialize sequence answer if needed
       if (question.type === 'sequence') {
         setUserAnswers((prev: any) => {
-          // Only initialize if not already set
           if (!prev[currentQuestionIndex]) {
             const initialOrder = [...question.answers].sort(() => Math.random() - 0.5);
             return { ...prev, [currentQuestionIndex]: initialOrder };
@@ -69,6 +128,16 @@ export default function QuizScreen() {
     );
   }
 
+  // Calculate attempt information
+  const student = getCurrentStudent();
+  const previousAttempts = student.quizScores.filter((qs) => qs.quizId === quizId);
+  const currentAttemptNumber = previousAttempts.length + 1;
+  const hasMaxAttempts = quiz.maxAttempts !== undefined;
+  const attemptsRemaining = hasMaxAttempts ? quiz.maxAttempts! - previousAttempts.length : null;
+  const isAttemptsExhausted = hasMaxAttempts && attemptsRemaining! <= 0;
+  const bestScore =
+    previousAttempts.length > 0 ? Math.max(...previousAttempts.map((a) => a.score)) : null;
+
   const currentQuestion = quiz.questions[currentQuestionIndex];
   const isLastQuestion = currentQuestionIndex === quiz.questions.length - 1;
 
@@ -77,10 +146,8 @@ export default function QuizScreen() {
 
     if (currentQuestion.type === 'multiple-choice' || currentQuestion.type === 'true-false') {
       if (currentQuestion.allowMultipleAnswers) {
-        // For multiple selection, check if array exists and has at least one item
         return Array.isArray(currentAns) && currentAns.length > 0;
       } else {
-        // For single selection
         return currentAns !== undefined && currentAns !== null && currentAns !== '';
       }
     } else if (currentQuestion.type === 'text') {
@@ -90,7 +157,6 @@ export default function QuizScreen() {
     } else if (currentQuestion.type === 'fill-in-blank') {
       const blanks = currentQuestion.answers.filter((a) => a.blank_position);
       if (!currentAns || typeof currentAns !== 'object') return false;
-      // Check if at least one blank is filled
       return blanks.some((blank) => {
         const userVal = currentAns[blank.blank_position || 0];
         return userVal && userVal.trim() !== '';
@@ -102,7 +168,7 @@ export default function QuizScreen() {
   const handleNext = () => {
     if (showFeedback) {
       if (isLastQuestion) {
-        finishQuiz();
+        setIsSummary(true);
       } else {
         setCurrentQuestionIndex((prev) => prev + 1);
         setShowFeedback(false);
@@ -119,61 +185,51 @@ export default function QuizScreen() {
     }
   };
 
-  const checkAnswer = () => {
-    const currentAns = userAnswers[currentQuestionIndex];
-    let isCorrect = false;
-
-    if (currentQuestion.type === 'multiple-choice' || currentQuestion.type === 'true-false') {
-      if (currentQuestion.allowMultipleAnswers) {
-        // For multiple selection, check if all correct answers are selected and no incorrect ones
-        const correctAnswers = currentQuestion.answers
-          .filter((a) => a.is_correct)
-          .map((a) => a.content);
-        const selectedAnswers = Array.isArray(currentAns) ? currentAns : [];
-
-        // Check if arrays match (all correct selected, no incorrect selected)
-        isCorrect =
-          correctAnswers.length === selectedAnswers.length &&
-          correctAnswers.every((ans) => selectedAnswers.includes(ans));
-      } else {
-        // Single selection
-        const correctOption = currentQuestion.answers.find((a) => a.is_correct);
-        if (correctOption && currentAns === correctOption.content) {
-          isCorrect = true;
-        }
-      }
-    } else if (currentQuestion.type === 'text') {
-      const possibleAnswers = currentQuestion.answers.map((a) => a.content.toLowerCase());
-      if (possibleAnswers.includes((currentAns || '').toLowerCase())) {
-        isCorrect = true;
-      }
-    } else if (currentQuestion.type === 'sequence') {
-      const correctOrder = [...currentQuestion.answers].sort(
-        (a, b) => (a.order || 0) - (b.order || 0),
-      );
-      const userOrder = currentAns || [];
-      if (userOrder.length === correctOrder.length) {
-        isCorrect = userOrder.every(
-          (item: any, index: number) => item.content === correctOrder[index].content,
-        );
-      }
-    } else if (currentQuestion.type === 'fill-in-blank') {
-      const blanks = currentQuestion.answers.filter((a) => a.blank_position);
-      isCorrect = blanks.every((blank) => {
-        const userVal = (currentAns || {})[blank.blank_position || 0];
-        return userVal && userVal.toLowerCase() === blank.content.toLowerCase();
-      });
-    }
-
-    // Store the correctness result
-    setIsCurrentAnswerCorrect(isCorrect);
-
-    if (isCorrect) {
-      setScore((prev) => prev + (currentQuestion.pointMultiplier === 'double' ? 20 : 10));
+  const handlePrevious = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex((prev) => prev - 1);
+      setShowFeedback(false);
     }
   };
 
+  const checkAnswer = () => {
+    const currentAns = userAnswers[currentQuestionIndex];
+
+    // For questions with no validation, always mark as correct
+    if (currentQuestion.validationMode === 'none') {
+      setIsCurrentAnswerCorrect(true);
+      return;
+    }
+
+    const isCorrect = evaluateAnswer(currentQuestion, currentAns);
+    setIsCurrentAnswerCorrect(isCorrect);
+  };
+
   const finishQuiz = () => {
+    // Calculate final score
+    let finalScore = 0;
+    quiz.questions.forEach((q, index) => {
+      const ans = userAnswers[index];
+      const isCorrect = evaluateAnswer(q, ans);
+      if (isCorrect) {
+        finalScore += q.pointMultiplier === 'double' ? 20 : 10;
+      }
+    });
+
+    // Save the quiz score with attempt number
+    const newQuizScore: QuizScore = {
+      quizId: quiz.id,
+      moduleId: quiz.moduleId,
+      score: finalScore,
+      completedAt: new Date().toISOString(),
+      attemptNumber: currentAttemptNumber,
+    };
+
+    // In a real app, this would be saved to the backend
+    // For now, we'll just add it to the student's scores in memory
+    student.quizScores.push(newQuizScore);
+
+    setScore(finalScore);
     setIsFinished(true);
   };
 
@@ -191,6 +247,81 @@ export default function QuizScreen() {
       default:
         return <ThemedText>Unsupported question type</ThemedText>;
     }
+  };
+
+  const renderSummary = () => {
+    return (
+      <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
+        <Stack.Screen
+          options={{
+            headerShown: true,
+            title: 'Resumen del Quiz',
+            headerBackVisible: false,
+            headerRight: () => (
+              <TouchableOpacity onPress={() => router.back()} style={{ padding: 4 }}>
+                <X size={24} color={COLORS.text} />
+              </TouchableOpacity>
+            ),
+          }}
+        />
+        <ScrollView
+          contentContainerStyle={styles.summaryContent}
+          showsVerticalScrollIndicator={true}
+        >
+          <ThemedText style={styles.questionTitle}>
+            Revisa tus respuestas antes de enviar
+          </ThemedText>
+
+          {hasMaxAttempts && (
+            <View style={styles.attemptInfoBox}>
+              <ThemedText style={styles.attemptInfoText}>
+                Intento {currentAttemptNumber} de {quiz.maxAttempts}
+              </ThemedText>
+            </View>
+          )}
+
+          <View style={{ gap: 12 }}>
+            {quiz.questions.map((q, index) => {
+              const isCorrect = evaluateAnswer(q, userAnswers[index]);
+              return (
+                <View key={index} style={styles.summaryItem}>
+                  <View style={styles.summaryHeader}>
+                    <ThemedText style={styles.summaryQuestionNum}>Pregunta {index + 1}</ThemedText>
+                    {isCorrect ? (
+                      <View style={[styles.statusBadge, { backgroundColor: '#DCFCE7' }]}>
+                        <Check size={14} color={COLORS.correct} />
+                        <ThemedText style={[styles.statusText, { color: COLORS.correct }]}>
+                          Correcto
+                        </ThemedText>
+                      </View>
+                    ) : (
+                      <View style={[styles.statusBadge, { backgroundColor: '#FEE2E2' }]}>
+                        <X size={14} color={COLORS.incorrect} />
+                        <ThemedText style={[styles.statusText, { color: COLORS.incorrect }]}>
+                          Incorrecto
+                        </ThemedText>
+                      </View>
+                    )}
+                  </View>
+                  <ThemedText numberOfLines={2} style={styles.summaryQuestionTitle}>
+                    {q.title}
+                  </ThemedText>
+                </View>
+              );
+            })}
+          </View>
+        </ScrollView>
+
+        <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 20) }]}>
+          <TouchableOpacity style={styles.prevButton} onPress={() => setIsSummary(false)}>
+            <ThemedText style={styles.prevButtonText}>Volver</ThemedText>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.nextButton} onPress={finishQuiz}>
+            <ThemedText style={styles.nextButtonText}>Enviar Quiz</ThemedText>
+          </TouchableOpacity>
+        </View>
+      </ThemedView>
+    );
   };
 
   const renderMultipleChoice = () => {
@@ -228,7 +359,7 @@ export default function QuizScreen() {
           let backgroundColor = '#F3F4F6';
           let borderColor = 'transparent';
 
-          if (showFeedback) {
+          if (showFeedback && currentQuestion.validationMode !== 'none') {
             if (option.is_correct) {
               backgroundColor = '#DCFCE7';
               borderColor = COLORS.correct;
@@ -258,10 +389,13 @@ export default function QuizScreen() {
                 )}
               </View>
               <ThemedText style={styles.optionText}>{option.content}</ThemedText>
-              {showFeedback && option.is_correct && <Check size={20} color={COLORS.correct} />}
-              {showFeedback && isSelected && !option.is_correct && (
-                <X size={20} color={COLORS.incorrect} />
+              {showFeedback && currentQuestion.validationMode !== 'none' && option.is_correct && (
+                <Check size={20} color={COLORS.correct} />
               )}
+              {showFeedback &&
+                currentQuestion.validationMode !== 'none' &&
+                isSelected &&
+                !option.is_correct && <X size={20} color={COLORS.incorrect} />}
             </TouchableOpacity>
           );
         })}
@@ -273,8 +407,7 @@ export default function QuizScreen() {
     const value = userAnswers[currentQuestionIndex] || '';
     let inputStyle = styles.textInput;
     if (showFeedback) {
-      const possibleAnswers = currentQuestion.answers.map((a) => a.content.toLowerCase());
-      const isCorrect = possibleAnswers.includes(value.toLowerCase());
+      const isCorrect = evaluateAnswer(currentQuestion, value);
       inputStyle = isCorrect ? styles.textInputCorrect : styles.textInputIncorrect;
     }
 
@@ -288,7 +421,7 @@ export default function QuizScreen() {
           onChangeText={(text) => setUserAnswers({ ...userAnswers, [currentQuestionIndex]: text })}
           editable={!showFeedback}
         />
-        {showFeedback && (
+        {showFeedback && currentQuestion.validationMode !== 'none' && (
           <View style={styles.feedbackBox}>
             <ThemedText style={styles.feedbackLabel}>Respuestas correctas:</ThemedText>
             {currentQuestion.answers.map((a, i) => (
@@ -305,56 +438,51 @@ export default function QuizScreen() {
   const renderSequence = () => {
     const currentOrder = userAnswers[currentQuestionIndex] || currentQuestion.answers;
 
-    const moveItem = (fromIndex: number, direction: 'up' | 'down') => {
-      if (showFeedback) return;
-      const newOrder = [...currentOrder];
-      const toIndex = direction === 'up' ? fromIndex - 1 : fromIndex + 1;
+    const renderItem = ({ item, drag, isActive, getIndex }: RenderItemParams<any>) => {
+      const index = getIndex();
+      return (
+        <ScaleDecorator>
+          <TouchableOpacity
+            onLongPress={showFeedback ? undefined : drag}
+            disabled={showFeedback}
+            delayLongPress={100}
+            activeOpacity={1}
+            style={[
+              styles.sequenceItem,
+              isActive && styles.sequenceItemActive,
+              showFeedback && isActive && { backgroundColor: '#F3F4F6', elevation: 0 },
+            ]}
+          >
+            <View style={styles.sequenceNumber}>
+              <ThemedText style={styles.sequenceNumberText}>{(index || 0) + 1}</ThemedText>
+            </View>
+            <ThemedText style={styles.sequenceText}>{item.content}</ThemedText>
 
-      if (toIndex >= 0 && toIndex < newOrder.length) {
-        const item = newOrder[fromIndex];
-        newOrder.splice(fromIndex, 1);
-        newOrder.splice(toIndex, 0, item);
-        setUserAnswers({ ...userAnswers, [currentQuestionIndex]: newOrder });
-      }
+            {!showFeedback && (
+              <TouchableOpacity onPressIn={drag} style={styles.dragHandle}>
+                <GripVertical size={24} color={COLORS.textLight} />
+              </TouchableOpacity>
+            )}
+          </TouchableOpacity>
+        </ScaleDecorator>
+      );
     };
 
     return (
       <View style={styles.optionsContainer}>
         <ThemedText style={styles.sequenceInstructions}>
-          Usa las flechas para ordenar los elementos correctamente
+          {showFeedback
+            ? 'Orden correcto:'
+            : 'Mantén presionado y arrastra para ordenar los elementos'}
         </ThemedText>
-        {currentOrder.map((item: any, index: number) => (
-          <View key={index} style={styles.sequenceItem}>
-            <View style={styles.sequenceNumber}>
-              <ThemedText style={styles.sequenceNumberText}>{index + 1}</ThemedText>
-            </View>
-            <ThemedText style={styles.sequenceText}>{item.content}</ThemedText>
-            {!showFeedback && (
-              <View style={styles.sequenceControls}>
-                <TouchableOpacity
-                  onPress={() => moveItem(index, 'up')}
-                  disabled={index === 0}
-                  style={[styles.arrowButton, index === 0 && styles.arrowButtonDisabled]}
-                >
-                  <ArrowUp size={20} color={index === 0 ? '#E5E7EB' : COLORS.primary} />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => moveItem(index, 'down')}
-                  disabled={index === currentOrder.length - 1}
-                  style={[
-                    styles.arrowButton,
-                    index === currentOrder.length - 1 && styles.arrowButtonDisabled,
-                  ]}
-                >
-                  <ArrowDown
-                    size={20}
-                    color={index === currentOrder.length - 1 ? '#E5E7EB' : COLORS.primary}
-                  />
-                </TouchableOpacity>
-              </View>
-            )}
-          </View>
-        ))}
+
+        <DraggableFlatList
+          data={currentOrder}
+          onDragEnd={({ data }) => setUserAnswers({ ...userAnswers, [currentQuestionIndex]: data })}
+          keyExtractor={(item) => item.content}
+          renderItem={renderItem}
+          scrollEnabled={false}
+        />
 
         {showFeedback && (
           <View style={styles.feedbackBox}>
@@ -382,33 +510,79 @@ export default function QuizScreen() {
           {parts.map((part, index) => (
             <React.Fragment key={index}>
               <ThemedText style={styles.fillBlankText}>{part}</ThemedText>
-              {index < parts.length - 1 && (
-                <TextInput
-                  style={[
-                    styles.fillBlankInput,
-                    showFeedback &&
-                      (currentQuestion.answers
-                        .find((a) => a.blank_position === index + 1)
-                        ?.content.toLowerCase() ===
-                      (userAnswers[currentQuestionIndex]?.[index + 1] || '').toLowerCase()
-                        ? styles.textInputCorrect
-                        : styles.textInputIncorrect),
-                  ]}
-                  value={userAnswers[currentQuestionIndex]?.[index + 1] || ''}
-                  onChangeText={(text) => {
-                    const currentAns = userAnswers[currentQuestionIndex] || {};
-                    setUserAnswers({
-                      ...userAnswers,
-                      [currentQuestionIndex]: { ...currentAns, [index + 1]: text },
-                    });
-                  }}
-                  editable={!showFeedback}
-                />
-              )}
+              {index < parts.length - 1 &&
+                (() => {
+                  const blankAnswer = currentQuestion.answers.find(
+                    (a) => a.blank_position === index + 1,
+                  );
+                  const hasOptions = blankAnswer?.options && blankAnswer.options.length > 0;
+
+                  if (hasOptions) {
+                    // Render dropdown picker
+                    return (
+                      <View style={styles.fillBlankPickerContainer}>
+                        <Picker
+                          selectedValue={userAnswers[currentQuestionIndex]?.[index + 1] || ''}
+                          onValueChange={(value: string) => {
+                            const currentAns = userAnswers[currentQuestionIndex] || {};
+                            setUserAnswers({
+                              ...userAnswers,
+                              [currentQuestionIndex]: { ...currentAns, [index + 1]: value },
+                            });
+                          }}
+                          enabled={!showFeedback}
+                          style={styles.fillBlankPicker}
+                          mode="dropdown"
+                          dropdownIconColor={COLORS.primary}
+                        >
+                          <Picker.Item
+                            label="Selecciona..."
+                            value=""
+                            style={styles.pickerItemPlaceholder}
+                          />
+                          {blankAnswer.options!.map((option, optIndex) => (
+                            <Picker.Item
+                              key={optIndex}
+                              label={option}
+                              value={option}
+                              style={styles.pickerItem}
+                            />
+                          ))}
+                        </Picker>
+                      </View>
+                    );
+                  } else {
+                    // Render text input
+                    return (
+                      <TextInput
+                        style={[
+                          styles.fillBlankInput,
+                          showFeedback &&
+                            currentQuestion.validationMode !== 'none' &&
+                            (currentQuestion.answers
+                              .find((a) => a.blank_position === index + 1)
+                              ?.content.toLowerCase() ===
+                            (userAnswers[currentQuestionIndex]?.[index + 1] || '').toLowerCase()
+                              ? styles.textInputCorrect
+                              : styles.textInputIncorrect),
+                        ]}
+                        value={userAnswers[currentQuestionIndex]?.[index + 1] || ''}
+                        onChangeText={(text) => {
+                          const currentAns = userAnswers[currentQuestionIndex] || {};
+                          setUserAnswers({
+                            ...userAnswers,
+                            [currentQuestionIndex]: { ...currentAns, [index + 1]: text },
+                          });
+                        }}
+                        editable={!showFeedback}
+                      />
+                    );
+                  }
+                })()}
             </React.Fragment>
           ))}
         </View>
-        {showFeedback && (
+        {showFeedback && currentQuestion.validationMode !== 'none' && (
           <View style={styles.feedbackBox}>
             <ThemedText style={styles.feedbackLabel}>Respuestas:</ThemedText>
             {currentQuestion.answers
@@ -425,13 +599,129 @@ export default function QuizScreen() {
   };
 
   if (isFinished) {
+    const isPassed = score >= quiz.passingScore;
+    const newAttemptsRemaining = hasMaxAttempts ? attemptsRemaining! - 1 : null;
+    const canRetry = !hasMaxAttempts || newAttemptsRemaining! > 0;
+
     return (
       <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
-        <Stack.Screen options={{ title: 'Resultados', headerBackVisible: false }} />
+        <Stack.Screen
+          options={{
+            headerShown: true,
+            title: 'Resultados',
+            headerBackVisible: false,
+            headerRight: () => (
+              <TouchableOpacity onPress={() => router.back()} style={{ padding: 4 }}>
+                <X size={24} color={COLORS.text} />
+              </TouchableOpacity>
+            ),
+          }}
+        />
         <View style={styles.resultContainer}>
-          <CheckCircle size={64} color={COLORS.correct} style={{ marginBottom: 20 }} />
-          <ThemedText style={styles.resultTitle}>¡Quiz Completado!</ThemedText>
+          <CheckCircle
+            size={64}
+            color={isPassed ? COLORS.correct : COLORS.incorrect}
+            style={{ marginBottom: 20 }}
+          />
+          <ThemedText style={styles.resultTitle}>
+            {isPassed ? '¡Quiz Completado!' : 'Quiz Completado'}
+          </ThemedText>
           <ThemedText style={styles.resultScore}>Puntuación: {score}</ThemedText>
+
+          {bestScore !== null && bestScore > score && (
+            <ThemedText style={styles.bestScoreText}>Mejor puntuación: {bestScore}</ThemedText>
+          )}
+
+          <View style={styles.resultDetails}>
+            <ThemedText style={styles.resultDetailText}>
+              Puntuación mínima: {quiz.passingScore}
+            </ThemedText>
+            <ThemedText
+              style={[styles.resultDetailText, isPassed ? styles.passedText : styles.failedText]}
+            >
+              {isPassed ? '✓ Aprobado' : '✗ No aprobado'}
+            </ThemedText>
+          </View>
+
+          {hasMaxAttempts && (
+            <View style={styles.attemptInfoBox}>
+              <ThemedText style={styles.attemptInfoText}>
+                Intento {currentAttemptNumber} de {quiz.maxAttempts}
+              </ThemedText>
+              {newAttemptsRemaining !== null && newAttemptsRemaining > 0 && (
+                <ThemedText style={styles.attemptsRemainingText}>
+                  {newAttemptsRemaining}{' '}
+                  {newAttemptsRemaining === 1 ? 'intento restante' : 'intentos restantes'}
+                </ThemedText>
+              )}
+              {newAttemptsRemaining === 0 && (
+                <ThemedText style={styles.noAttemptsText}>No quedan más intentos</ThemedText>
+              )}
+            </View>
+          )}
+
+          <View style={styles.resultButtonsContainer}>
+            {canRetry && !isPassed && (
+              <TouchableOpacity
+                style={styles.retryButton}
+                onPress={() => {
+                  // Reset quiz state
+                  setCurrentQuestionIndex(0);
+                  setUserAnswers({});
+                  setShowFeedback(false);
+                  setIsCurrentAnswerCorrect(false);
+                  setScore(0);
+                  setIsFinished(false);
+                  setIsSummary(false);
+                }}
+              >
+                <ThemedText style={styles.retryButtonText}>Reintentar</ThemedText>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity
+              style={[styles.finishButton, canRetry && !isPassed && { flex: 1 }]}
+              onPress={() => router.back()}
+            >
+              <ThemedText style={styles.finishButtonText}>Volver a la lección</ThemedText>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ThemedView>
+    );
+  }
+
+  // Show blocked screen if attempts are exhausted
+  if (isAttemptsExhausted) {
+    return (
+      <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
+        <Stack.Screen
+          options={{
+            headerShown: true,
+            title: quiz.title,
+            headerBackVisible: false,
+            headerRight: () => (
+              <TouchableOpacity onPress={() => router.back()} style={{ padding: 4 }}>
+                <X size={24} color={COLORS.text} />
+              </TouchableOpacity>
+            ),
+          }}
+        />
+        <View style={styles.resultContainer}>
+          <X size={64} color={COLORS.incorrect} style={{ marginBottom: 20 }} />
+          <ThemedText style={styles.resultTitle}>Intentos Agotados</ThemedText>
+          <ThemedText style={styles.blockedMessage}>
+            Has utilizado todos los intentos disponibles para este quiz.
+          </ThemedText>
+
+          <View style={styles.attemptInfoBox}>
+            <ThemedText style={styles.attemptInfoText}>
+              Intentos utilizados: {quiz.maxAttempts} de {quiz.maxAttempts}
+            </ThemedText>
+            {bestScore !== null && (
+              <ThemedText style={styles.bestScoreText}>Tu mejor puntuación: {bestScore}</ThemedText>
+            )}
+          </View>
+
           <TouchableOpacity style={styles.finishButton} onPress={() => router.back()}>
             <ThemedText style={styles.finishButtonText}>Volver a la lección</ThemedText>
           </TouchableOpacity>
@@ -440,12 +730,29 @@ export default function QuizScreen() {
     );
   }
 
+  if (isSummary) {
+    return renderSummary();
+  }
+
   return (
     <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
       <Stack.Screen
         options={{
+          headerShown: true,
           title: `Pregunta ${currentQuestionIndex + 1}/${quiz.questions.length}`,
-          headerBackTitle: 'Salir',
+          headerBackVisible: false,
+          headerRight: () => (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+              {hasMaxAttempts && (
+                <ThemedText style={{ fontSize: 12, color: COLORS.textLight }}>
+                  Intento {currentAttemptNumber}/{quiz.maxAttempts}
+                </ThemedText>
+              )}
+              <TouchableOpacity onPress={() => router.back()} style={{ padding: 4 }}>
+                <X size={24} color={COLORS.text} />
+              </TouchableOpacity>
+            </View>
+          ),
         }}
       />
 
@@ -471,17 +778,28 @@ export default function QuizScreen() {
             <View
               style={[
                 styles.feedbackContainer,
-                isCurrentAnswerCorrect ? styles.feedbackCorrect : styles.feedbackIncorrect,
+                currentQuestion.validationMode === 'none'
+                  ? { backgroundColor: '#EFF6FF', borderLeftColor: COLORS.primary } // Neutral blue for open questions
+                  : isCurrentAnswerCorrect
+                    ? styles.feedbackCorrect
+                    : styles.feedbackIncorrect,
               ]}
             >
-              <ThemedText style={styles.feedbackMainText}>
-                {isCurrentAnswerCorrect
-                  ? currentQuestion.feedback?.correct ||
-                    currentQuestion.feedback_on_correct ||
-                    '¡Correcto!'
-                  : currentQuestion.feedback?.incorrect ||
-                    currentQuestion.feedback_on_incorrect ||
-                    'Incorrecto. Inténtalo de nuevo.'}
+              <ThemedText
+                style={[
+                  styles.feedbackMainText,
+                  currentQuestion.validationMode === 'none' && { color: COLORS.primary },
+                ]}
+              >
+                {currentQuestion.validationMode === 'none'
+                  ? currentQuestion.feedback_on_correct || 'Respuesta guardada'
+                  : isCurrentAnswerCorrect
+                    ? currentQuestion.feedback?.correct ||
+                      currentQuestion.feedback_on_correct ||
+                      '¡Correcto!'
+                    : currentQuestion.feedback?.incorrect ||
+                      currentQuestion.feedback_on_incorrect ||
+                      'Incorrecto. Inténtalo de nuevo.'}
               </ThemedText>
             </View>
           )}
@@ -489,6 +807,20 @@ export default function QuizScreen() {
       </KeyboardAvoidingView>
 
       <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 20) }]}>
+        <TouchableOpacity
+          style={[styles.prevButton, currentQuestionIndex === 0 && styles.prevButtonDisabled]}
+          onPress={handlePrevious}
+          disabled={currentQuestionIndex === 0}
+        >
+          <ThemedText
+            style={[
+              styles.prevButtonText,
+              currentQuestionIndex === 0 && styles.prevButtonDisabledText,
+            ]}
+          >
+            Anterior
+          </ThemedText>
+        </TouchableOpacity>
         <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
           <ThemedText style={styles.nextButtonText}>
             {showFeedback ? (isLastQuestion ? 'Finalizar' : 'Siguiente') : 'Comprobar'}
@@ -507,6 +839,11 @@ const styles = StyleSheet.create({
   content: {
     padding: 20,
     paddingBottom: 100,
+  },
+  summaryContent: {
+    padding: 20,
+    paddingBottom: 120, // Extra padding for footer
+    flexGrow: 1,
   },
   progressContainer: {
     height: 6,
@@ -582,6 +919,14 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: 10,
   },
+  sequenceItemActive: {
+    backgroundColor: '#E0E7FF',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    shadowOffset: { width: 0, height: 2 },
+  },
   sequenceNumber: {
     width: 32,
     height: 32,
@@ -601,17 +946,8 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     flex: 1,
   },
-  sequenceControls: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  arrowButton: {
+  dragHandle: {
     padding: 8,
-    borderRadius: 8,
-    backgroundColor: '#FFFFFF',
-  },
-  arrowButtonDisabled: {
-    opacity: 0.3,
   },
   fillBlankContainer: {
     marginBottom: 20,
@@ -636,6 +972,30 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     color: COLORS.text,
   },
+  fillBlankPickerContainer: {
+    borderBottomWidth: 2,
+    borderBottomColor: COLORS.primary,
+    minWidth: 160, // Increased min-width
+    marginHorizontal: 4,
+    backgroundColor: '#F3F4F6',
+    borderRadius: 8,
+    height: 50,
+    justifyContent: 'center',
+    marginVertical: 4,
+  },
+  fillBlankPicker: {
+    width: '100%',
+    height: 50,
+    color: COLORS.text,
+  },
+  pickerItem: {
+    fontSize: 16,
+    color: COLORS.text,
+  },
+  pickerItemPlaceholder: {
+    fontSize: 16,
+    color: COLORS.textLight,
+  },
   footer: {
     position: 'absolute',
     bottom: 0,
@@ -645,8 +1005,31 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
     borderTopColor: COLORS.border,
+    flexDirection: 'row',
+    gap: 12,
+  },
+  prevButton: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: COLORS.primary,
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  prevButtonDisabled: {
+    borderColor: '#E5E7EB',
+    opacity: 0.5,
+  },
+  prevButtonText: {
+    color: COLORS.primary,
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  prevButtonDisabledText: {
+    color: '#9CA3AF',
   },
   nextButton: {
+    flex: 2,
     backgroundColor: COLORS.primary,
     paddingVertical: 16,
     borderRadius: 12,
@@ -756,5 +1139,116 @@ const styles = StyleSheet.create({
   radioButtonSelected: {
     borderColor: COLORS.primary,
     backgroundColor: COLORS.primary,
+  },
+  summaryItem: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  summaryHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  summaryQuestionNum: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.textLight,
+  },
+  summaryQuestionTitle: {
+    fontSize: 16,
+    color: COLORS.text,
+  },
+  statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    gap: 4,
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  attemptInfoBox: {
+    backgroundColor: '#EFF6FF',
+    borderRadius: 8,
+    padding: 12,
+    marginVertical: 12,
+    borderLeftWidth: 3,
+    borderLeftColor: COLORS.primary,
+  },
+  attemptInfoText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.text,
+    marginBottom: 4,
+  },
+  attemptsRemainingText: {
+    fontSize: 13,
+    color: COLORS.textLight,
+  },
+  noAttemptsText: {
+    fontSize: 13,
+    color: COLORS.incorrect,
+    fontWeight: '600',
+  },
+  bestScoreText: {
+    fontSize: 16,
+    color: COLORS.textLight,
+    marginBottom: 8,
+  },
+  resultDetails: {
+    backgroundColor: '#F3F4F6',
+    borderRadius: 8,
+    padding: 12,
+    marginVertical: 16,
+    width: '100%',
+    alignItems: 'center',
+  },
+  resultDetailText: {
+    fontSize: 14,
+    color: COLORS.text,
+    marginVertical: 2,
+  },
+  passedText: {
+    color: COLORS.correct,
+    fontWeight: '700',
+  },
+  failedText: {
+    color: COLORS.incorrect,
+    fontWeight: '700',
+  },
+  resultButtonsContainer: {
+    flexDirection: 'row',
+    gap: 12,
+    width: '100%',
+    marginTop: 16,
+  },
+  retryButton: {
+    flex: 1,
+    backgroundColor: COLORS.secondaryBackground,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: COLORS.primary,
+    alignItems: 'center',
+  },
+  retryButtonText: {
+    color: COLORS.primary,
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  blockedMessage: {
+    fontSize: 16,
+    color: COLORS.textLight,
+    textAlign: 'center',
+    marginBottom: 20,
+    paddingHorizontal: 20,
   },
 });

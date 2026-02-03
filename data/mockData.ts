@@ -33,6 +33,7 @@ export interface Course {
   id: string;
   title: string;
   description: string;
+  sequential?: boolean; // If true, lessons must be completed in order
   instructor: {
     id: string;
     name: string;
@@ -63,6 +64,7 @@ export interface Answer {
   order?: number;
   blank_position?: number;
   feedback?: string;
+  options?: string[]; // For fill-in-blank with dropdown options
 }
 
 export interface QuestionFeedback {
@@ -70,6 +72,11 @@ export interface QuestionFeedback {
   partial?: string;
   incorrect?: string;
 }
+
+export type ValidationMode = 'auto' | 'manual' | 'none';
+// 'auto': Automatically check answer and show feedback (default)
+// 'manual': Require explicit check/submit but validate answer
+// 'none': No validation, just collect the answer (open-ended)
 
 export interface QuizQuestion {
   id?: string;
@@ -83,6 +90,7 @@ export interface QuizQuestion {
   feedback_on_correct?: string;
   feedback_on_incorrect?: string;
   allowMultipleAnswers?: boolean;
+  validationMode?: ValidationMode; // How to validate the answer (default: 'auto')
   answers: Answer[];
 }
 
@@ -94,6 +102,7 @@ export interface Quiz {
   questions: QuizQuestion[];
   duration: number; // in minutes
   passingScore: number; // percentage
+  maxAttempts?: number; // maximum number of attempts allowed (undefined = unlimited)
 }
 
 export interface QuizScore {
@@ -101,6 +110,7 @@ export interface QuizScore {
   moduleId: string;
   score: number; // 0-100
   completedAt: string;
+  attemptNumber: number; // which attempt this was (1, 2, 3, etc.)
 }
 
 export interface Student {
@@ -109,6 +119,8 @@ export interface Student {
   email: string;
   avatar: string;
   enrolledCourses: string[];
+  school: string;
+  grade: string;
   progress: StudentProgress[];
   quizScores: QuizScore[];
 }
@@ -116,9 +128,11 @@ export interface Student {
 export const mockStudents: Student[] = [
   {
     id: 'student-1',
-    name: 'Sarah Chen',
+    name: 'Alejo',
     email: 'sarah.chen@example.com',
     avatar: 'https://i.pravatar.cc/150?img=1',
+    school: 'Colegio San José',
+    grade: '10° Grado',
     enrolledCourses: ['course-1', 'course-2', 'course-3'],
     progress: [
       {
@@ -152,24 +166,28 @@ export const mockStudents: Student[] = [
         moduleId: 'module-1',
         score: 85,
         completedAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
+        attemptNumber: 1,
       },
       {
         quizId: 'quiz-module-1-2',
         moduleId: 'module-2',
         score: 92,
         completedAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+        attemptNumber: 1,
       },
       {
         quizId: 'quiz-module-2-1',
         moduleId: 'module-3',
         score: 78,
         completedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+        attemptNumber: 2,
       },
       {
         quizId: 'quiz-module-3-1',
         moduleId: 'module-5',
         score: 88,
         completedAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+        attemptNumber: 1,
       },
     ],
   },
@@ -179,6 +197,7 @@ export const mockCourses: Course[] = [
   {
     id: 'course-1',
     title: 'Ciencias Naturales',
+    sequential: true,
     description:
       'Aprende los conceptos fundamentales de ciencias naturales incluyendo biología, química y física.',
     instructor: {
@@ -361,58 +380,59 @@ export const mockCourses: Course[] = [
   },
   {
     id: 'course-3',
-    title: 'Prueba',
+    title: 'Lenguaje y Comunicación',
     description:
-      'Un curso de prueba con contenido introductorio para familiarizarse con la plataforma.',
+      'Mejora tus habilidades de lectura, escritura y comunicación efectiva con este curso integral.',
     instructor: {
       id: 'instructor-3',
-      name: 'Prof. Michael Zhang',
+      name: 'Lic. Ana Martínez',
       avatar: 'https://i.pravatar.cc/150?img=3',
     },
-    thumbnail: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=300&fit=crop',
-    category: 'General',
-    students: 5400,
+    thumbnail: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=400&h=300&fit=crop',
+    category: 'Humanidades',
+    students: 6500,
     duration: 24,
     modules: [
       {
         id: 'module-6',
-        title: 'Módulo 1: Introducción',
+        title: 'Comunicación Efectiva',
         duration: 8,
         lessons: [
           {
             id: 'lesson-12',
-            title: 'Bienvenida al Curso',
+            title: 'Elementos de la Comunicación',
             type: 'video',
-            duration: 65,
-            description: 'Introducción y descripción general del curso.',
+            duration: 45,
+            description: 'Aprende los elementos fundamentales del proceso comunicativo.',
           },
           {
             id: 'lesson-13',
-            title: 'Cómo Usar la Plataforma',
+            title: 'Técnicas de Expresión Oral',
             type: 'video',
-            duration: 85,
-            description: 'Aprende a navegar y usar la plataforma de manera efectiva.',
+            duration: 60,
+            description: 'Mejora tu capacidad de hablar en público y expresar ideas.',
           },
         ],
       },
       {
         id: 'module-7',
-        title: 'Módulo 2: Contenido Principal',
+        title: 'Comprensión Lectora',
         duration: 16,
         lessons: [
           {
             id: 'lesson-14',
-            title: 'Lección 1',
+            title: 'Análisis de Textos',
             type: 'video',
-            duration: 75,
-            description: 'Primer contenido del módulo principal.',
+            duration: 55,
+            description: 'Estrategias para analizar y comprender textos complejos.',
           },
           {
             id: 'lesson-15',
-            title: 'Lección 2',
+            title: 'Tipos de Textos',
             type: 'video',
-            duration: 90,
-            description: 'Segundo contenido del módulo principal.',
+            duration: 50,
+            description:
+              'Identifica y comprende diferentes tipos de textos literarios y no literarios.',
           },
         ],
       },
@@ -428,6 +448,7 @@ export const mockQuizzes: Quiz[] = [
     moduleId: 'module-1',
     duration: 15,
     passingScore: 70,
+    maxAttempts: 3,
     questions: [
       {
         title: '¿Cuál es el propósito principal de React Native?',
@@ -436,6 +457,7 @@ export const mockQuizzes: Quiz[] = [
         timer: 30,
         pointMultiplier: 'none',
         b64_image: null,
+        validationMode: 'auto', // Auto-check answer
         feedback_on_correct:
           '¡Correcto! React Native permite crear aplicaciones móviles multiplataforma.',
         feedback_on_incorrect:
@@ -490,6 +512,7 @@ export const mockQuizzes: Quiz[] = [
         timer: 45,
         pointMultiplier: 'none',
         b64_image: null,
+        validationMode: 'auto', // Auto-check answer
         feedback_on_correct: '¡Perfecto! Tu respuesta es correcta.',
         feedback_on_incorrect: 'Incorrecto. Las respuestas correctas son: Answer 1 o Answer 2.',
         answers: [
@@ -511,16 +534,16 @@ export const mockQuizzes: Quiz[] = [
         feedback_on_incorrect: 'El orden no es correcto. Revisa la secuencia mostrada abajo.',
         answers: [
           {
-            content: 'First item',
-            order: 1,
-          },
-          {
             content: 'Second item',
             order: 2,
           },
           {
             content: 'Third item',
             order: 3,
+          },
+          {
+            content: 'First item',
+            order: 1,
           },
         ],
       },
@@ -551,9 +574,47 @@ export const mockQuizzes: Quiz[] = [
         ],
       },
       {
+        title: 'Pregunta abierta: ¿Qué aprendiste hoy?',
+        type: 'text',
+        timer: 120,
+        pointMultiplier: 'none',
+        validationMode: 'none', // No validation - open-ended question
+        feedback_on_correct: 'Gracias por tu respuesta.',
+        answers: [
+          {
+            content: '',
+          },
+        ],
+      },
+      {
+        title: 'Complete: React Native uses ___ and renders to ___ components',
+        type: 'fill-in-blank',
+        timer: 60,
+        pointMultiplier: 'none',
+        validationMode: 'auto',
+        question_template: 'React Native uses ___ and renders to ___ components',
+        feedback: {
+          correct: 'Perfect! You know the React Native architecture.',
+          incorrect: 'Not quite. Review the React Native documentation.',
+        },
+        answers: [
+          {
+            blank_position: 1,
+            content: 'JavaScript',
+            options: ['JavaScript', 'TypeScript', 'Python', 'Java'],
+          },
+          {
+            blank_position: 2,
+            content: 'native',
+            options: ['native', 'web', 'hybrid', 'virtual'],
+          },
+        ],
+      },
+      {
         title: 'Selecciona todas las respuestas correctas (Múltiple selección)',
         type: 'multiple-choice',
         allowMultipleAnswers: true,
+        validationMode: 'auto',
         feedback_on_correct: '¡Excelente! Has seleccionado todas las respuestas correctas.',
         feedback_on_incorrect: 'No del todo. Revisa las opciones correctas mostradas abajo.',
         answers: [
@@ -585,6 +646,7 @@ export const mockQuizzes: Quiz[] = [
     moduleId: 'module-1',
     duration: 20,
     passingScore: 75,
+    maxAttempts: 2,
     questions: [
       {
         title: '¿Cuál es la diferencia entre los componentes View y Text?',
@@ -608,6 +670,7 @@ export const mockQuizzes: Quiz[] = [
     moduleId: 'module-2',
     duration: 10,
     passingScore: 60,
+    // No maxAttempts = unlimited attempts
     questions: [
       {
         title: '¿Cómo aplicas estilos en React Native?',
@@ -696,4 +759,23 @@ export const getCourseIdByLessonId = (lessonId: string): string | undefined => {
     }
   }
   return undefined;
+};
+
+// Helper function to get adjacent lessons (previous and next)
+export const getAdjacentLessons = (lessonId: string) => {
+  const courseId = getCourseIdByLessonId(lessonId);
+  if (!courseId) return { prev: null, next: null };
+
+  const course = getCourseById(courseId);
+  if (!course) return { prev: null, next: null };
+
+  const allLessons = course.modules.flatMap((m) => m.lessons);
+  const currentIndex = allLessons.findIndex((l) => l.id === lessonId);
+
+  if (currentIndex === -1) return { prev: null, next: null };
+
+  return {
+    prev: currentIndex > 0 ? allLessons[currentIndex - 1] : null,
+    next: currentIndex < allLessons.length - 1 ? allLessons[currentIndex + 1] : null,
+  };
 };

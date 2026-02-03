@@ -2,7 +2,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BrandingColors } from '@/constants/theme';
 import React from 'react';
-import { Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Image, StyleSheet, TouchableOpacity } from 'react-native';
 
 const COLORS = {
   primary: BrandingColors.hotPink,
@@ -21,16 +21,16 @@ interface CourseCardProps {
 export const CourseCard: React.FC<CourseCardProps> = ({ title, thumbnail, onPress }) => {
   return (
     <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.8}>
-      <ThemedView style={styles.card}>
+      <ThemedView style={styles.card} lightColor="#FFFFFF" darkColor="#1F2937">
         {/* Thumbnail */}
         <Image source={{ uri: thumbnail }} style={styles.thumbnail} />
 
         {/* Content */}
-        <ThemedView style={styles.content}>
+        <View style={styles.content}>
           <ThemedText style={styles.title} numberOfLines={2}>
             {title}
           </ThemedText>
-        </ThemedView>
+        </View>
       </ThemedView>
     </TouchableOpacity>
   );
@@ -38,7 +38,6 @@ export const CourseCard: React.FC<CourseCardProps> = ({ title, thumbnail, onPres
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     marginBottom: 16,
   },
   card: {

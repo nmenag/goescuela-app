@@ -2,6 +2,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BrandingColors } from '@/constants/theme';
 import {
+  getAdjacentLessons,
   getCourseIdByLessonId,
   getCurrentStudent,
   getLessonById,
@@ -11,14 +12,22 @@ import {
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import * as WebBrowser from 'expo-web-browser';
-import { CheckCircle, Circle, Pause, Play } from 'lucide-react-native';
+import {
+  CheckCircle,
+  Circle,
+  Pause,
+  Play,
+  Download,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const COLORS = {
   primary: BrandingColors.hotPink,
-  background: '#FFFFFF',
+  background: BrandingColors.lightPink,
   text: '#1F2937',
   textLight: '#6B7280',
   border: '#E5E7EB',
@@ -81,16 +90,15 @@ export default function LessonScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const lesson = getLessonById(lessonId || '');
+  const { prev, next } = getAdjacentLessons(lessonId || '');
   const student = getCurrentStudent();
 
   const courseId = getCourseIdByLessonId(lessonId || '') || '';
   const progress = getStudentCourseProgress(student.id, courseId);
-  // Re-calculate completion status whenever screen is viewed or updated
   const isLessonCompletedInitial = progress?.completedLessons.includes(lessonId || '') || false;
 
   const [isCompleted, setIsCompleted] = useState(isLessonCompletedInitial);
 
-  // Update local state if initial state changes (e.g. if navigating back and forth)
   useEffect(() => {
     setIsCompleted(progress?.completedLessons.includes(lessonId || '') || false);
   }, [lessonId, progress]);
@@ -216,10 +224,14 @@ export default function LessonScreen() {
 
   return (
     <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
-      <Stack.Screen options={{ title: lesson.title, headerBackTitle: 'Atrás' }} />
+      <Stack.Screen options={{ title: lesson.title, headerLeft: () => null }} />
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButtonTouch}>
-          <ThemedText style={styles.backButton}>← Volver</ThemedText>
+        <View style={{ flex: 1 }} />
+        <TouchableOpacity
+          style={styles.syncButton}
+          onPress={() => alert('Sincronizando contenido...')}
+        >
+          <Download size={20} color={COLORS.primary} />
         </TouchableOpacity>
       </View>
 
@@ -231,6 +243,30 @@ export default function LessonScreen() {
         </ThemedView>
 
         {renderContent()}
+
+        <View style={styles.navigationContainer}>
+          <TouchableOpacity
+            style={[styles.navButton, !prev && styles.navButtonDisabled]}
+            onPress={() => prev && router.replace(`/lesson/${prev.id}`)}
+            disabled={!prev}
+          >
+            <ChevronLeft size={24} color={prev ? COLORS.primary : COLORS.textLight} />
+            <ThemedText style={[styles.navButtonText, !prev && styles.navButtonTextDisabled]}>
+              Anterior
+            </ThemedText>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.navButton, !next && styles.navButtonDisabled]}
+            onPress={() => next && router.replace(`/lesson/${next.id}`)}
+            disabled={!next}
+          >
+            <ThemedText style={[styles.navButtonText, !next && styles.navButtonTextDisabled]}>
+              Siguiente
+            </ThemedText>
+            <ChevronRight size={24} color={next ? COLORS.primary : COLORS.textLight} />
+          </TouchableOpacity>
+        </View>
 
         <View style={styles.completionContainer}>
           <TouchableOpacity
@@ -268,6 +304,14 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  syncButton: {
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 102, 196, 0.1)',
   },
   backButtonTouch: {
     alignSelf: 'flex-start',
@@ -491,5 +535,36 @@ const styles = StyleSheet.create({
   },
   completionButtonTextActive: {
     color: '#FFFFFF',
+  },
+  navigationContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 32,
+    gap: 12,
+  },
+  navButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: COLORS.primary,
+  },
+  navButtonDisabled: {
+    borderColor: COLORS.border,
+    backgroundColor: '#F3F4F6',
+  },
+  navButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.primary,
+    marginHorizontal: 4,
+  },
+  navButtonTextDisabled: {
+    color: COLORS.textLight,
   },
 });
