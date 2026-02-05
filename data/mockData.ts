@@ -205,7 +205,8 @@ export const mockCourses: Course[] = [
       name: 'Dr. James Wilson',
       avatar: 'https://i.pravatar.cc/150?img=5',
     },
-    thumbnail: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=300&fit=crop',
+    thumbnail:
+      'https://res.cloudinary.com/dmajjcjp1/image/upload/v1770258883/icon_naturales_er8emq.png',
     category: 'Ciencias',
     students: 12500,
     duration: 20,
@@ -329,7 +330,8 @@ export const mockCourses: Course[] = [
       name: 'Emma Rodriguez',
       avatar: 'https://i.pravatar.cc/150?img=9',
     },
-    thumbnail: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400&h=300&fit=crop',
+    thumbnail:
+      'https://res.cloudinary.com/dmajjcjp1/image/upload/v1770259440/icon_ingles_lx1skr.png',
     category: 'Idiomas',
     students: 8200,
     duration: 16,
@@ -388,7 +390,8 @@ export const mockCourses: Course[] = [
       name: 'Lic. Ana Martínez',
       avatar: 'https://i.pravatar.cc/150?img=3',
     },
-    thumbnail: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=400&h=300&fit=crop',
+    thumbnail:
+      'https://res.cloudinary.com/dmajjcjp1/image/upload/v1770259441/icon_lenguaje_nllhor.png',
     category: 'Humanidades',
     students: 6500,
     duration: 24,
