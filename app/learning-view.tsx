@@ -14,17 +14,18 @@ import { Picker } from '@react-native-picker/picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   CheckCircle,
-  Lock,
   PlayCircle,
   Video,
   FileText,
   BookOpen,
   Mic,
   HelpCircle,
+  Download,
 } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { FlatList, ScrollView, StyleSheet, TouchableOpacity, View, Dimensions } from 'react-native';
+import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useOffline } from '@/hooks/useOffline';
 
 const COLORS = {
   primary: BrandingColors.hotPink,
@@ -46,6 +47,7 @@ export default function LearningViewScreen() {
   const student = getCurrentStudent();
   const progress = getStudentCourseProgress(student.id, courseId || '');
   const quizScores = getStudentCourseQuizScores(student.id, courseId || '');
+  const { isDownloaded } = useOffline();
 
   const enrolledCourses = mockCourses.filter((c) => student.enrolledCourses.includes(c.id));
 
@@ -76,23 +78,6 @@ export default function LearningViewScreen() {
         return <Mic size={size} color={color} />;
       default:
         return <PlayCircle size={size} color={color} />;
-    }
-  };
-
-  const getLessonLabel = (type: string) => {
-    switch (type) {
-      case 'video':
-        return 'Video';
-      case 'audio':
-        return 'Audio';
-      case 'quiz':
-        return 'Cuestionario';
-      case 'resource':
-        return 'Recurso';
-      case 'homework':
-        return 'Tarea';
-      default:
-        return 'Lección';
     }
   };
 
@@ -153,6 +138,17 @@ export default function LearningViewScreen() {
                       ) : (
                         getLessonIconComponent(lesson.type, isLocked ? '#9CA3AF' : '#FFFFFF', 32)
                       )}
+                      {(() => {
+                        const url = lesson.videoUrl || lesson.audioUrl || lesson.resourceUrl;
+                        if (url && isDownloaded(url)) {
+                          return (
+                            <View style={styles.downloadIndicator}>
+                              <Download size={12} color="#FFFFFF" strokeWidth={3} />
+                            </View>
+                          );
+                        }
+                        return null;
+                      })()}
                     </TouchableOpacity>
                     <ThemedView style={styles.lessonLabelContainer}>
                       <ThemedText
@@ -427,6 +423,19 @@ const styles = StyleSheet.create({
   },
   lessonLabelLocked: {
     color: COLORS.textLight,
+  },
+  downloadIndicator: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    backgroundColor: '#10B981', // Success green
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
   },
   gradeSection: {
     marginBottom: 24,

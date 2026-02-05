@@ -23,7 +23,9 @@ export const CourseCard: React.FC<CourseCardProps> = ({ title, thumbnail, onPres
     <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.8}>
       <ThemedView style={styles.card} lightColor="#FFFFFF" darkColor="#1F2937">
         {/* Thumbnail */}
-        <Image source={{ uri: thumbnail }} style={styles.thumbnail} />
+        <View style={styles.thumbnailContainer}>
+          <Image source={{ uri: thumbnail }} style={styles.thumbnail} resizeMode="contain" />
+        </View>
 
         {/* Content */}
         <View style={styles.content}>
@@ -41,6 +43,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   card: {
+    width: '100%',
     borderRadius: 16,
     overflow: 'hidden',
     shadowColor: '#000',
@@ -49,10 +52,17 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 3,
   },
+  thumbnailContainer: {
+    width: '100%',
+    aspectRatio: 16 / 9,
+    padding: 12,
+    backgroundColor: 'transparent',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   thumbnail: {
     width: '100%',
-    height: 200,
-    backgroundColor: '#E5E7EB',
+    height: '100%',
   },
   ratingBadge: {
     position: 'absolute',

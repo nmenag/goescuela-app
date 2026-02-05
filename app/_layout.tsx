@@ -10,6 +10,7 @@ import '../global.css';
 
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { offlineService } from '@/services/offlineService';
 
 function RootLayoutContent() {
   const colorScheme = useColorScheme();
@@ -19,6 +20,17 @@ function RootLayoutContent() {
   const segments = useSegments();
 
   useEffect(() => {
+    const initialize = async () => {
+      await offlineService.init();
+      // Automatically sync important data when user signs in
+      if (isAuthenticated) {
+        offlineService.sync();
+      }
+    };
+    initialize();
+  }, [isAuthenticated]);
+
+  useEffect(() => {
     const inAuthGroup = segments[0] === '(tabs)';
 
     if (!isAuthenticated && inAuthGroup) {
@@ -26,7 +38,7 @@ function RootLayoutContent() {
     } else if (isAuthenticated && segments[0] === 'login') {
       router.replace('/(tabs)');
     }
-  }, [isAuthenticated, segments]);
+  }, [isAuthenticated, segments, router]);
 
   return (
     <SafeAreaProvider>

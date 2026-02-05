@@ -3,9 +3,18 @@ import { ThemedView } from '@/components/themed-view';
 import { BrandingColors } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
 import { getCurrentStudent, getCourseById, getStudentCourseQuizScores } from '@/data/mockData';
+import { FileText, Download, LogOut, CheckCircle } from 'lucide-react-native';
 import React from 'react';
-import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import {
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useOffline } from '@/hooks/useOffline';
 
 const COLORS = {
   primary: BrandingColors.hotPink,
@@ -20,12 +29,40 @@ export default function ProfileScreen() {
   const { logout } = useAuth();
   const student = getCurrentStudent();
   const insets = useSafeAreaInsets();
+  const { sync, isSyncing } = useOffline();
+
+  const handleSync = async () => {
+    const success = await sync();
+    if (success) {
+      Alert.alert('Éxito', 'Los datos se han sincronizado correctamente.');
+    } else {
+      Alert.alert('Aviso', 'No se ha podido sincronizar. Verifica tu conexión a internet.');
+    }
+  };
+
+  const handleLogout = () => {
+    Alert.alert('Cerrar Sesión', '¿Estás seguro de que quieres cerrar sesión?', [
+      { text: 'Cancelar', style: 'cancel' },
+      { text: 'Cerrar Sesión', style: 'destructive', onPress: logout },
+    ]);
+  };
 
   return (
     <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Profile Header */}
         <ThemedView style={styles.profileHeader}>
+          <TouchableOpacity
+            style={styles.headerSyncButton}
+            onPress={handleSync}
+            disabled={isSyncing}
+          >
+            {isSyncing ? (
+              <ActivityIndicator size="small" color={COLORS.primary} />
+            ) : (
+              <Download size={20} color={COLORS.primary} />
+            )}
+          </TouchableOpacity>
           <ThemedView style={styles.avatarContainer}>
             <ThemedText style={styles.avatar}>👤</ThemedText>
           </ThemedView>
@@ -93,6 +130,7 @@ export default function ProfileScreen() {
                 <View style={styles.courseGradeDetails}>
                   <View style={styles.courseGradeDetailItem}>
                     <ThemedText style={styles.courseGradeDetailLabel}>Promedio</ThemedText>
+                    <ThemedText style={styles.courseGradeDetailValue}>{courseAverage}%</ThemedText>
                   </View>
                   <View style={styles.courseGradeDetailItem}>
                     <ThemedText style={styles.courseGradeDetailLabel}>Progreso</ThemedText>
@@ -113,6 +151,9 @@ export default function ProfileScreen() {
             );
           })}
         </ThemedView>
+
+        {/* Offline Content Section */}
+        <OfflineContentSection />
 
         <ThemedView style={styles.section}>
           <ThemedText style={styles.sectionTitle}>Configuración de Cuenta</ThemedText>
@@ -142,16 +183,58 @@ export default function ProfileScreen() {
             <ThemedText style={styles.arrow}>›</ThemedText>
           </TouchableOpacity>
           <TouchableOpacity style={styles.settingItem}>
-            <ThemedText style={styles.settingLabel}>Acerca de Goescuela</ThemedText>
+            <ThemedText style={styles.settingLabel}>Términos y Condiciones</ThemedText>
             <ThemedText style={styles.arrow}>›</ThemedText>
           </TouchableOpacity>
         </ThemedView>
 
         {/* Logout Button */}
-        <TouchableOpacity style={styles.logoutButton} onPress={logout}>
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <LogOut size={20} color="#EF4444" />
           <ThemedText style={styles.logoutText}>Cerrar Sesión</ThemedText>
         </TouchableOpacity>
+
+        <View style={{ height: 40 }} />
       </ScrollView>
+    </ThemedView>
+  );
+}
+
+function OfflineContentSection() {
+  const { downloadedResources, isInitialized } = useOffline();
+
+  if (!isInitialized) return null;
+  if (downloadedResources.length === 0) return null;
+
+  return (
+    <ThemedView style={styles.section}>
+      <View style={styles.sectionHeader}>
+        <ThemedText style={styles.sectionTitle}>Contenido Offline</ThemedText>
+        <View style={styles.offlineBadge}>
+          <Download size={14} color="#FFFFFF" />
+          <ThemedText style={styles.offlineBadgeText}>{downloadedResources.length}</ThemedText>
+        </View>
+      </View>
+      <View style={styles.offlineList}>
+        {downloadedResources.map((resource) => (
+          <View key={resource.originalUrl} style={styles.offlineItem}>
+            <View style={styles.offlineIcon}>
+              <FileText size={20} color={COLORS.primary} />
+            </View>
+            <View style={styles.offlineInfo}>
+              <ThemedText style={styles.offlineFilename} numberOfLines={1}>
+                {resource.filename}
+              </ThemedText>
+              <ThemedText style={styles.offlineDate}>
+                Descargado el {new Date(resource.downloadDate).toLocaleDateString()}
+              </ThemedText>
+            </View>
+            <View style={styles.checkIndicator}>
+              <CheckCircle size={18} color="#10B981" />
+            </View>
+          </View>
+        ))}
+      </View>
     </ThemedView>
   );
 }
@@ -171,6 +254,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
+    overflow: 'hidden',
+  },
+  headerSyncButton: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    padding: 10,
+    backgroundColor: 'rgba(255, 102, 196, 0.1)',
+    borderRadius: 20,
   },
   avatarContainer: {
     width: 100,
@@ -245,6 +337,64 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     marginBottom: 12,
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  offlineBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#10B981',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    gap: 4,
+  },
+  offlineBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  offlineList: {
+    gap: 12,
+  },
+  offlineItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F9FAFB',
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  offlineIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  offlineInfo: {
+    flex: 1,
+  },
+  offlineFilename: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.text,
+  },
+  offlineDate: {
+    fontSize: 12,
+    color: COLORS.textLight,
+  },
+  removeButton: {
+    padding: 8,
+  },
   settingItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -269,16 +419,20 @@ const styles = StyleSheet.create({
     marginTop: 20,
     paddingVertical: 14,
     paddingHorizontal: 20,
-    backgroundColor: COLORS.error,
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     alignItems: 'center',
     minHeight: 48,
     justifyContent: 'center',
+    flexDirection: 'row',
+    borderWidth: 1,
+    borderColor: '#EF4444',
   },
   logoutText: {
+    color: '#EF4444',
     fontSize: 16,
     fontWeight: '600',
-    color: '#FFFFFF',
+    marginLeft: 10,
   },
   courseGradeCard: {
     backgroundColor: '#FFFFFF',
@@ -328,5 +482,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     color: COLORS.text,
+  },
+  checkIndicator: {
+    padding: 8,
   },
 });
