@@ -489,7 +489,7 @@ export const mockQuizzes: Quiz[] = [
         ],
       },
       {
-        title: 'True or False question?',
+        title: '¿Pregunta de Verdadero o Falso?',
         type: 'true-false',
         timer: 20,
         pointMultiplier: 'double',
@@ -510,25 +510,25 @@ export const mockQuizzes: Quiz[] = [
         ],
       },
       {
-        title: 'Type your answer',
+        title: 'Escribe tu respuesta',
         type: 'text',
         timer: 45,
         pointMultiplier: 'none',
         b64_image: null,
         validationMode: 'auto', // Auto-check answer
         feedback_on_correct: '¡Perfecto! Tu respuesta es correcta.',
-        feedback_on_incorrect: 'Incorrecto. Las respuestas correctas son: Answer 1 o Answer 2.',
+        feedback_on_incorrect: 'Incorrecto. Las respuestas correctas son: Respuesta 1 o Respuesta 2.',
         answers: [
           {
-            content: 'Answer 1',
+            content: 'Respuesta 1',
           },
           {
-            content: 'Answer 2',
+            content: 'Respuesta 2',
           },
         ],
       },
       {
-        title: 'Sort in correct order',
+        title: 'Ordena de manera correcta',
         type: 'sequence',
         timer: 60,
         pointMultiplier: 'none',
@@ -537,42 +537,42 @@ export const mockQuizzes: Quiz[] = [
         feedback_on_incorrect: 'El orden no es correcto. Revisa la secuencia mostrada abajo.',
         answers: [
           {
-            content: 'Second item',
+            content: 'Segundo elemento',
             order: 2,
           },
           {
-            content: 'Third item',
+            content: 'Tercer elemento',
             order: 3,
           },
           {
-            content: 'First item',
+            content: 'Primer elemento',
             order: 1,
           },
         ],
       },
       {
-        title: 'Fill in blanks',
+        title: 'Llena los espacios en blanco',
         type: 'fill-in-blank',
         timer: 45,
         pointMultiplier: 'none',
-        question_template: 'The ___ brown ___ jumps over the lazy ___',
+        question_template: 'El ___ zorro café salta sobre el ___ perezoso',
         feedback: {
-          correct: 'Perfect! You completed the sentence correctly.',
-          partial: 'You got some blanks right, but check position 2.',
-          incorrect: 'Try again. Hint: The first blank is an adjective describing speed.',
+          correct: '¡Perfecto! Completaste la oración correctamente.',
+          partial: 'Acertaste algunos espacios, pero revisa la posición 2.',
+          incorrect: 'Inténtalo de nuevo. Pista: El primer espacio es un adjetivo que describe velocidad.',
         },
         answers: [
           {
             blank_position: 1,
-            content: 'quick',
+            content: 'rápido',
           },
           {
             blank_position: 2,
-            content: 'fox',
+            content: 'zorro',
           },
           {
             blank_position: 3,
-            content: 'dog',
+            content: 'perro',
           },
         ],
       },
@@ -590,15 +590,15 @@ export const mockQuizzes: Quiz[] = [
         ],
       },
       {
-        title: 'Complete: React Native uses ___ and renders to ___ components',
+        title: 'Completa: React Native usa ___ y renderiza componentes ___',
         type: 'fill-in-blank',
         timer: 60,
         pointMultiplier: 'none',
         validationMode: 'auto',
-        question_template: 'React Native uses ___ and renders to ___ components',
+        question_template: 'React Native usa ___ y renderiza componentes ___',
         feedback: {
-          correct: 'Perfect! You know the React Native architecture.',
-          incorrect: 'Not quite. Review the React Native documentation.',
+          correct: '¡Perfecto! Conoces la arquitectura de React Native.',
+          incorrect: 'No exactamente. Revisa la documentación de React Native.',
         },
         answers: [
           {
@@ -608,8 +608,8 @@ export const mockQuizzes: Quiz[] = [
           },
           {
             blank_position: 2,
-            content: 'native',
-            options: ['native', 'web', 'hybrid', 'virtual'],
+            content: 'nativos',
+            options: ['nativos', 'web', 'híbridos', 'virtuales'],
           },
         ],
       },
