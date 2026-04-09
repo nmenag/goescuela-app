@@ -33,7 +33,7 @@ export default function QuizScreen() {
   if (!quiz) {
     return (
       <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
-        <ThemedText>Quiz not found</ThemedText>
+        <ThemedText>Quiz no encontrado</ThemedText>
       </ThemedView>
     );
   }
@@ -151,7 +151,7 @@ export default function QuizScreen() {
         {/* Header */}
         <ThemedView style={styles.header}>
           <TouchableOpacity onPress={() => router.back()}>
-            <ThemedText style={styles.backButton}>← Back</ThemedText>
+            <ThemedText style={styles.backButton}>← Volver</ThemedText>
           </TouchableOpacity>
           <ThemedText style={styles.headerTitle}>{quiz.title}</ThemedText>
           <ThemedView />
@@ -162,7 +162,7 @@ export default function QuizScreen() {
           <ThemedView style={[styles.progressBar, { width: `${progress}%` }]} />
         </ThemedView>
         <ThemedText style={styles.progressText}>
-          Question {currentQuestionIndex + 1} of {quiz.questions.length}
+          Pregunta {currentQuestionIndex + 1} de {quiz.questions.length}
         </ThemedText>
 
         {/* Question */}
@@ -269,7 +269,7 @@ export default function QuizScreen() {
             disabled={currentQuestionIndex === 0}
             activeOpacity={0.7}
           >
-            <ThemedText style={styles.navButtonText}>← Previous</ThemedText>
+            <ThemedText style={styles.navButtonText}>← Anterior</ThemedText>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -279,7 +279,7 @@ export default function QuizScreen() {
             activeOpacity={0.7}
           >
             <ThemedText style={styles.nextButtonText}>
-              {currentQuestionIndex === quiz.questions.length - 1 ? 'Review' : 'Next →'}
+              {currentQuestionIndex === quiz.questions.length - 1 ? 'Revisar' : 'Siguiente →'}
             </ThemedText>
           </TouchableOpacity>
         </ThemedView>
@@ -292,9 +292,9 @@ export default function QuizScreen() {
       <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
         <ThemedView style={styles.header}>
           <TouchableOpacity onPress={() => setState('questions')}>
-            <ThemedText style={styles.backButton}>← Back to Quiz</ThemedText>
+            <ThemedText style={styles.backButton}>← Volver al Quiz</ThemedText>
           </TouchableOpacity>
-          <ThemedText style={styles.headerTitle}>Review Answers</ThemedText>
+          <ThemedText style={styles.headerTitle}>Revisar Respuestas</ThemedText>
           <ThemedView />
         </ThemedView>
 
@@ -315,7 +315,7 @@ export default function QuizScreen() {
                     {q.title}
                   </ThemedText>
                   <ThemedText style={styles.reviewSummaryStatus}>
-                    {answers[i] ? 'Answered' : 'Skipped'}
+                    {answers[i] ? 'Respondida' : 'Omitida'}
                   </ThemedText>
                 </ThemedView>
                 <ThemedText style={styles.arrowText}>›</ThemedText>
@@ -326,7 +326,7 @@ export default function QuizScreen() {
 
         <ThemedView style={styles.footer}>
           <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-            <ThemedText style={styles.submitButtonText}>Submit Quiz</ThemedText>
+            <ThemedText style={styles.submitButtonText}>Enviar Quiz</ThemedText>
           </TouchableOpacity>
         </ThemedView>
       </ThemedView>
@@ -342,9 +342,9 @@ export default function QuizScreen() {
         {/* Header */}
         <ThemedView style={styles.header}>
           <TouchableOpacity onPress={() => router.back()}>
-            <ThemedText style={styles.backButton}>← Back</ThemedText>
+            <ThemedText style={styles.backButton}>← Volver</ThemedText>
           </TouchableOpacity>
-          <ThemedText style={styles.headerTitle}>Results</ThemedText>
+          <ThemedText style={styles.headerTitle}>Resultados</ThemedText>
           <ThemedView />
         </ThemedView>
 
@@ -362,42 +362,42 @@ export default function QuizScreen() {
             <ThemedText
               style={[styles.statusText, passed ? styles.statusSuccess : styles.statusFailure]}
             >
-              {passed ? 'Quiz Passed!' : 'Keep Trying!'}
+              {passed ? '¡Quiz Aprobado!' : '¡Sigue Intentando!'}
             </ThemedText>
             <ThemedText style={styles.statusSubtext}>
               {passed
-                ? `Great job! You've mastered this course.`
-                : `You need ${quiz.passingScore}% to pass.`}
+                ? `¡Buen trabajo! Has dominado este curso.`
+                : `Necesitas ${quiz.passingScore}% para aprobar.`}
             </ThemedText>
           </ThemedView>
 
           {/* Score Display */}
           <ThemedView style={styles.scoreContainer}>
             <ThemedText style={styles.scoreValue}>{score}%</ThemedText>
-            <ThemedText style={styles.scoreLabel}>Your Score</ThemedText>
+            <ThemedText style={styles.scoreLabel}>Tu Calificación</ThemedText>
           </ThemedView>
 
           {/* Stats */}
           <ThemedView style={styles.statsContainer}>
             <ThemedView style={styles.statBox}>
               <ThemedText style={styles.statBoxValue}>{totalCorrect}</ThemedText>
-              <ThemedText style={styles.statBoxLabel}>Correct</ThemedText>
+              <ThemedText style={styles.statBoxLabel}>Correctas</ThemedText>
             </ThemedView>
             <ThemedView style={styles.statBox}>
               <ThemedText style={styles.statBoxValue}>
                 {quiz.questions.length - totalCorrect}
               </ThemedText>
-              <ThemedText style={styles.statBoxLabel}>Incorrect</ThemedText>
+              <ThemedText style={styles.statBoxLabel}>Incorrectas</ThemedText>
             </ThemedView>
             <ThemedView style={styles.statBox}>
               <ThemedText style={styles.statBoxValue}>{quiz.duration}</ThemedText>
-              <ThemedText style={styles.statBoxLabel}>Minutes</ThemedText>
+              <ThemedText style={styles.statBoxLabel}>Minutos</ThemedText>
             </ThemedView>
           </ThemedView>
 
           {/* Review Section */}
           <ThemedView style={styles.reviewSection}>
-            <ThemedText style={styles.reviewTitle}>Answer Review</ThemedText>
+            <ThemedText style={styles.reviewTitle}>Revisión de Respuestas</ThemedText>
             {quiz.questions.map((question, index) => {
               const selectedAnswerIndex = answers[index];
               const isCorrect =
@@ -405,26 +405,26 @@ export default function QuizScreen() {
               return (
                 <ThemedView key={index} style={styles.reviewItem}>
                   <ThemedView style={styles.reviewHeader}>
-                    <ThemedText style={styles.reviewQuestionNum}>Question {index + 1}</ThemedText>
+                    <ThemedText style={styles.reviewQuestionNum}>Pregunta {index + 1}</ThemedText>
                     <ThemedText
                       style={[
                         styles.reviewStatus,
                         isCorrect ? styles.reviewStatusCorrect : styles.reviewStatusIncorrect,
                       ]}
                     >
-                      {isCorrect ? '✓ Correct' : '✗ Incorrect'}
+                      {isCorrect ? '✓ Correcta' : '✗ Incorrecta'}
                     </ThemedText>
                   </ThemedView>
                   <ThemedText style={styles.reviewQuestion}>{question.title}</ThemedText>
                   <ThemedText style={styles.reviewAnswer}>
-                    Your answer:{' '}
+                    Tu respuesta:{' '}
                     {selectedAnswerIndex !== null
                       ? question.answers[selectedAnswerIndex].content
-                      : 'No answer'}
+                      : 'Sin respuesta'}
                   </ThemedText>
                   {!isCorrect && (
                     <ThemedText style={styles.correctAnswer}>
-                      Correct answer: {question.answers.find((a) => a.is_correct)?.content}
+                      Respuesta correcta: {question.answers.find((a) => a.is_correct)?.content}
                     </ThemedText>
                   )}
                 </ThemedView>
@@ -436,7 +436,7 @@ export default function QuizScreen() {
         {/* Action Buttons */}
         <ThemedView style={[styles.resultsButtons, { paddingBottom: Math.max(insets.bottom, 16) }]}>
           <TouchableOpacity style={styles.retakeButton} onPress={handleRetake} activeOpacity={0.7}>
-            <ThemedText style={styles.retakeButtonText}>Retake Quiz</ThemedText>
+            <ThemedText style={styles.retakeButtonText}>Volver a intentar</ThemedText>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -444,7 +444,7 @@ export default function QuizScreen() {
             onPress={() => router.back()}
             activeOpacity={0.7}
           >
-            <ThemedText style={styles.backHomeButtonText}>← Back to Course</ThemedText>
+            <ThemedText style={styles.backHomeButtonText}>← Volver al Curso</ThemedText>
           </TouchableOpacity>
         </ThemedView>
       </ThemedView>
@@ -469,7 +469,7 @@ const IntroScreen = ({
     <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
       <ThemedView style={styles.header}>
         <TouchableOpacity onPress={onBack}>
-          <ThemedText style={styles.backButton}>← Back</ThemedText>
+          <ThemedText style={styles.backButton}>← Volver</ThemedText>
         </TouchableOpacity>
         <ThemedText style={styles.headerTitle}>Quiz</ThemedText>
         <ThemedView />
@@ -480,38 +480,38 @@ const IntroScreen = ({
           <ThemedText style={styles.introIcon}>🧠</ThemedText>
           <ThemedText style={styles.introTitle}>{quiz.title}</ThemedText>
           <ThemedText style={styles.introDescription}>
-            Test your knowledge with this interactive quiz. Answer all questions to see your
-            results.
+            Pon a prueba tus conocimientos con este quiz interactivo. Responde todas las preguntas
+            para ver tus resultados.
           </ThemedText>
 
           <ThemedView style={styles.quizInfo}>
             <ThemedView style={styles.infoItem}>
-              <ThemedText style={styles.infoLabel}>Questions</ThemedText>
+              <ThemedText style={styles.infoLabel}>Preguntas</ThemedText>
               <ThemedText style={styles.infoValue}>{quiz.questions.length}</ThemedText>
             </ThemedView>
             <ThemedView style={styles.infoItem}>
-              <ThemedText style={styles.infoLabel}>Duration</ThemedText>
+              <ThemedText style={styles.infoLabel}>Duración</ThemedText>
               <ThemedText style={styles.infoValue}>{quiz.duration} min</ThemedText>
             </ThemedView>
             <ThemedView style={styles.infoItem}>
-              <ThemedText style={styles.infoLabel}>Passing Score</ThemedText>
+              <ThemedText style={styles.infoLabel}>Puntaje de aprobación</ThemedText>
               <ThemedText style={styles.infoValue}>{quiz.passingScore}%</ThemedText>
             </ThemedView>
           </ThemedView>
 
           <ThemedView style={styles.instructions}>
-            <ThemedText style={styles.instructionsTitle}>Instructions:</ThemedText>
+            <ThemedText style={styles.instructionsTitle}>Instrucciones:</ThemedText>
             <ThemedText style={styles.instructionItem}>
-              • Answer all questions to complete the quiz
+              • Responde todas las preguntas para completar el quiz
             </ThemedText>
             <ThemedText style={styles.instructionItem}>
-              • You can review your answers before submitting
+              • Puedes revisar tus respuestas antes de enviar
             </ThemedText>
             <ThemedText style={styles.instructionItem}>
-              • Your score will be shown immediately after submission
+              • Tu calificación se mostrará inmediatamente después de enviar
             </ThemedText>
             <ThemedText style={styles.instructionItem}>
-              • You need {quiz.passingScore}% to pass
+              • Necesitas {quiz.passingScore}% para aprobar
             </ThemedText>
           </ThemedView>
         </ThemedView>
@@ -519,7 +519,7 @@ const IntroScreen = ({
 
       <ThemedView style={[styles.introButtons, { paddingBottom: Math.max(insets.bottom, 16) }]}>
         <TouchableOpacity style={styles.startButton} onPress={onStart} activeOpacity={0.7}>
-          <ThemedText style={styles.startButtonText}>Start Quiz</ThemedText>
+          <ThemedText style={styles.startButtonText}>Comenzar Quiz</ThemedText>
         </TouchableOpacity>
       </ThemedView>
     </ThemedView>
