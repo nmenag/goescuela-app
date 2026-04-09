@@ -517,7 +517,8 @@ export const mockQuizzes: Quiz[] = [
         b64_image: null,
         validationMode: 'auto', // Auto-check answer
         feedback_on_correct: '¡Perfecto! Tu respuesta es correcta.',
-        feedback_on_incorrect: 'Incorrecto. Las respuestas correctas son: Respuesta 1 o Respuesta 2.',
+        feedback_on_incorrect:
+          'Incorrecto. Las respuestas correctas son: Respuesta 1 o Respuesta 2.',
         answers: [
           {
             content: 'Respuesta 1',
@@ -559,7 +560,8 @@ export const mockQuizzes: Quiz[] = [
         feedback: {
           correct: '¡Perfecto! Completaste la oración correctamente.',
           partial: 'Acertaste algunos espacios, pero revisa la posición 2.',
-          incorrect: 'Inténtalo de nuevo. Pista: El primer espacio es un adjetivo que describe velocidad.',
+          incorrect:
+            'Inténtalo de nuevo. Pista: El primer espacio es un adjetivo que describe velocidad.',
         },
         answers: [
           {
