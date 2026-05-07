@@ -9,6 +9,7 @@ import {
   StudentProgress,
   CompletedLesson,
   QuizScore,
+  Enrollment,
 } from './models';
 
 const adapter = new SQLiteAdapter({
@@ -25,5 +26,14 @@ const adapter = new SQLiteAdapter({
 
 export const database = new Database({
   adapter,
-  modelClasses: [Student, Course, Module, Lesson, StudentProgress, CompletedLesson, QuizScore],
+  modelClasses: [
+    Student,
+    Course,
+    Module,
+    Lesson,
+    StudentProgress,
+    CompletedLesson,
+    QuizScore,
+    Enrollment,
+  ],
 });

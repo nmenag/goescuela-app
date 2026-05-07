@@ -1,4 +1,5 @@
-import { MMKV } from 'react-native-mmkv';
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { MMKV } = require('react-native-mmkv');
 
 export const mmkv = new MMKV();
 

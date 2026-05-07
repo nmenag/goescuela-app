@@ -14,10 +14,13 @@ export class WatermelonStudentRepository implements IStudentRepository {
   private progressCollection = database.get<ProgressModel>('student_progress');
   private completedLessonsCollection = database.get<CompletedLessonModel>('completed_lessons');
   private quizScoresCollection = database.get<QuizScoreModel>('quiz_scores');
+  private enrollmentsCollection = database.get<any>('enrollments');
 
   async getProfile(id: string): Promise<Student | null> {
     try {
       const model = await this.studentsCollection.find(id);
+      const enrollments = await this.enrollmentsCollection.query(Q.where('student_id', id)).fetch();
+      
       return {
         id: model.id,
         name: model.name,
@@ -25,6 +28,7 @@ export class WatermelonStudentRepository implements IStudentRepository {
         avatar: model.avatar,
         school: model.school,
         grade: model.grade,
+        enrolledCourseIds: enrollments.map((e: any) => e.courseId),
       };
     } catch {
       return null;

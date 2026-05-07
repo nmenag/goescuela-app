@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { courseRepository, studentRepository } from '../../infrastructure/repositories';
-import { Course, StudentProgress } from '../../domain/entities';
+import { StudentProgress } from '../../domain/entities';
 
 export const useCourses = () => {
   return useQuery({

@@ -17,6 +17,7 @@ import { ThemedView } from '@/components/themed-view';
 import { BrandingColors } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
 import { useCourses } from '@/application/hooks/useCourses';
+import { useOffline } from '@/hooks/useOffline';
 import { CourseCard } from '@/components/course-card';
 
 export default function HomeScreen() {

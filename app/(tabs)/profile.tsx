@@ -12,7 +12,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BrandingColors } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
-import { getCurrentStudent, getCourseById, getStudentCourseQuizScores } from '@/data/mockData';
+import { getCourseById } from '@/data/mockData';
 import {
   FileText,
   LogOut,
@@ -38,7 +38,7 @@ export default function ProfileScreen() {
   const { sync, isSyncing, downloadedResources } = useOffline();
 
   const { data: student, isLoading: isStudentLoading } = useStudentProfile(authUser?.id || '');
-  const { data: courses = [], isLoading: isCoursesLoading } = useCourses();
+  const { isLoading: isCoursesLoading } = useCourses();
 
   const handleSync = async () => {
     const success = await sync();
@@ -106,23 +106,20 @@ export default function ProfileScreen() {
 
         {/* Stats Section */}
         <View style={styles.statsGrid}>
-          <ProfileStat label="Cursos" value={student.enrolledCourses.length} />
+          <ProfileStat label="Cursos" value={student.enrolledCourseIds.length} />
           <ProfileStat label="Promedio" value={`${averageScore}%`} />
-          <ProfileStat label="Quizzes" value={student.quizScores.length} />
+          <ProfileStat label="Quizzes" value={0} />
         </View>
 
         {/* Grades Section */}
         <View style={styles.section}>
           <ThemedText style={styles.sectionTitle}>Progreso Académico</ThemedText>
-          {student.enrolledCourses.map((courseId) => {
+          {student.enrolledCourseIds.map((courseId) => {
             const course = getCourseById(courseId);
             if (!course) return null;
-            const courseProgress = student.progress.find((p) => p.courseId === courseId);
-            const courseScores = getStudentCourseQuizScores(student.id, courseId);
-            const courseAvg =
-              courseScores.length > 0
-                ? Math.round(courseScores.reduce((a, b) => a + b.score, 0) / courseScores.length)
-                : 0;
+            const courseAvg = 0;
+            const progress = 0;
+            const topics = 0;
 
             return (
               <View key={courseId} style={styles.academicCard}>
@@ -133,13 +130,11 @@ export default function ProfileScreen() {
                     <ThemedText style={styles.academicLab}>Nota</ThemedText>
                   </View>
                   <View style={styles.academicStat}>
-                    <ThemedText style={styles.academicVal}>
-                      {courseProgress?.progress || 0}%
-                    </ThemedText>
+                    <ThemedText style={styles.academicVal}>{progress}%</ThemedText>
                     <ThemedText style={styles.academicLab}>Progreso</ThemedText>
                   </View>
                   <View style={styles.academicStat}>
-                    <ThemedText style={styles.academicVal}>{courseScores.length}</ThemedText>
+                    <ThemedText style={styles.academicVal}>{topics}</ThemedText>
                     <ThemedText style={styles.academicLab}>Temas</ThemedText>
                   </View>
                 </View>

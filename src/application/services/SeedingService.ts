@@ -1,6 +1,6 @@
-import { database } from '../infrastructure/storage/watermelon';
+import { database } from '../../infrastructure/storage/watermelon';
 import { mockCourses, mockStudents } from '@/data/mockData';
-import { StorageService } from '../infrastructure/storage/mmkv';
+import { StorageService } from '../../infrastructure/storage/mmkv';
 
 export const SeedingService = {
   seed: async () => {
@@ -89,6 +89,15 @@ export const SeedingService = {
             model.lessonId = lessonId;
           });
         }
+      }
+
+      // 5. Seed Enrollments
+      const enrollmentCollection = database.get('enrollments');
+      for (const courseId of student.enrolledCourses) {
+        await enrollmentCollection.create((model: any) => {
+          model.studentId = student.id;
+          model.courseId = courseId;
+        });
       }
     });
 

@@ -1,5 +1,5 @@
 import { Model } from '@nozbe/watermelondb';
-import { field, relation, children, date, readonly } from '@nozbe/watermelondb/decorators';
+import { field, relation, children } from '@nozbe/watermelondb/decorators';
 
 export class Student extends Model {
   static table = 'students';
@@ -121,4 +121,18 @@ export class QuizScore extends Model {
   @field('attempt_number') attemptNumber!: number;
 
   @relation('students', 'student_id') student!: any;
+}
+
+export class Enrollment extends Model {
+  static table = 'enrollments';
+  static associations = {
+    students: { type: 'belongs_to', key: 'student_id' },
+    courses: { type: 'belongs_to', key: 'course_id' },
+  } as const;
+
+  @field('student_id') studentId!: string;
+  @field('course_id') courseId!: string;
+
+  @relation('students', 'student_id') student!: any;
+  @relation('courses', 'course_id') course!: any;
 }
