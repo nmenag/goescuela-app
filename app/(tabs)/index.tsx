@@ -16,8 +16,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BrandingColors } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
-import { mockCourses } from '@/data/mockData';
-import { useOffline } from '@/hooks/useOffline';
+import { useCourses } from '@/application/hooks/useCourses';
 import { CourseCard } from '@/components/course-card';
 
 export default function HomeScreen() {
@@ -26,6 +25,8 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const { sync, isSyncing } = useOffline();
   const [search, setSearch] = useState('');
+
+  const { data: courses = [], isLoading } = useCourses();
 
   const handleSync = async () => {
     const success = await sync();
@@ -46,11 +47,19 @@ export default function HomeScreen() {
   const categories = ['Todos', 'Ciencias', 'Idiomas', 'Humanidades', 'Arte'];
   const [activeCategory, setActiveCategory] = useState('Todos');
 
-  const filteredCourses = mockCourses.filter(
+  const filteredCourses = courses.filter(
     (c) =>
       (activeCategory === 'Todos' || c.category === activeCategory) &&
       c.title.toLowerCase().includes(search.toLowerCase()),
   );
+
+  if (isLoading) {
+    return (
+      <ThemedView style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color={BrandingColors.hotPink} />
+      </ThemedView>
+    );
+  }
 
   return (
     <ThemedView style={styles.container}>
@@ -134,7 +143,7 @@ export default function HomeScreen() {
             snapToInterval={300}
             decelerationRate="fast"
           >
-            {mockCourses.slice(0, 3).map((course) => (
+            {courses.slice(0, 3).map((course) => (
               <TouchableOpacity
                 key={course.id}
                 style={styles.featuredCard}

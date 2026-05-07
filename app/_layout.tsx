@@ -13,6 +13,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { offlineService } from '@/services/offlineService';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/api/queryClient';
+import { SeedingService } from '@/application/services/SeedingService';
 
 function RootLayoutContent() {
   const colorScheme = useColorScheme();
@@ -23,6 +24,7 @@ function RootLayoutContent() {
 
   useEffect(() => {
     const initialize = async () => {
+      await SeedingService.seed();
       await offlineService.init();
       // Automatically sync important data when user signs in
       if (isAuthenticated) {
