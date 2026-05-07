@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { BrandingColors } from '@/constants/theme';
 import { Question, Answer } from '@/data/mockData';
@@ -54,7 +54,7 @@ export const QuizQuestion = ({ question, userAnswer, onSelect }: QuizQuestionPro
 
   return (
     <View style={styles.optionsContainer}>
-      {question.answers.map((option, index) => {
+      {question.answers.map((option: Answer, index: number) => {
         const isSelected = isMultiple
           ? (userAnswer as number[])?.includes(index)
           : userAnswer === index;

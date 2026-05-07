@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master, feat/improvements-v1 ]
+  pull_request:
+    branches: [ main, master, feat/improvements-v1 ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Expo Doctor
+        run: npm run doctor
+
+      - name: Run Lint
+        run: npm run lint
+
+      - name: Run Type Check
+        run: npm run type-check

@@ -12,7 +12,6 @@ import {
   StyleSheet,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
 import { Eye, EyeOff, Mail, Lock, ArrowRight } from 'lucide-react-native';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -28,7 +27,6 @@ export default function LoginScreen() {
 
   const { login } = useAuth();
   const insets = useSafeAreaInsets();
-  const router = useRouter();
 
   const handleLogin = async () => {
     if (!email && !password) {
@@ -44,7 +42,7 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       await login(email, password);
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'Credenciales inválidas');
     } finally {
       setLoading(false);

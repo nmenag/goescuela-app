@@ -4,7 +4,6 @@ import {
   TouchableOpacity,
   Image,
   View,
-  FlatList,
   ActivityIndicator,
   Alert,
   ScrollView,
@@ -17,7 +16,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BrandingColors } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
-import { mockCourses, getCurrentStudent } from '@/data/mockData';
+import { mockCourses } from '@/data/mockData';
 import { useOffline } from '@/hooks/useOffline';
 import { CourseCard } from '@/components/course-card';
 

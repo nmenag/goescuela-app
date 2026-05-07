@@ -9,6 +9,8 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
+    "doctor": "npx expo-doctor",
+    "type-check": "tsc --noEmit",
     "format": "prettier --write ."
   },
   "dependencies": {

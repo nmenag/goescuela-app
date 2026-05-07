@@ -15,11 +15,9 @@ import { useAuth } from '@/context/AuthContext';
 import { getCurrentStudent, getCourseById, getStudentCourseQuizScores } from '@/data/mockData';
 import {
   FileText,
-  Download,
   LogOut,
   CheckCircle,
   User,
-  Settings,
   Bell,
   HelpCircle,
   Shield,

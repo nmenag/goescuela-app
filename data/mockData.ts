@@ -94,6 +94,8 @@ export interface QuizQuestion {
   answers: Answer[];
 }
 
+export type Question = QuizQuestion;
+
 export interface Quiz {
   id: string;
   title: string;

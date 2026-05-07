@@ -22,7 +22,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const user = await authRepo.login(email, password);
       set({ user, isLoading: false });
-    } catch (e) {
+    } catch {
       set({ error: 'Login failed', isLoading: false });
     }
   },

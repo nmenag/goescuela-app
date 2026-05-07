@@ -1,4 +1,4 @@
-import { documentDirectory, createDownloadResumable, getInfoAsync } from 'expo-file-system';
+import * as FileSystem from 'expo-file-system';
 import { create } from 'zustand';
 
 interface DownloadState {
@@ -12,16 +12,16 @@ export const useDownloadStore = create<DownloadState>((set) => ({
 
   isDownloaded: async (url) => {
     const filename = url.split('/').pop();
-    const fileUri = `${documentDirectory}${filename}`;
-    const info = await getInfoAsync(fileUri);
+    const fileUri = `${(FileSystem as any).documentDirectory}${filename}`;
+    const info = await FileSystem.getInfoAsync(fileUri);
     return info.exists;
   },
 
   downloadContent: async (url) => {
     const filename = url.split('/').pop();
-    const fileUri = `${documentDirectory}${filename}`;
+    const fileUri = `${(FileSystem as any).documentDirectory}${filename}`;
 
-    const downloadResumable = createDownloadResumable(url, fileUri, {}, (progress) => {
+    const downloadResumable = FileSystem.createDownloadResumable(url, fileUri, {}, (progress) => {
       const p = progress.totalBytesWritten / progress.totalBytesExpectedToWrite;
       set((state) => ({
         downloads: { ...state.downloads, [url]: p },

@@ -26,7 +26,7 @@ export const useSyncStore = create<SyncState>((set, get) => ({
       // 3. Sync Courses (Downstream)
 
       set({ syncStatus: 'idle', lastSync: new Date() });
-    } catch (e) {
+    } catch {
       set({ syncStatus: 'error' });
     }
   },
