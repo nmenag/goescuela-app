@@ -1,8 +1,3 @@
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { BrandingColors } from '@/constants/theme';
-import { useAuth } from '@/context/AuthContext';
-import { Eye, EyeOff } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
@@ -11,41 +6,46 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  StyleSheet,
   TextInput,
   TouchableOpacity,
   View,
+  StyleSheet,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
-const COLORS = {
-  primary: BrandingColors.lightPink,
-  primaryDark: BrandingColors.hotPink,
-  background: BrandingColors.lightPink,
-  text: '#1F2937',
-  textLight: '#6B7280',
-  border: '#E5E7EB',
-  error: '#DC2626',
-};
+import { useRouter } from 'expo-router';
+import { Eye, EyeOff, Mail, Lock, ArrowRight } from 'lucide-react-native';
+import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
+import { BrandingColors } from '@/constants/theme';
+import { useAuth } from '@/context/AuthContext';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [focusedInput, setFocusedInput] = useState<'email' | 'password' | null>(null);
+
   const { login } = useAuth();
   const insets = useSafeAreaInsets();
+  const router = useRouter();
 
   const handleLogin = async () => {
+    if (!email && !password) {
+      // For demo purposes, allow empty login as "guest"
+      setLoading(true);
+      setTimeout(async () => {
+        await login('demo@example.com', 'demo123');
+        setLoading(false);
+      }, 1000);
+      return;
+    }
+
     setLoading(true);
     try {
-      // Demo mode - skip validation and login immediately
-      await login(email || 'demo@example.com', password || 'demo123');
+      await login(email, password);
     } catch (error) {
-      Alert.alert(
-        'Error de Inicio de Sesión',
-        error instanceof Error ? error.message : 'Algo salió mal',
-      );
+      Alert.alert('Error', 'Credenciales inválidas');
     } finally {
       setLoading(false);
     }
@@ -60,73 +60,134 @@ export default function LoginScreen() {
         <ScrollView
           contentContainerStyle={[
             styles.scrollContent,
-            { paddingTop: insets.top + 40, paddingBottom: insets.bottom + 40 },
+            { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 20 },
           ]}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          <ThemedView style={styles.header}>
-            <Image source={require('@/assets/images/logo.png')} style={styles.logo} />
-          </ThemedView>
+          {/* Top Illustration or Logo */}
+          <View style={styles.header}>
+            <View style={styles.logoContainer}>
+              <Image source={require('@/assets/images/logo.png')} style={styles.logo} />
+            </View>
+            <ThemedText style={styles.title}>¡Bienvenido!</ThemedText>
+            <ThemedText style={styles.subtitle}>
+              Inicia sesión para continuar tu aprendizaje
+            </ThemedText>
+          </View>
 
-          <ThemedView style={styles.formContainer}>
-            <ThemedView style={styles.inputGroup}>
+          {/* Form */}
+          <View style={styles.form}>
+            <View style={styles.inputWrapper}>
               <ThemedText style={styles.label}>Correo Electrónico</ThemedText>
-              <TextInput
-                style={styles.input}
-                placeholder="tu@ejemplo.com"
-                placeholderTextColor={COLORS.textLight}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                editable={!loading}
-                value={email}
-                onChangeText={setEmail}
-              />
-            </ThemedView>
-
-            <ThemedView style={styles.inputGroup}>
-              <ThemedText style={styles.label}>Contraseña</ThemedText>
-              <View style={styles.passwordInputContainer}>
+              <View
+                style={[
+                  styles.inputContainer,
+                  focusedInput === 'email' && styles.inputContainerFocused,
+                ]}
+              >
+                <Mail
+                  size={20}
+                  color={focusedInput === 'email' ? BrandingColors.hotPink : '#9CA3AF'}
+                  style={styles.inputIcon}
+                />
                 <TextInput
-                  style={styles.passwordInput}
+                  style={styles.input}
+                  placeholder="ejemplo@correo.com"
+                  placeholderTextColor="#9CA3AF"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  value={email}
+                  onChangeText={setEmail}
+                  onFocus={() => setFocusedInput('email')}
+                  onBlur={() => setFocusedInput(null)}
+                />
+              </View>
+            </View>
+
+            <View style={styles.inputWrapper}>
+              <ThemedText style={styles.label}>Contraseña</ThemedText>
+              <View
+                style={[
+                  styles.inputContainer,
+                  focusedInput === 'password' && styles.inputContainerFocused,
+                ]}
+              >
+                <Lock
+                  size={20}
+                  color={focusedInput === 'password' ? BrandingColors.hotPink : '#9CA3AF'}
+                  style={styles.inputIcon}
+                />
+                <TextInput
+                  style={styles.input}
                   placeholder="••••••••"
-                  placeholderTextColor={COLORS.textLight}
+                  placeholderTextColor="#9CA3AF"
                   secureTextEntry={!showPassword}
-                  editable={!loading}
                   value={password}
                   onChangeText={setPassword}
+                  onFocus={() => setFocusedInput('password')}
+                  onBlur={() => setFocusedInput(null)}
                 />
                 <TouchableOpacity
-                  style={styles.eyeIcon}
                   onPress={() => setShowPassword(!showPassword)}
-                  disabled={loading}
+                  style={styles.eyeButton}
                 >
                   {showPassword ? (
-                    <EyeOff size={20} color={COLORS.textLight} />
+                    <EyeOff size={20} color="#9CA3AF" />
                   ) : (
-                    <Eye size={20} color={COLORS.textLight} />
+                    <Eye size={20} color="#9CA3AF" />
                   )}
                 </TouchableOpacity>
               </View>
-            </ThemedView>
+            </View>
 
-            <TouchableOpacity disabled={loading}>
-              <ThemedText style={styles.forgotPassword}>¿Olvidó la contraseña?</ThemedText>
+            <TouchableOpacity style={styles.forgotPassword}>
+              <ThemedText style={styles.forgotPasswordText}>¿Olvidaste tu contraseña?</ThemedText>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={[styles.loginButton, loading && styles.loginButtonDisabled]}
               onPress={handleLogin}
               disabled={loading}
-              activeOpacity={0.7}
+              activeOpacity={0.8}
             >
               {loading ? (
-                <ActivityIndicator color="white" size="small" />
+                <ActivityIndicator color="#FFFFFF" />
               ) : (
-                <ThemedText style={styles.loginButtonText}>Iniciar Sesión</ThemedText>
+                <>
+                  <ThemedText style={styles.loginButtonText}>Ingresar</ThemedText>
+                  <ArrowRight size={20} color="#FFFFFF" style={styles.buttonIcon} />
+                </>
               )}
             </TouchableOpacity>
-          </ThemedView>
+          </View>
+
+          {/* Social Login Mock */}
+          <View style={styles.dividerContainer}>
+            <View style={styles.divider} />
+            <ThemedText style={styles.dividerText}>O continúa con</ThemedText>
+            <View style={styles.divider} />
+          </View>
+
+          <View style={styles.socialContainer}>
+            <TouchableOpacity style={styles.socialButton}>
+              <ThemedText style={styles.socialIcon}>G</ThemedText>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.socialButton}>
+              <ThemedText style={styles.socialIcon}>f</ThemedText>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.socialButton}>
+              <ThemedText style={styles.socialIcon}></ThemedText>
+            </TouchableOpacity>
+          </View>
+
+          {/* Footer */}
+          <View style={styles.footer}>
+            <ThemedText style={styles.footerText}>¿No tienes una cuenta? </ThemedText>
+            <TouchableOpacity>
+              <ThemedText style={styles.signupText}>Regístrate</ThemedText>
+            </TouchableOpacity>
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </ThemedView>
@@ -136,144 +197,174 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: BrandingColors.lightPink,
   },
   scrollContent: {
     flexGrow: 1,
+    paddingHorizontal: 24,
     justifyContent: 'center',
-    paddingHorizontal: 20,
   },
   header: {
-    marginBottom: 40,
     alignItems: 'center',
-    backgroundColor: COLORS.background,
+    marginBottom: 40,
   },
-  logo: {
-    width: 120,
-    height: 120,
-    resizeMode: 'contain',
+  logoContainer: {
+    width: 100,
+    height: 100,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 10,
     marginBottom: 24,
   },
+  logo: {
+    width: 60,
+    height: 60,
+    resizeMode: 'contain',
+  },
   title: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: COLORS.text,
+    fontSize: 28,
+    fontWeight: '900',
+    color: '#1F2937',
     marginBottom: 8,
   },
   subtitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: COLORS.text,
-    marginBottom: 12,
-  },
-  description: {
-    fontSize: 14,
-    color: COLORS.textLight,
+    fontSize: 16,
+    color: '#6B7280',
     textAlign: 'center',
-    lineHeight: 20,
+    paddingHorizontal: 20,
   },
-  formContainer: {
-    marginBottom: 30,
-    backgroundColor: COLORS.background,
+  form: {
+    width: '100%',
   },
-  inputGroup: {
+  inputWrapper: {
     marginBottom: 20,
-    backgroundColor: COLORS.background,
   },
   label: {
     fontSize: 14,
-    fontWeight: '600',
-    color: COLORS.text,
+    fontWeight: '700',
+    color: '#374151',
     marginBottom: 8,
+    marginLeft: 4,
   },
-  input: {
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-    color: COLORS.text,
-    backgroundColor: '#F9FAFB',
-  },
-  passwordInputContainer: {
+  inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: 12,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: '#F3F4F6',
+    paddingHorizontal: 16,
   },
-  passwordInput: {
+  inputContainerFocused: {
+    borderColor: BrandingColors.hotPink,
+    shadowColor: BrandingColors.hotPink,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  inputIcon: {
+    marginRight: 12,
+  },
+  input: {
     flex: 1,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingVertical: 16,
     fontSize: 16,
-    color: COLORS.text,
+    color: '#1F2937',
+    fontWeight: '500',
   },
-  eyeIcon: {
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+  eyeButton: {
+    padding: 8,
   },
   forgotPassword: {
+    alignSelf: 'flex-end',
+    marginBottom: 32,
+  },
+  forgotPasswordText: {
     fontSize: 14,
-    fontWeight: '500',
-    color: COLORS.primaryDark,
-    textAlign: 'right',
-    marginBottom: 24,
+    fontWeight: '600',
+    color: BrandingColors.hotPink,
   },
   loginButton: {
     backgroundColor: BrandingColors.hotPink,
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 12,
-    minHeight: 48,
-    shadowColor: BrandingColors.hotPink,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  loginButtonDisabled: {
-    opacity: 0.7,
-  },
-  loginButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  demoSection: {
-    backgroundColor: '#F3E8FF',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 20,
-  },
-  demoLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#6D28D9',
-    marginBottom: 8,
-  },
-  demoText: {
-    fontSize: 12,
-    color: '#6D28D9',
-    lineHeight: 18,
-  },
-  signupSection: {
+    borderRadius: 18,
+    paddingVertical: 18,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: COLORS.background,
+    shadowColor: BrandingColors.hotPink,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 6,
   },
-  signupText: {
-    fontSize: 14,
-    color: COLORS.textLight,
+  loginButtonDisabled: {
+    opacity: 0.6,
   },
-  signupLink: {
+  loginButtonText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '800',
+  },
+  buttonIcon: {
+    marginLeft: 10,
+  },
+  dividerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 32,
+  },
+  divider: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#E5E7EB',
+  },
+  dividerText: {
+    marginHorizontal: 16,
+    color: '#9CA3AF',
     fontSize: 14,
     fontWeight: '600',
-    color: COLORS.primary,
+  },
+  socialContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 16,
+    marginBottom: 32,
+  },
+  socialButton: {
+    width: 60,
+    height: 60,
+    borderRadius: 20,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  socialIcon: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: '#374151',
+  },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  footerText: {
+    color: '#6B7280',
+    fontSize: 15,
+  },
+  signupText: {
+    color: BrandingColors.hotPink,
+    fontSize: 15,
+    fontWeight: '800',
   },
 });
