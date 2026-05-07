@@ -222,8 +222,7 @@ export const mockCourses: Course[] = [
             type: 'video',
             duration: 45,
             description: 'Seres Vivos y su clasificación',
-            videoUrl:
-              'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+            videoUrl: 'https://samplelib.com/mp4/sample-5s.mp4',
             resources: [
               {
                 id: 'res-1',

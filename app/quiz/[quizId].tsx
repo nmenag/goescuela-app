@@ -87,7 +87,7 @@ const evaluateAnswer = (question: QuizQuestion, answer: any): boolean => {
   return false;
 };
 
-export default function QuizScreen() {
+function QuizScreen() {
   const { quizId } = useLocalSearchParams<{ quizId: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -1252,3 +1252,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
 });
+
+export default QuizScreen;

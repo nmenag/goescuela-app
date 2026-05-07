@@ -68,7 +68,7 @@ function RootLayoutContent() {
   );
 }
 
-export default function RootLayout() {
+function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <AuthProvider>
@@ -77,3 +77,5 @@ export default function RootLayout() {
     </GestureHandlerRootView>
   );
 }
+
+export default RootLayout;

@@ -38,15 +38,11 @@
           }
         }
       ],
-      "expo-font",
-      "expo-video",
-      "expo-image",
-      "expo-sharing",
-      "expo-web-browser"
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true,
-      "reactCompiler": true
+      "reactCompiler": false
     },
     "extra": {
       "router": {},
