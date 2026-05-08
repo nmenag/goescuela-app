@@ -20,7 +20,7 @@ export class WatermelonStudentRepository implements IStudentRepository {
     try {
       const model = await this.studentsCollection.find(id);
       const enrollments = await this.enrollmentsCollection.query(Q.where('student_id', id)).fetch();
-      
+
       return {
         id: model.id,
         name: model.name,

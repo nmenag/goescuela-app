@@ -2,6 +2,9 @@
   "name": "goescuela-app",
   "main": "expo-router/entry",
   "version": "1.0.0",
+  "engines": {
+    "node": ">=25.9.0"
+  },
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
@@ -19,7 +22,7 @@
     "@gluestack-ui/utils": "^3.0.15",
     "@gluestack/ui-next-adapter": "^3.0.3",
     "@hookform/resolvers": "^5.2.2",
-    "@nozbe/watermelondb": "^0.28.0",
+    "@nozbe/watermelondb": "^0.25.5",
     "@nozbe/with-observables": "^1.6.0",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-community/netinfo": "11.5.2",
@@ -54,6 +57,7 @@
     "react-native-draggable-flatlist": "^4.0.3",
     "react-native-gesture-handler": "~2.30.0",
     "react-native-mmkv": "^4.3.1",
+    "react-native-nitro-modules": "^0.35.0",
     "react-native-reanimated": "4.2.1",
     "react-native-safe-area-context": "~5.6.0",
     "react-native-screens": "~4.23.0",
