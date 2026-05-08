@@ -4,7 +4,7 @@ import { mockCourses } from '@/data/mockData';
 
 export class CourseRepository implements ICourseRepository {
   async getCourses(): Promise<Course[]> {
-    // In production: return database.get('courses').query().fetch()
+    // In production: return courseRepository.getAll()
     return mockCourses;
   }
 
@@ -14,6 +14,6 @@ export class CourseRepository implements ICourseRepository {
   }
 
   async syncCourses(): Promise<void> {
-    // Fetch from API and update WatermelonDB
+    // Fetch from API and update SQLite
   }
 }

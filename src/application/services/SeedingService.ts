@@ -1,4 +1,4 @@
-import { database } from '../../infrastructure/storage/watermelon';
+import { getDatabase } from '../../infrastructure/storage/sqlite';
 import { mockCourses, mockStudents } from '@/data/mockData';
 import { StorageService } from '../../infrastructure/storage/mmkv';
 
@@ -7,97 +7,107 @@ export const SeedingService = {
     const isSeeded = StorageService.getItem<boolean>('is_seeded');
     if (isSeeded) return;
 
-    await database.write(async () => {
+    const db = await getDatabase();
+
+    await db.withTransactionAsync(async () => {
       // 1. Seed Student
       const student = mockStudents[0];
-      const studentCollection = database.get('students');
-      await studentCollection.create((model: any) => {
-        model._raw.id = student.id;
-        model.name = student.name;
-        model.email = student.email;
-        model.avatar = student.avatar;
-        model.school = student.school;
-        model.grade = student.grade;
-      });
+      await db.runAsync(
+        'INSERT INTO students (id, name, email, avatar, school, grade) VALUES (?, ?, ?, ?, ?, ?)',
+        [
+          student.id,
+          student.name,
+          student.email,
+          student.avatar || null,
+          student.school || null,
+          student.grade || null,
+        ],
+      );
 
       // 2. Seed Courses, Modules, Lessons
-      const courseCollection = database.get('courses');
-      const moduleCollection = database.get('modules');
-      const lessonCollection = database.get('lessons');
-
       for (const course of mockCourses) {
-        await courseCollection.create((model: any) => {
-          model._raw.id = course.id;
-          model.title = course.title;
-          model.description = course.description;
-          model.thumbnail = course.thumbnail;
-          model.category = course.category;
-          model.duration = course.duration;
-          model.studentsCount = course.students;
-          model.instructorName = course.instructor.name;
-          model.instructorAvatar = course.instructor.avatar;
-          model.isSequential = course.sequential || false;
-        });
+        await db.runAsync(
+          `INSERT INTO courses (
+            id, title, description, thumbnail, category, 
+            duration, students_count, instructor_name, instructor_avatar, is_sequential
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            course.id,
+            course.title,
+            course.description,
+            course.thumbnail,
+            course.category,
+            course.duration,
+            course.students,
+            course.instructor.name,
+            course.instructor.avatar,
+            course.sequential ? 1 : 0,
+          ],
+        );
 
         for (let i = 0; i < course.modules.length; i++) {
           const mod = course.modules[i];
-          await moduleCollection.create((model: any) => {
-            model._raw.id = mod.id;
-            model.courseId = course.id;
-            model.title = mod.title;
-            model.duration = mod.duration;
-            model.order = i;
-          });
+          await db.runAsync(
+            'INSERT INTO modules (id, course_id, title, duration, "order") VALUES (?, ?, ?, ?, ?)',
+            [mod.id, course.id, mod.title, mod.duration, i],
+          );
 
           for (let j = 0; j < mod.lessons.length; j++) {
             const lesson = mod.lessons[j];
-            await lessonCollection.create((model: any) => {
-              model._raw.id = lesson.id;
-              model.moduleId = mod.id;
-              model.title = lesson.title;
-              model.type = lesson.type;
-              model.duration = lesson.duration;
-              model.description = lesson.description;
-              model.videoUrl = lesson.videoUrl;
-              model.audioUrl = lesson.audioUrl;
-              model.resourceUrl = lesson.resourceUrl;
-              model.order = j;
-            });
+            await db.runAsync(
+              `INSERT INTO lessons (
+                id, module_id, title, type, duration, description, 
+                video_url, audio_url, resource_url, "order"
+              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+              [
+                lesson.id,
+                mod.id,
+                lesson.title,
+                lesson.type,
+                lesson.duration,
+                lesson.description || null,
+                lesson.videoUrl || null,
+                lesson.audioUrl || null,
+                lesson.resourceUrl || null,
+                j,
+              ],
+            );
           }
         }
       }
 
       // 3. Seed Progress
-      const progressCollection = database.get('student_progress');
       for (const progress of student.progress) {
-        await progressCollection.create((model: any) => {
-          model.studentId = student.id;
-          model.courseId = progress.courseId;
-          model.progress = progress.progress;
-          model.lastAccessed = progress.lastAccessed;
-          model.currentLessonId = progress.currentLessonId;
-        });
+        await db.runAsync(
+          'INSERT INTO student_progress (id, student_id, course_id, progress, last_accessed, current_lesson_id) VALUES (?, ?, ?, ?, ?, ?)',
+          [
+            `${student.id}_${progress.courseId}`,
+            student.id,
+            progress.courseId,
+            progress.progress,
+            progress.lastAccessed,
+            progress.currentLessonId || null,
+          ],
+        );
       }
 
       // 4. Seed Completed Lessons
-      const completedCollection = database.get('completed_lessons');
       for (const progress of student.progress) {
         for (const lessonId of progress.completedLessons) {
-          await completedCollection.create((model: any) => {
-            model.studentId = student.id;
-            model.courseId = progress.courseId;
-            model.lessonId = lessonId;
-          });
+          await db.runAsync(
+            'INSERT INTO completed_lessons (id, student_id, course_id, lesson_id) VALUES (?, ?, ?, ?)',
+            [`${student.id}_${lessonId}`, student.id, progress.courseId, lessonId],
+          );
         }
       }
 
       // 5. Seed Enrollments
-      const enrollmentCollection = database.get('enrollments');
       for (const courseId of student.enrolledCourses) {
-        await enrollmentCollection.create((model: any) => {
-          model.studentId = student.id;
-          model.courseId = courseId;
-        });
+        await db.runAsync('INSERT INTO enrollments (id, student_id, course_id) VALUES (?, ?, ?)', [
+          `${student.id}_${courseId}`,
+          student.id,
+          courseId,
+        ]);
       }
     });
 

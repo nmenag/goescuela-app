@@ -8,7 +8,8 @@
     "scheme": "goescuelaapp",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.goescuelaapp"
     },
     "android": {
       "adaptiveIcon": {
@@ -42,7 +43,8 @@
       "expo-image",
       "expo-sharing",
       "expo-video",
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-sqlite"
     ],
     "experiments": {
       "typedRoutes": true,

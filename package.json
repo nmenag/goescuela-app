@@ -22,8 +22,6 @@
     "@gluestack-ui/utils": "^3.0.15",
     "@gluestack/ui-next-adapter": "^3.0.3",
     "@hookform/resolvers": "^5.2.2",
-    "@nozbe/watermelondb": "^0.25.5",
-    "@nozbe/with-observables": "^1.6.0",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-community/netinfo": "11.5.2",
     "@react-native-picker/picker": "2.11.4",
@@ -43,6 +41,7 @@
     "expo-router": "~55.0.14",
     "expo-sharing": "~55.0.18",
     "expo-splash-screen": "~55.0.20",
+    "expo-sqlite": "~55.0.15",
     "expo-status-bar": "~55.0.6",
     "expo-symbols": "~55.0.8",
     "expo-system-ui": "~55.0.17",
@@ -84,9 +83,7 @@
     "doctor": {
       "reactNativeDirectoryCheck": {
         "exclude": [
-          "expo-av",
-          "@nozbe/watermelondb",
-          "@nozbe/simdjson"
+          "expo-av"
         ]
       }
     }
