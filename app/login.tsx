@@ -68,7 +68,7 @@ export default function LoginScreen() {
             <View style={styles.logoContainer}>
               <Image source={require('@/assets/images/logo.png')} style={styles.logo} />
             </View>
-            <ThemedText style={styles.title}>¡Bienvenido!</ThemedText>
+            <ThemedText style={styles.title}>¡Bienvenido!!!!!</ThemedText>
             <ThemedText style={styles.subtitle}>
               Inicia sesión para continuar tu aprendizaje
             </ThemedText>

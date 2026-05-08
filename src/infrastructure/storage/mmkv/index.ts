@@ -6,7 +6,8 @@ const createMMKV = () => {
   if (Platform.OS === 'web') {
     if (typeof localStorage !== 'undefined') {
       return {
-        set: (key: string, value: string | number | boolean) => localStorage.setItem(key, String(value)),
+        set: (key: string, value: string | number | boolean) =>
+          localStorage.setItem(key, String(value)),
         getString: (key: string) => localStorage.getItem(key) || undefined,
         getNumber: (key: string) => Number(localStorage.getItem(key)) || undefined,
         getBoolean: (key: string) => localStorage.getItem(key) === 'true',
@@ -23,15 +24,24 @@ const createMMKV = () => {
     const { MMKV } = require('react-native-mmkv');
     return new MMKV();
   } catch (error) {
-    console.warn('MMKV native module not found, falling back to in-memory storage. Rebuild your app if you are on mobile.', error);
+    console.warn(
+      'MMKV native module not found, falling back to in-memory storage. Rebuild your app if you are on mobile.',
+      error,
+    );
     const mockStorage: Record<string, string> = {};
     return {
-      set: (key: string, value: string | number | boolean) => { mockStorage[key] = String(value); },
+      set: (key: string, value: string | number | boolean) => {
+        mockStorage[key] = String(value);
+      },
       getString: (key: string) => mockStorage[key],
       getNumber: (key: string) => Number(mockStorage[key]) || undefined,
       getBoolean: (key: string) => mockStorage[key] === 'true',
-      delete: (key: string) => { delete mockStorage[key]; },
-      clearAll: () => { for (const key in mockStorage) delete mockStorage[key]; },
+      delete: (key: string) => {
+        delete mockStorage[key];
+      },
+      clearAll: () => {
+        for (const key in mockStorage) delete mockStorage[key];
+      },
       contains: (key: string) => key in mockStorage,
       getAllKeys: () => Object.keys(mockStorage),
     } as any;
