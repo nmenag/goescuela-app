@@ -1,15 +1,7 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { BrandingColors } from '@/constants/theme';
 import React from 'react';
-import { View, Image, StyleSheet, TouchableOpacity } from 'react-native';
-
-const COLORS = {
-  primary: BrandingColors.hotPink,
-  text: '#1F2937',
-  textLight: '#6B7280',
-  border: '#E5E7EB',
-};
+import { View, Image, TouchableOpacity } from 'react-native';
 
 interface CourseCardProps {
   id: string;
@@ -20,16 +12,19 @@ interface CourseCardProps {
 
 export const CourseCard: React.FC<CourseCardProps> = ({ title, thumbnail, onPress }) => {
   return (
-    <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.8}>
-      <ThemedView style={styles.card} lightColor="#FFFFFF" darkColor="#1F2937">
+    <TouchableOpacity className="mb-4" onPress={onPress} activeOpacity={0.8}>
+      <ThemedView className="w-full rounded-2xl overflow-hidden shadow-sm shadow-black/5 dark:shadow-none bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800">
         {/* Thumbnail */}
-        <View style={styles.thumbnailContainer}>
-          <Image source={{ uri: thumbnail }} style={styles.thumbnail} resizeMode="contain" />
+        <View className="w-full aspect-[16/9] p-3 bg-transparent justify-center items-center">
+          <Image source={{ uri: thumbnail }} className="w-full h-full" resizeMode="contain" />
         </View>
 
         {/* Content */}
-        <View style={styles.content}>
-          <ThemedText style={styles.title} numberOfLines={2}>
+        <View className="p-4">
+          <ThemedText
+            className="text-[15px] font-bold text-gray-900 dark:text-gray-100 mb-1.5 leading-[21px]"
+            numberOfLines={2}
+          >
             {title}
           </ThemedText>
         </View>
@@ -37,74 +32,3 @@ export const CourseCard: React.FC<CourseCardProps> = ({ title, thumbnail, onPres
     </TouchableOpacity>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: 16,
-  },
-  card: {
-    width: '100%',
-    borderRadius: 16,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  thumbnailContainer: {
-    width: '100%',
-    aspectRatio: 16 / 9,
-    padding: 12,
-    backgroundColor: 'transparent',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  thumbnail: {
-    width: '100%',
-    height: '100%',
-  },
-  ratingBadge: {
-    position: 'absolute',
-    top: 12,
-    right: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 8,
-  },
-  ratingText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: COLORS.text,
-  },
-  content: {
-    padding: 16,
-  },
-  title: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: COLORS.text,
-    marginBottom: 6,
-    lineHeight: 21,
-  },
-  instructor: {
-    fontSize: 13,
-    color: COLORS.textLight,
-    marginBottom: 12,
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  students: {
-    fontSize: 12,
-    color: COLORS.textLight,
-  },
-  price: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: COLORS.primary,
-  },
-});

@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, TouchableOpacity, ScrollView } from 'react-native';
+import { View, TouchableOpacity, ScrollView } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BrandingColors } from '@/constants/theme';
@@ -35,8 +35,8 @@ export default function LearningViewScreen() {
 
   if (!course) {
     return (
-      <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
-        <ThemedText>Curso no encontrado</ThemedText>
+      <ThemedView className="flex-1 justify-center items-center bg-brand-lightPink dark:bg-zinc-950">
+        <ThemedText className="text-gray-500 dark:text-gray-400">Curso no encontrado</ThemedText>
       </ThemedView>
     );
   }
@@ -48,7 +48,10 @@ export default function LearningViewScreen() {
   const renderModules = () => {
     let globalLessonIndex = 0;
     return (
-      <ScrollView contentContainerStyle={styles.modulesScroll} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={{ paddingVertical: 24, paddingHorizontal: 16 }}
+        showsVerticalScrollIndicator={false}
+      >
         {course.modules.map((module, idx) => {
           const currentStartIndex = globalLessonIndex;
           globalLessonIndex += module.lessons.length;
@@ -65,30 +68,37 @@ export default function LearningViewScreen() {
             />
           );
         })}
-        <View style={{ height: 120 }} />
+        <View className="h-32" />
       </ScrollView>
     );
   };
 
   const renderGrades = () => (
-    <ScrollView contentContainerStyle={styles.gradesScroll} showsVerticalScrollIndicator={false}>
+    <ScrollView contentContainerStyle={{ padding: 20 }} showsVerticalScrollIndicator={false}>
       {course.modules.map((module) => {
         const moduleScores = quizScores.filter((qs) => qs.moduleId === module.id);
         if (moduleScores.length === 0) return null;
 
         return (
-          <View key={module.id} style={styles.gradeGroup}>
-            <ThemedText style={styles.gradeGroupTitle}>{module.title}</ThemedText>
+          <View key={module.id} className="mb-6">
+            <ThemedText className="text-sm font-extrabold text-gray-700 dark:text-gray-300 mb-3 pl-1">
+              {module.title}
+            </ThemedText>
             {moduleScores.map((qs, index) => {
               const quiz = mockQuizzes.find((q) => q.id === qs.quizId);
               return (
-                <View key={index} style={styles.gradeRow}>
-                  <ThemedText style={styles.gradeQuizTitle}>
+                <View
+                  key={index}
+                  className="flex-row justify-between items-center bg-white dark:bg-zinc-900 p-4 rounded-2xl border border-gray-100 dark:border-zinc-800 mb-2"
+                >
+                  <ThemedText className="text-[15px] font-bold text-gray-900 dark:text-gray-100 flex-1">
                     {quiz?.title || 'Evaluación'}
                   </ThemedText>
-                  <View style={styles.gradeBadge}>
-                    <ThemedText style={styles.gradeValue}>{qs.score}</ThemedText>
-                    <ThemedText style={styles.gradeTotal}>/ 100</ThemedText>
+                  <View className="flex-row items-baseline bg-gray-50 dark:bg-zinc-800 px-2.5 py-1 rounded-lg">
+                    <ThemedText className="text-base font-black text-brand-hotPink dark:text-pink-400">
+                      {qs.score}
+                    </ThemedText>
+                    <ThemedText className="text-xs text-gray-400 ml-0.5">/ 100</ThemedText>
                   </View>
                 </View>
               );
@@ -97,24 +107,30 @@ export default function LearningViewScreen() {
         );
       })}
       {quizScores.length === 0 && (
-        <View style={styles.emptyState}>
-          <ThemedText style={styles.emptyStateText}>No hay calificaciones aún.</ThemedText>
+        <View className="items-center mt-10">
+          <ThemedText className="text-sm text-gray-400 dark:text-gray-500">
+            No hay calificaciones aún.
+          </ThemedText>
         </View>
       )}
     </ScrollView>
   );
 
   return (
-    <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
+    <ThemedView
+      className="flex-1 bg-brand-lightPink dark:bg-zinc-950"
+      style={{ paddingTop: insets.top }}
+    >
       {/* Header with Selector */}
-      <View style={styles.header}>
-        <View style={styles.pickerContainer}>
+      <View className="p-4">
+        <View className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 overflow-hidden">
           <Picker
             selectedValue={courseId}
             onValueChange={(val) =>
               router.replace({ pathname: '/learning-view', params: { courseId: val } })
             }
-            style={styles.picker}
+            style={{ height: 50, width: '100%', color: BrandingColors.black }}
+            dropdownIconColor={BrandingColors.hotPink}
           >
             {enrolledCourses.map((c) => (
               <Picker.Item key={c.id} label={c.title} value={c.id} />
@@ -124,189 +140,51 @@ export default function LearningViewScreen() {
       </View>
 
       {/* Progress Card */}
-      <View style={styles.progressSection}>
-        <View style={styles.progressCard}>
-          <View style={styles.progressInfo}>
-            <ThemedText style={styles.progressLabel}>Tu Progreso</ThemedText>
-            <ThemedText style={styles.progressPercent}>
+      <View className="px-4 mb-4">
+        <View className="bg-white dark:bg-zinc-900 rounded-2xl p-4 border border-gray-200 dark:border-zinc-800 shadow-sm shadow-black/5">
+          <View className="flex-row justify-between items-center mb-3">
+            <ThemedText className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+              Tu Progreso
+            </ThemedText>
+            <ThemedText className="text-2xl font-black text-brand-hotPink dark:text-pink-400">
               {Math.round(progress?.progress || 0)}%
             </ThemedText>
           </View>
-          <View style={styles.progressBarBg}>
-            <View style={[styles.progressBarFill, { width: `${progress?.progress || 0}%` }]} />
+          <View className="h-2.5 bg-gray-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+            <View
+              className="h-full bg-brand-hotPink rounded-full"
+              style={{ width: `${progress?.progress || 0}%` }}
+            />
           </View>
         </View>
       </View>
 
       {/* Tabs */}
-      <View style={styles.tabBar}>
+      <View className="flex-row border-b border-gray-200 dark:border-zinc-800 px-4">
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'modules' && styles.tabActive]}
+          className={`flex-1 py-3.5 items-center border-b-2 ${activeTab === 'modules' ? 'border-brand-hotPink' : 'border-transparent'}`}
           onPress={() => setActiveTab('modules')}
         >
-          <ThemedText style={[styles.tabText, activeTab === 'modules' && styles.tabTextActive]}>
+          <ThemedText
+            className={`text-[15px] font-bold ${activeTab === 'modules' ? 'text-brand-hotPink dark:text-pink-400' : 'text-gray-400 dark:text-gray-500'}`}
+          >
             Módulos
           </ThemedText>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'grades' && styles.tabActive]}
+          className={`flex-1 py-3.5 items-center border-b-2 ${activeTab === 'grades' ? 'border-brand-hotPink' : 'border-transparent'}`}
           onPress={() => setActiveTab('grades')}
         >
-          <ThemedText style={[styles.tabText, activeTab === 'grades' && styles.tabTextActive]}>
+          <ThemedText
+            className={`text-[15px] font-bold ${activeTab === 'grades' ? 'text-brand-hotPink dark:text-pink-400' : 'text-gray-400 dark:text-gray-500'}`}
+          >
             Calificaciones
           </ThemedText>
         </TouchableOpacity>
       </View>
 
       {/* Content */}
-      <View style={styles.content}>
-        {activeTab === 'modules' ? renderModules() : renderGrades()}
-      </View>
+      <View className="flex-1">{activeTab === 'modules' ? renderModules() : renderGrades()}</View>
     </ThemedView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: BrandingColors.lightPink,
-  },
-  header: {
-    padding: 16,
-  },
-  pickerContainer: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    overflow: 'hidden',
-  },
-  picker: {
-    height: 50,
-    width: '100%',
-  },
-  progressSection: {
-    paddingHorizontal: 16,
-    marginBottom: 16,
-  },
-  progressCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-  },
-  progressInfo: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  progressLabel: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#6B7280',
-    textTransform: 'uppercase',
-  },
-  progressPercent: {
-    fontSize: 24,
-    fontWeight: '900',
-    color: BrandingColors.hotPink,
-  },
-  progressBarBg: {
-    height: 10,
-    backgroundColor: '#F3F4F6',
-    borderRadius: 5,
-    overflow: 'hidden',
-  },
-  progressBarFill: {
-    height: '100%',
-    backgroundColor: BrandingColors.hotPink,
-    borderRadius: 5,
-  },
-  tabBar: {
-    flexDirection: 'row',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: 14,
-    alignItems: 'center',
-    borderBottomWidth: 3,
-    borderBottomColor: 'transparent',
-  },
-  tabActive: {
-    borderBottomColor: BrandingColors.hotPink,
-  },
-  tabText: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#9CA3AF',
-  },
-  tabTextActive: {
-    color: BrandingColors.hotPink,
-  },
-  content: {
-    flex: 1,
-  },
-  modulesScroll: {
-    paddingVertical: 24,
-  },
-  gradesScroll: {
-    padding: 20,
-  },
-  gradeGroup: {
-    marginBottom: 24,
-  },
-  gradeGroupTitle: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#374151',
-    marginBottom: 12,
-    paddingLeft: 4,
-  },
-  gradeRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    padding: 16,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    marginBottom: 8,
-  },
-  gradeQuizTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#1F2937',
-    flex: 1,
-  },
-  gradeBadge: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    backgroundColor: '#F9FAFB',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  gradeValue: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: BrandingColors.hotPink,
-  },
-  gradeTotal: {
-    fontSize: 12,
-    color: '#9CA3AF',
-    marginLeft: 2,
-  },
-  emptyState: {
-    alignItems: 'center',
-    marginTop: 40,
-  },
-  emptyStateText: {
-    color: '#9CA3AF',
-    fontSize: 14,
-  },
-});

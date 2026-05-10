@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { TouchableOpacity, ScrollView, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
@@ -39,8 +39,11 @@ export default function QuizScreen() {
 
   if (!quiz) {
     return (
-      <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
-        <ThemedText>Quiz no encontrado</ThemedText>
+      <ThemedView
+        className="flex-1 justify-center items-center bg-brand-lightPink dark:bg-zinc-950"
+        style={{ paddingTop: insets.top }}
+      >
+        <ThemedText className="text-gray-500 dark:text-gray-400">Quiz no encontrado</ThemedText>
       </ThemedView>
     );
   }
@@ -73,53 +76,79 @@ export default function QuizScreen() {
   }
 
   return (
-    <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
+    <ThemedView
+      className="flex-1 bg-brand-lightPink dark:bg-zinc-950"
+      style={{ paddingTop: insets.top }}
+    >
       {/* Header */}
-      <ThemedView style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={20}>
-          <ThemedText style={styles.backButton}>Cancelar</ThemedText>
+      <ThemedView className="flex-row justify-between items-center px-4 py-3 bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-800">
+        <TouchableOpacity
+          onPress={() => router.back()}
+          hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+        >
+          <ThemedText className="text-sm font-semibold text-gray-500 dark:text-gray-400">
+            Cancelar
+          </ThemedText>
         </TouchableOpacity>
-        <ThemedText style={styles.headerTitle}>{quiz.title}</ThemedText>
-        <ThemedView style={{ width: 60 }} />
+        <ThemedText className="text-base font-bold text-gray-900 dark:text-gray-100">
+          {quiz.title}
+        </ThemedText>
+        <View style={{ width: 60 }} />
       </ThemedView>
 
       {/* Progress Bar */}
-      <ThemedView style={styles.progressContainer}>
-        <ThemedView style={[styles.progressBar, { width: `${progress}%` }]} />
+      <ThemedView className="h-1.5 bg-gray-200 dark:bg-zinc-800 w-full overflow-hidden">
+        <ThemedView className="h-full bg-brand-hotPink" style={{ width: `${progress}%` }} />
       </ThemedView>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <ThemedView style={styles.questionMeta}>
-          <ThemedText style={styles.questionCount}>
+      <ScrollView className="flex-1 px-5 pt-5" showsVerticalScrollIndicator={false}>
+        <View className="mb-3">
+          <ThemedText className="text-xs font-bold text-brand-hotPink dark:text-pink-400 uppercase tracking-wider">
             Pregunta {currentQuestionIndex + 1} de {quiz.questions.length}
           </ThemedText>
-        </ThemedView>
+        </View>
 
-        <ThemedText style={styles.questionTitle}>{currentQuestion.title}</ThemedText>
+        <ThemedText className="text-2xl font-extrabold text-gray-900 dark:text-gray-100 mb-8 leading-[30px]">
+          {currentQuestion.title}
+        </ThemedText>
 
         <QuizQuestion
           question={currentQuestion}
           userAnswer={answers[currentQuestionIndex]}
           onSelect={selectAnswer}
         />
+        <View className="h-10" />
       </ScrollView>
 
       {/* Navigation Footer */}
-      <ThemedView style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
+      <ThemedView
+        className="flex-row px-5 pt-4 bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-800 gap-3"
+        style={{ paddingBottom: Math.max(insets.bottom, 16) }}
+      >
         <TouchableOpacity
-          style={[styles.navButton, currentQuestionIndex === 0 && styles.navButtonDisabled]}
+          className={`flex-1 py-3.5 rounded-xl border-2 items-center justify-center ${
+            currentQuestionIndex === 0
+              ? 'opacity-30 border-gray-200 dark:border-zinc-800'
+              : 'border-gray-200 dark:border-zinc-700'
+          }`}
           onPress={previousQuestion}
           disabled={currentQuestionIndex === 0}
         >
-          <ThemedText style={styles.navButtonText}>Anterior</ThemedText>
+          <ThemedText className="text-base font-bold text-gray-600 dark:text-gray-300">
+            Anterior
+          </ThemedText>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.nextButton, !isAnswered && styles.nextButtonDisabled]}
+          className={`flex-[2] py-3.5 rounded-xl items-center justify-center ${
+            !isAnswered ? 'bg-gray-200 dark:bg-zinc-800' : 'bg-brand-hotPink'
+          }`}
           onPress={nextQuestion}
           disabled={!isAnswered}
         >
-          <ThemedText style={styles.nextButtonText}>
+          <ThemedText
+            className={`text-base font-bold ${!isAnswered ? 'text-gray-400 dark:text-gray-500' : 'text-white'}`}
+          >
             {currentQuestionIndex === quiz.questions.length - 1 ? 'Revisar' : 'Siguiente'}
           </ThemedText>
         </TouchableOpacity>
@@ -127,99 +156,3 @@ export default function QuizScreen() {
     </ThemedView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: BrandingColors.lightPink,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-  },
-  backButton: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#6B7280',
-  },
-  headerTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#1F2937',
-  },
-  progressContainer: {
-    height: 6,
-    backgroundColor: '#E5E7EB',
-    width: '100%',
-  },
-  progressBar: {
-    height: '100%',
-    backgroundColor: BrandingColors.hotPink,
-  },
-  content: {
-    flex: 1,
-    padding: 20,
-  },
-  questionMeta: {
-    marginBottom: 12,
-  },
-  questionCount: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: BrandingColors.hotPink,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-  },
-  questionTitle: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: '#1F2937',
-    marginBottom: 32,
-    lineHeight: 30,
-  },
-  footer: {
-    flexDirection: 'row',
-    padding: 20,
-    backgroundColor: '#FFFFFF',
-    borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
-    gap: 12,
-  },
-  navButton: {
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: '#E5E7EB',
-    alignItems: 'center',
-  },
-  navButtonDisabled: {
-    opacity: 0.3,
-  },
-  navButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#4B5563',
-  },
-  nextButton: {
-    flex: 2,
-    paddingVertical: 14,
-    borderRadius: 12,
-    backgroundColor: BrandingColors.hotPink,
-    alignItems: 'center',
-  },
-  nextButtonDisabled: {
-    backgroundColor: '#E5E7EB',
-  },
-  nextButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-});
