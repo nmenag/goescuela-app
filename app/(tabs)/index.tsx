@@ -1,37 +1,51 @@
-import { CourseCard } from '@/components/course-card';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
+import React, { useState, useMemo } from 'react';
+import {
+  TouchableOpacity,
+  Image,
+  View,
+  Text,
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  TextInput,
+  FlatList,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import { Search, RefreshCw, Clock, BookOpen } from 'lucide-react-native';
+import Animated, { FadeInDown, FadeInRight, FadeInUp } from 'react-native-reanimated';
 import { BrandingColors } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
-import { mockCourses } from '@/data/mockData';
-import { useRouter } from 'expo-router';
-import { Download } from 'lucide-react-native';
-import React from 'react';
-import { FlatList, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useCourses } from '@/application/hooks/useCourses';
 import { useOffline } from '@/hooks/useOffline';
-import { ActivityIndicator, Alert } from 'react-native';
-
-const COLORS = {
-  primary: BrandingColors.hotPink,
-  background: BrandingColors.lightPink,
-  text: '#1F2937',
-  textLight: '#6B7280',
-  border: '#E5E7EB',
-};
+import { CourseCard } from '@/components/course-card';
 
 export default function HomeScreen() {
   const router = useRouter();
   const { user } = useAuth();
   const insets = useSafeAreaInsets();
   const { sync, isSyncing } = useOffline();
+  const [search, setSearch] = useState('');
+  const [activeCategory, setActiveCategory] = useState('Todos');
+
+  const { data: courses = [], isLoading } = useCourses();
+
+  const categories = ['Todos', 'Ciencias', 'Idiomas', 'Humanidades', 'Arte'];
+
+  const filteredCourses = useMemo(() => {
+    return courses.filter(
+      (c) =>
+        (activeCategory === 'Todos' || c.category === activeCategory) &&
+        c.title.toLowerCase().includes(search.toLowerCase()),
+    );
+  }, [courses, activeCategory, search]);
 
   const handleSync = async () => {
     const success = await sync();
     if (success) {
-      Alert.alert('Éxito', 'Los datos se han sincronizado correctamente.');
+      Alert.alert('Sincronizado', 'Tus cursos están al día.');
     } else {
-      Alert.alert('Aviso', 'No se ha podido sincronizar. Verifica tu conexión a internet.');
+      Alert.alert('Error', 'No se pudo sincronizar.');
     }
   };
 
@@ -42,119 +56,187 @@ export default function HomeScreen() {
     });
   };
 
-  const renderHeader = () => (
-    <ThemedView style={[styles.header, { paddingTop: insets.top + 10 }]}>
-      <ThemedView style={styles.headerTop}>
-        <ThemedView>
-          <ThemedText style={styles.greeting}>Hola 👋</ThemedText>
-          <ThemedText style={styles.name}>{user?.name || 'Estudiante'}</ThemedText>
-        </ThemedView>
-        <TouchableOpacity style={styles.syncButton} onPress={handleSync} disabled={isSyncing}>
-          {isSyncing ? (
-            <ActivityIndicator size="small" color={COLORS.primary} />
-          ) : (
-            <Download size={22} color={COLORS.primary} />
-          )}
-        </TouchableOpacity>
-      </ThemedView>
-
-      <ThemedView style={styles.logoContainer}>
-        <Image
-          source={require('@/assets/images/logo.png')}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-      </ThemedView>
-    </ThemedView>
-  );
+  if (isLoading) {
+    return (
+      <View className="flex-1 justify-center items-center bg-brand-lightPink ">
+        <ActivityIndicator size="large" color={BrandingColors.hotPink} />
+      </View>
+    );
+  }
 
   return (
-    <ThemedView style={styles.container}>
-      {renderHeader()}
-      <ThemedView style={styles.horizontalSection}>
+    <View className="flex-1 bg-brand-lightPink ">
+      <View className="flex-1">
+        {/* Profile Header */}
+        <Animated.View
+          entering={FadeInUp.duration(400).springify()}
+          className="px-6 pb-5 bg-brand-lightPink "
+          style={{ paddingTop: insets.top + 10 }}
+        >
+          <View className="flex-row justify-between items-center">
+            <View className="flex-1">
+              <Text className="text-xl font-black text-gray-900 ">
+                Hola, {user?.name || 'Estudiante'} 👋
+              </Text>
+              <Text className="text-sm text-gray-500 mt-1">Listo para aprender algo nuevo</Text>
+            </View>
+            <View className="flex-row gap-3">
+              <TouchableOpacity
+                className="w-11 h-11 rounded-2xl bg-white justify-center items-center border border-gray-100 shadow-sm shadow-black/5"
+                onPress={handleSync}
+                accessibilityLabel="Sincronizar"
+              >
+                {isSyncing ? (
+                  <ActivityIndicator size="small" color={BrandingColors.hotPink} />
+                ) : (
+                  <RefreshCw size={20} color={BrandingColors.hotPink} />
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Animated.View>
+
         <FlatList
-          horizontal
-          data={mockCourses}
-          renderItem={({ item }) => (
-            <ThemedView style={styles.courseCardWrapper}>
+          data={filteredCourses}
+          keyExtractor={(item) => item.id}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 40 }}
+          ListHeaderComponent={
+            <>
+              {/* Search Bar */}
+              <Animated.View
+                entering={FadeInDown.duration(400).delay(100)}
+                className="px-6 pb-4 bg-brand-lightPink z-10"
+              >
+                <View className="flex-row items-center bg-white rounded-2xl px-4 py-3 border border-gray-100 shadow-sm shadow-black/5">
+                  <Search size={20} color="#6B7280" />
+                  <TextInput
+                    className="flex-1 ml-3 text-base text-gray-900 font-medium"
+                    placeholder="Buscar cursos..."
+                    placeholderTextColor="#6B7280"
+                    value={search}
+                    onChangeText={setSearch}
+                  />
+                </View>
+              </Animated.View>
+
+              {/* Categories */}
+              <Animated.View entering={FadeInRight.duration(400).delay(200)} className="mb-6">
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{ paddingHorizontal: 24, gap: 10 }}
+                >
+                  {categories.map((cat) => (
+                    <TouchableOpacity
+                      key={cat}
+                      className={`px-5 py-2.5 rounded-xl border transition-colors ${
+                        activeCategory === cat
+                          ? 'bg-brand-hotPink border-brand-hotPink'
+                          : 'bg-white border-gray-100 '
+                      }`}
+                      onPress={() => setActiveCategory(cat)}
+                    >
+                      <Text
+                        className={`text-sm font-bold ${
+                          activeCategory === cat ? 'text-white' : 'text-gray-500 '
+                        }`}
+                      >
+                        {cat}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </Animated.View>
+
+              {/* Continue Learning */}
+              <Animated.View entering={FadeInRight.duration(400).delay(300)} className="px-6 mb-8">
+                <View className="flex-row justify-between items-center mb-4">
+                  <Text className="text-lg font-extrabold text-gray-900 ">
+                    Continuar Aprendiendo
+                  </Text>
+                  <TouchableOpacity>
+                    <Text className="text-sm font-bold text-brand-hotPink ">Ver todos</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{ gap: 16, paddingRight: 24 }}
+                  snapToInterval={300}
+                  decelerationRate="fast"
+                >
+                  {courses.slice(0, 3).map((course, index) => (
+                    <Animated.View
+                      key={course.id}
+                      entering={FadeInRight.duration(400).delay(300 + index * 100)}
+                    >
+                      <TouchableOpacity
+                        className="w-[280px] rounded-3xl overflow-hidden bg-white border border-gray-100 shadow-sm"
+                        onPress={() => handleCoursePress(course.id)}
+                        activeOpacity={0.9}
+                      >
+                        <View className="w-full h-[140px] p-4 bg-gray-50/50 justify-center items-center border-b border-gray-50">
+                          <Image
+                            source={{ uri: course.thumbnail }}
+                            className="w-full h-full"
+                            resizeMode="contain"
+                          />
+                        </View>
+                        <View className="p-4">
+                          <Text
+                            className="text-base font-black text-gray-900 mb-3"
+                            numberOfLines={2}
+                          >
+                            {course.title}
+                          </Text>
+                          <View className="flex-row items-center justify-between">
+                            <View className="flex-row items-center gap-1.5 bg-brand-lightPink px-2.5 py-1 rounded-lg">
+                              <BookOpen size={12} color="#ff66c4" />
+                              <Text className="text-brand-hotPink text-[10px] font-black uppercase tracking-wider">
+                                {course.category}
+                              </Text>
+                            </View>
+                            <View className="flex-row items-center gap-1.5">
+                              <Clock size={14} color="#9CA3AF" />
+                              <Text className="text-gray-500 text-xs font-bold">
+                                {course.duration}h
+                              </Text>
+                            </View>
+                          </View>
+                        </View>
+                      </TouchableOpacity>
+                    </Animated.View>
+                  ))}
+                </ScrollView>
+              </Animated.View>
+
+              <Animated.View entering={FadeInUp.duration(400).delay(400)} className="px-6 mb-4">
+                <Text className="text-lg font-extrabold text-gray-900 ">Recomendados para ti</Text>
+              </Animated.View>
+            </>
+          }
+          renderItem={({ item, index }) => (
+            <Animated.View
+              entering={FadeInDown.duration(400).delay(400 + index * 50)}
+              className="px-6 mb-4"
+            >
               <CourseCard
-                key={item.id}
                 id={item.id}
                 title={item.title}
                 thumbnail={item.thumbnail}
                 onPress={() => handleCoursePress(item.id)}
               />
-            </ThemedView>
+            </Animated.View>
           )}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.listContent}
-          showsHorizontalScrollIndicator={false}
-          scrollEventThrottle={16}
-          snapToInterval={280 + 16}
-          decelerationRate="fast"
+          ListEmptyComponent={
+            <View className="items-center py-10">
+              <Text className="text-sm text-gray-400 ">No se encontraron cursos.</Text>
+            </View>
+          }
         />
-      </ThemedView>
-    </ThemedView>
+      </View>
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
-  listContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-    paddingTop: 0,
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 24,
-    backgroundColor: COLORS.background,
-  },
-  headerTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: 'transparent',
-  },
-  logoContainer: {
-    alignItems: 'center',
-    marginBottom: 10,
-    backgroundColor: 'transparent',
-  },
-  logo: {
-    width: 250,
-    height: 200,
-  },
-  horizontalSection: {
-    marginHorizontal: 0,
-    paddingVertical: 10,
-  },
-  syncButton: {
-    padding: 10,
-    borderRadius: 20,
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  greeting: {
-    fontSize: 14,
-    color: COLORS.textLight,
-    marginBottom: 4,
-  },
-  name: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: COLORS.text,
-  },
-  courseCardWrapper: {
-    width: 280,
-    marginRight: 16,
-  },
-});
