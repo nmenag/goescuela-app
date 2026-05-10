@@ -8,9 +8,7 @@ GoEscuela is designed to work reliably in low-connectivity environments. We achi
     - Used for structured data like Courses, Modules, and Lessons.
     - Highly performant for large datasets.
     - Observables-based, ensuring the UI updates automatically when the DB changes.
-2.  **MMKV (Key-Value)**:
-    - Replaces AsyncStorage for high-speed access to Auth tokens, user preferences, and small app state.
-3.  **Expo File System**:
+2.  **Expo File System**:
     - Used for binary content (Videos, PDFs, Audio).
     - Managed by the `DownloadManager`.
 

@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "goescuelaapp",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.goescuelaapp"
@@ -33,10 +33,7 @@
           "image": "./assets/images/logo.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#FAE0F0",
-          "dark": {
-            "backgroundColor": "#000000"
-          }
+          "backgroundColor": "#FAE0F0"
         }
       ],
       "expo-font",

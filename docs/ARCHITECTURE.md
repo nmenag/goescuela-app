@@ -17,7 +17,6 @@ Contains the implementation details of the repository interfaces.
 
 - **API Clients**: Logic to communicate with the backend.
 - **Database (WatermelonDB)**: Logic for local persistence.
-- **Storage (MMKV)**: Fast key-value storage for sessions and settings.
 - **Repositories (Implementations)**: Concrete classes that fulfill the Domain's repository contracts.
 
 ### 3. Application Layer (`src/features/*/application`)

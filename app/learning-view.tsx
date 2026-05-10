@@ -1,7 +1,5 @@
 import React from 'react';
-import { View, TouchableOpacity, ScrollView } from 'react-native';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { BrandingColors } from '@/constants/theme';
 import {
   getCourseById,
@@ -35,9 +33,9 @@ export default function LearningViewScreen() {
 
   if (!course) {
     return (
-      <ThemedView className="flex-1 justify-center items-center bg-brand-lightPink dark:bg-zinc-950">
-        <ThemedText className="text-gray-500 dark:text-gray-400">Curso no encontrado</ThemedText>
-      </ThemedView>
+      <View className="flex-1 justify-center items-center bg-brand-lightPink ">
+        <Text className="text-gray-500 ">Curso no encontrado</Text>
+      </View>
     );
   }
 
@@ -81,24 +79,20 @@ export default function LearningViewScreen() {
 
         return (
           <View key={module.id} className="mb-6">
-            <ThemedText className="text-sm font-extrabold text-gray-700 dark:text-gray-300 mb-3 pl-1">
-              {module.title}
-            </ThemedText>
+            <Text className="text-sm font-extrabold text-gray-700 mb-3 pl-1">{module.title}</Text>
             {moduleScores.map((qs, index) => {
               const quiz = mockQuizzes.find((q) => q.id === qs.quizId);
               return (
                 <View
                   key={index}
-                  className="flex-row justify-between items-center bg-white dark:bg-zinc-900 p-4 rounded-2xl border border-gray-100 dark:border-zinc-800 mb-2"
+                  className="flex-row justify-between items-center bg-white p-4 rounded-2xl border border-gray-100 mb-2"
                 >
-                  <ThemedText className="text-[15px] font-bold text-gray-900 dark:text-gray-100 flex-1">
+                  <Text className="text-[15px] font-bold text-gray-900 flex-1">
                     {quiz?.title || 'Evaluación'}
-                  </ThemedText>
-                  <View className="flex-row items-baseline bg-gray-50 dark:bg-zinc-800 px-2.5 py-1 rounded-lg">
-                    <ThemedText className="text-base font-black text-brand-hotPink dark:text-pink-400">
-                      {qs.score}
-                    </ThemedText>
-                    <ThemedText className="text-xs text-gray-400 ml-0.5">/ 100</ThemedText>
+                  </Text>
+                  <View className="flex-row items-baseline bg-gray-50 px-2.5 py-1 rounded-lg">
+                    <Text className="text-base font-black text-brand-hotPink ">{qs.score}</Text>
+                    <Text className="text-xs text-gray-400 ml-0.5">/ 100</Text>
                   </View>
                 </View>
               );
@@ -108,22 +102,17 @@ export default function LearningViewScreen() {
       })}
       {quizScores.length === 0 && (
         <View className="items-center mt-10">
-          <ThemedText className="text-sm text-gray-400 dark:text-gray-500">
-            No hay calificaciones aún.
-          </ThemedText>
+          <Text className="text-sm text-gray-400 ">No hay calificaciones aún.</Text>
         </View>
       )}
     </ScrollView>
   );
 
   return (
-    <ThemedView
-      className="flex-1 bg-brand-lightPink dark:bg-zinc-950"
-      style={{ paddingTop: insets.top }}
-    >
+    <View className="flex-1 bg-brand-lightPink " style={{ paddingTop: insets.top }}>
       {/* Header with Selector */}
       <View className="p-4">
-        <View className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 overflow-hidden">
+        <View className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
           <Picker
             selectedValue={courseId}
             onValueChange={(val) =>
@@ -141,16 +130,16 @@ export default function LearningViewScreen() {
 
       {/* Progress Card */}
       <View className="px-4 mb-4">
-        <View className="bg-white dark:bg-zinc-900 rounded-2xl p-4 border border-gray-200 dark:border-zinc-800 shadow-sm shadow-black/5">
+        <View className="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm shadow-black/5">
           <View className="flex-row justify-between items-center mb-3">
-            <ThemedText className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+            <Text className="text-sm font-bold text-gray-500 uppercase tracking-wide">
               Tu Progreso
-            </ThemedText>
-            <ThemedText className="text-2xl font-black text-brand-hotPink dark:text-pink-400">
+            </Text>
+            <Text className="text-2xl font-black text-brand-hotPink ">
               {Math.round(progress?.progress || 0)}%
-            </ThemedText>
+            </Text>
           </View>
-          <View className="h-2.5 bg-gray-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+          <View className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
             <View
               className="h-full bg-brand-hotPink rounded-full"
               style={{ width: `${progress?.progress || 0}%` }}
@@ -160,31 +149,31 @@ export default function LearningViewScreen() {
       </View>
 
       {/* Tabs */}
-      <View className="flex-row border-b border-gray-200 dark:border-zinc-800 px-4">
+      <View className="flex-row border-b border-gray-200 px-4">
         <TouchableOpacity
           className={`flex-1 py-3.5 items-center border-b-2 ${activeTab === 'modules' ? 'border-brand-hotPink' : 'border-transparent'}`}
           onPress={() => setActiveTab('modules')}
         >
-          <ThemedText
-            className={`text-[15px] font-bold ${activeTab === 'modules' ? 'text-brand-hotPink dark:text-pink-400' : 'text-gray-400 dark:text-gray-500'}`}
+          <Text
+            className={`text-[15px] font-bold ${activeTab === 'modules' ? 'text-brand-hotPink ' : 'text-gray-400 '}`}
           >
             Módulos
-          </ThemedText>
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
           className={`flex-1 py-3.5 items-center border-b-2 ${activeTab === 'grades' ? 'border-brand-hotPink' : 'border-transparent'}`}
           onPress={() => setActiveTab('grades')}
         >
-          <ThemedText
-            className={`text-[15px] font-bold ${activeTab === 'grades' ? 'text-brand-hotPink dark:text-pink-400' : 'text-gray-400 dark:text-gray-500'}`}
+          <Text
+            className={`text-[15px] font-bold ${activeTab === 'grades' ? 'text-brand-hotPink ' : 'text-gray-400 '}`}
           >
             Calificaciones
-          </ThemedText>
+          </Text>
         </TouchableOpacity>
       </View>
 
       {/* Content */}
       <View className="flex-1">{activeTab === 'modules' ? renderModules() : renderGrades()}</View>
-    </ThemedView>
+    </View>
   );
 }

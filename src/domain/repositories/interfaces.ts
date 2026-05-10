@@ -19,9 +19,3 @@ export interface IStudentRepository {
   saveQuizScore(score: Omit<QuizScore, 'id'>): Promise<void>;
   getQuizScores(studentId: string, courseId: string): Promise<QuizScore[]>;
 }
-
-export interface ISettingsRepository {
-  getSetting<T>(key: string): T | null;
-  saveSetting(key: string, value: any): void;
-  removeSetting(key: string): void;
-}

@@ -9,11 +9,10 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Text,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Eye, EyeOff, Mail, Lock, ArrowRight, AlertCircle } from 'lucide-react-native';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
 import { BrandingColors } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
 import { useForm, Controller } from 'react-hook-form';
@@ -68,7 +67,7 @@ export default function LoginScreen() {
   };
 
   return (
-    <ThemedView className="flex-1 bg-brand-lightPink dark:bg-zinc-950">
+    <View className="flex-1 bg-brand-lightPink ">
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"
@@ -78,45 +77,42 @@ export default function LoginScreen() {
             paddingTop: insets.top + 20,
             paddingBottom: insets.bottom + 20,
           }}
-          className="flex-grow px-6 justify-center"
+          className="px-6"
+          contentContainerClassName="flex-grow justify-center"
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
           {/* Top Illustration or Logo */}
           <View className="items-center mb-10">
-            <View className="w-24 h-24 bg-white dark:bg-zinc-900 rounded-3xl justify-center items-center shadow-sm shadow-black/5 dark:shadow-white/5 mb-6">
+            <View className="w-24 h-24 bg-white rounded-3xl justify-center items-center shadow-sm shadow-black/5 mb-6">
               <Image
                 source={require('@/assets/images/logo.png')}
                 className="w-14 h-14"
                 resizeMode="contain"
               />
             </View>
-            <ThemedText className="text-3xl font-black text-gray-900 dark:text-gray-100 mb-2">
-              Bienvenido de nuevo
-            </ThemedText>
-            <ThemedText className="text-base text-gray-600 dark:text-gray-400 text-center px-5">
+            <Text className="text-3xl font-black text-gray-900 mb-2">Bienvenido de nuevo</Text>
+            <Text className="text-base text-gray-600 text-center px-5">
               Inicia sesión para continuar tu aprendizaje
-            </ThemedText>
+            </Text>
           </View>
 
           {/* Form */}
           <View className="w-full max-w-md mx-auto">
             <View className="mb-5">
-              <ThemedText className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 ml-1">
-                Correo Electrónico
-              </ThemedText>
+              <Text className="text-sm font-bold text-gray-700 mb-2 ml-1">Correo Electrónico</Text>
               <Controller
                 control={control}
                 name="email"
                 render={({ field: { onChange, onBlur, value } }) => (
                   <>
                     <View
-                      className={`flex-row items-center bg-white dark:bg-zinc-900 rounded-2xl border-2 px-4 transition-colors ${
+                      className={`flex-row items-center bg-white rounded-2xl border-2 px-4 transition-colors ${
                         errors.email
                           ? 'border-red-500'
                           : focusedInput === 'email'
                             ? 'border-brand-hotPink'
-                            : 'border-gray-100 dark:border-zinc-800'
+                            : 'border-gray-100 '
                       }`}
                     >
                       <Mail
@@ -131,7 +127,7 @@ export default function LoginScreen() {
                         className="mr-3"
                       />
                       <TextInput
-                        className="flex-1 py-4 text-base text-gray-900 dark:text-gray-100 font-medium"
+                        className="flex-1 py-4 text-base text-gray-900 font-medium"
                         placeholder="ejemplo@correo.com"
                         placeholderTextColor="#6B7280"
                         keyboardType="email-address"
@@ -147,9 +143,9 @@ export default function LoginScreen() {
                       {errors.email && <AlertCircle size={20} color="#EF4444" className="ml-2" />}
                     </View>
                     {errors.email && (
-                      <ThemedText className="text-red-500 text-xs font-bold mt-2 ml-2">
+                      <Text className="text-red-500 text-xs font-bold mt-2 ml-2">
                         {errors.email.message}
-                      </ThemedText>
+                      </Text>
                     )}
                   </>
                 )}
@@ -157,21 +153,19 @@ export default function LoginScreen() {
             </View>
 
             <View className="mb-5">
-              <ThemedText className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 ml-1">
-                Contraseña
-              </ThemedText>
+              <Text className="text-sm font-bold text-gray-700 mb-2 ml-1">Contraseña</Text>
               <Controller
                 control={control}
                 name="password"
                 render={({ field: { onChange, onBlur, value } }) => (
                   <>
                     <View
-                      className={`flex-row items-center bg-white dark:bg-zinc-900 rounded-2xl border-2 px-4 transition-colors ${
+                      className={`flex-row items-center bg-white rounded-2xl border-2 px-4 transition-colors ${
                         errors.password
                           ? 'border-red-500'
                           : focusedInput === 'password'
                             ? 'border-brand-hotPink'
-                            : 'border-gray-100 dark:border-zinc-800'
+                            : 'border-gray-100 '
                       }`}
                     >
                       <Lock
@@ -186,7 +180,7 @@ export default function LoginScreen() {
                         className="mr-3"
                       />
                       <TextInput
-                        className="flex-1 py-4 text-base text-gray-900 dark:text-gray-100 font-medium"
+                        className="flex-1 py-4 text-base text-gray-900 font-medium"
                         placeholder="••••••••"
                         placeholderTextColor="#6B7280"
                         secureTextEntry={!showPassword}
@@ -214,9 +208,9 @@ export default function LoginScreen() {
                       </TouchableOpacity>
                     </View>
                     {errors.password && (
-                      <ThemedText className="text-red-500 text-xs font-bold mt-2 ml-2">
+                      <Text className="text-red-500 text-xs font-bold mt-2 ml-2">
                         {errors.password.message}
-                      </ThemedText>
+                      </Text>
                     )}
                   </>
                 )}
@@ -224,9 +218,9 @@ export default function LoginScreen() {
             </View>
 
             <TouchableOpacity className="self-end mb-8" onPress={handleDemoLogin}>
-              <ThemedText className="text-sm font-semibold text-brand-hotPink dark:text-pink-400">
+              <Text className="text-sm font-semibold text-brand-hotPink ">
                 ¿Olvidaste tu contraseña?
-              </ThemedText>
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -240,62 +234,16 @@ export default function LoginScreen() {
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
                 <>
-                  <ThemedText className="text-white text-lg font-extrabold">Ingresar</ThemedText>
+                  <Text className="text-white text-lg font-extrabold">Ingresar</Text>
                   <ArrowRight size={20} color="#FFFFFF" className="ml-2.5" />
                 </>
               )}
             </TouchableOpacity>
           </View>
 
-          {/* Social Login Mock */}
-          <View className="flex-row items-center my-8 max-w-md mx-auto w-full">
-            <View className="flex-1 h-px bg-gray-200 dark:bg-zinc-800" />
-            <ThemedText className="mx-4 text-gray-400 dark:text-gray-500 text-sm font-semibold">
-              O continúa con
-            </ThemedText>
-            <View className="flex-1 h-px bg-gray-200 dark:bg-zinc-800" />
-          </View>
-
-          <View className="flex-row justify-center gap-4 mb-8">
-            <TouchableOpacity
-              className="w-14 h-14 rounded-[20px] bg-white dark:bg-zinc-900 justify-center items-center border border-gray-200 dark:border-zinc-800 shadow-sm shadow-black/5"
-              accessibilityRole="button"
-            >
-              <ThemedText className="text-2xl font-black text-gray-700 dark:text-gray-300">
-                G
-              </ThemedText>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className="w-14 h-14 rounded-[20px] bg-white dark:bg-zinc-900 justify-center items-center border border-gray-200 dark:border-zinc-800 shadow-sm shadow-black/5"
-              accessibilityRole="button"
-            >
-              <ThemedText className="text-2xl font-black text-gray-700 dark:text-gray-300">
-                f
-              </ThemedText>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className="w-14 h-14 rounded-[20px] bg-white dark:bg-zinc-900 justify-center items-center border border-gray-200 dark:border-zinc-800 shadow-sm shadow-black/5"
-              accessibilityRole="button"
-            >
-              <ThemedText className="text-2xl font-black text-gray-700 dark:text-gray-300">
-                
-              </ThemedText>
-            </TouchableOpacity>
-          </View>
-
-          {/* Footer */}
-          <View className="flex-row justify-center items-center mb-5">
-            <ThemedText className="text-gray-500 dark:text-gray-400 text-[15px]">
-              ¿No tienes una cuenta?{' '}
-            </ThemedText>
-            <TouchableOpacity>
-              <ThemedText className="text-brand-hotPink dark:text-pink-400 text-[15px] font-extrabold">
-                Regístrate
-              </ThemedText>
-            </TouchableOpacity>
-          </View>
+          <View className="mb-8" />
         </ScrollView>
       </KeyboardAvoidingView>
-    </ThemedView>
+    </View>
   );
 }

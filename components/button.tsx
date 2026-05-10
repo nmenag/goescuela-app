@@ -18,9 +18,9 @@ export function Button({
   size = 'md',
 }: ButtonProps) {
   const variantClasses = {
-    primary: `bg-[${BrandingColors.hotPink}] dark:bg-[${BrandingColors.hotPink}]`,
-    secondary: `bg-[${BrandingColors.lightPurple}] dark:bg-[${BrandingColors.lightPurple}]`,
-    outline: `border border-[${BrandingColors.teal}] dark:border-[${BrandingColors.teal}]`,
+    primary: `bg-[${BrandingColors.hotPink}] }]`,
+    secondary: `bg-[${BrandingColors.lightPurple}] }]`,
+    outline: `border border-[${BrandingColors.teal}] }]`,
   };
 
   const sizeClasses = {
@@ -29,7 +29,7 @@ export function Button({
     lg: 'px-6 py-4',
   };
 
-  const textColorClass = variant === 'outline' ? 'text-gray-900 dark:text-white' : 'text-white';
+  const textColorClass = variant === 'outline' ? 'text-gray-900 ' : 'text-white';
 
   return (
     <Pressable

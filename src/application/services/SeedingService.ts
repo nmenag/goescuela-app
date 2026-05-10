@@ -1,13 +1,14 @@
 import { getDatabase } from '../../infrastructure/storage/sqlite';
 import { mockCourses, mockStudents } from '@/data/mockData';
-import { StorageService } from '../../infrastructure/storage/mmkv';
 
 export const SeedingService = {
   seed: async () => {
-    const isSeeded = StorageService.getItem<boolean>('is_seeded');
-    if (isSeeded) return;
-
     const db = await getDatabase();
+
+    const studentCount = await db.getFirstAsync<{ count: number }>(
+      'SELECT COUNT(*) as count FROM students',
+    );
+    if (studentCount && studentCount.count > 0) return;
 
     await db.withTransactionAsync(async () => {
       // 1. Seed Student
@@ -110,7 +111,5 @@ export const SeedingService = {
         ]);
       }
     });
-
-    StorageService.setItem('is_seeded', true);
   },
 };

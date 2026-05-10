@@ -3,6 +3,7 @@ import {
   TouchableOpacity,
   Image,
   View,
+  Text,
   ActivityIndicator,
   Alert,
   ScrollView,
@@ -11,10 +12,8 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Search, Bell, RefreshCw, Clock, BookOpen } from 'lucide-react-native';
+import { Search, RefreshCw, Clock, BookOpen } from 'lucide-react-native';
 import Animated, { FadeInDown, FadeInRight, FadeInUp } from 'react-native-reanimated';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
 import { BrandingColors } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
 import { useCourses } from '@/application/hooks/useCourses';
@@ -59,33 +58,31 @@ export default function HomeScreen() {
 
   if (isLoading) {
     return (
-      <ThemedView className="flex-1 justify-center items-center bg-brand-lightPink dark:bg-zinc-950">
+      <View className="flex-1 justify-center items-center bg-brand-lightPink ">
         <ActivityIndicator size="large" color={BrandingColors.hotPink} />
-      </ThemedView>
+      </View>
     );
   }
 
   return (
-    <ThemedView className="flex-1 bg-brand-lightPink dark:bg-zinc-950">
+    <View className="flex-1 bg-brand-lightPink ">
       <View className="flex-1">
         {/* Profile Header */}
         <Animated.View
           entering={FadeInUp.duration(400).springify()}
-          className="px-6 pb-5 bg-brand-lightPink dark:bg-zinc-950"
+          className="px-6 pb-5 bg-brand-lightPink "
           style={{ paddingTop: insets.top + 10 }}
         >
           <View className="flex-row justify-between items-center">
             <View className="flex-1">
-              <ThemedText className="text-xl font-black text-gray-900 dark:text-gray-100">
+              <Text className="text-xl font-black text-gray-900 ">
                 Hola, {user?.name || 'Estudiante'} 👋
-              </ThemedText>
-              <ThemedText className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Listo para aprender algo nuevo
-              </ThemedText>
+              </Text>
+              <Text className="text-sm text-gray-500 mt-1">Listo para aprender algo nuevo</Text>
             </View>
             <View className="flex-row gap-3">
               <TouchableOpacity
-                className="w-11 h-11 rounded-2xl bg-white dark:bg-zinc-900 justify-center items-center border border-gray-100 dark:border-zinc-800 shadow-sm shadow-black/5"
+                className="w-11 h-11 rounded-2xl bg-white justify-center items-center border border-gray-100 shadow-sm shadow-black/5"
                 onPress={handleSync}
                 accessibilityLabel="Sincronizar"
               >
@@ -94,12 +91,6 @@ export default function HomeScreen() {
                 ) : (
                   <RefreshCw size={20} color={BrandingColors.hotPink} />
                 )}
-              </TouchableOpacity>
-              <TouchableOpacity
-                className="w-11 h-11 rounded-2xl bg-white dark:bg-zinc-900 justify-center items-center border border-gray-100 dark:border-zinc-800 shadow-sm shadow-black/5"
-                accessibilityLabel="Notificaciones"
-              >
-                <Bell size={20} color={BrandingColors.hotPink} />
               </TouchableOpacity>
             </View>
           </View>
@@ -115,12 +106,12 @@ export default function HomeScreen() {
               {/* Search Bar */}
               <Animated.View
                 entering={FadeInDown.duration(400).delay(100)}
-                className="px-6 pb-4 bg-brand-lightPink dark:bg-zinc-950 z-10"
+                className="px-6 pb-4 bg-brand-lightPink z-10"
               >
-                <View className="flex-row items-center bg-white dark:bg-zinc-900 rounded-2xl px-4 py-3 border border-gray-100 dark:border-zinc-800 shadow-sm shadow-black/5">
+                <View className="flex-row items-center bg-white rounded-2xl px-4 py-3 border border-gray-100 shadow-sm shadow-black/5">
                   <Search size={20} color="#6B7280" />
                   <TextInput
-                    className="flex-1 ml-3 text-base text-gray-900 dark:text-gray-100 font-medium"
+                    className="flex-1 ml-3 text-base text-gray-900 font-medium"
                     placeholder="Buscar cursos..."
                     placeholderTextColor="#6B7280"
                     value={search}
@@ -142,17 +133,17 @@ export default function HomeScreen() {
                       className={`px-5 py-2.5 rounded-xl border transition-colors ${
                         activeCategory === cat
                           ? 'bg-brand-hotPink border-brand-hotPink'
-                          : 'bg-white dark:bg-zinc-900 border-gray-100 dark:border-zinc-800'
+                          : 'bg-white border-gray-100 '
                       }`}
                       onPress={() => setActiveCategory(cat)}
                     >
-                      <ThemedText
+                      <Text
                         className={`text-sm font-bold ${
-                          activeCategory === cat ? 'text-white' : 'text-gray-500 dark:text-gray-400'
+                          activeCategory === cat ? 'text-white' : 'text-gray-500 '
                         }`}
                       >
                         {cat}
-                      </ThemedText>
+                      </Text>
                     </TouchableOpacity>
                   ))}
                 </ScrollView>
@@ -161,13 +152,11 @@ export default function HomeScreen() {
               {/* Continue Learning */}
               <Animated.View entering={FadeInRight.duration(400).delay(300)} className="px-6 mb-8">
                 <View className="flex-row justify-between items-center mb-4">
-                  <ThemedText className="text-lg font-extrabold text-gray-900 dark:text-gray-100">
+                  <Text className="text-lg font-extrabold text-gray-900 ">
                     Continuar Aprendiendo
-                  </ThemedText>
+                  </Text>
                   <TouchableOpacity>
-                    <ThemedText className="text-sm font-bold text-brand-hotPink dark:text-pink-400">
-                      Ver todos
-                    </ThemedText>
+                    <Text className="text-sm font-bold text-brand-hotPink ">Ver todos</Text>
                   </TouchableOpacity>
                 </View>
 
@@ -184,33 +173,36 @@ export default function HomeScreen() {
                       entering={FadeInRight.duration(400).delay(300 + index * 100)}
                     >
                       <TouchableOpacity
-                        className="w-[280px] h-[180px] rounded-3xl overflow-hidden bg-black"
+                        className="w-[280px] rounded-3xl overflow-hidden bg-white border border-gray-100 shadow-sm"
                         onPress={() => handleCoursePress(course.id)}
                         activeOpacity={0.9}
                       >
-                        <Image
-                          source={{ uri: course.thumbnail }}
-                          className="w-full h-full opacity-70"
-                        />
-                        <View className="absolute bottom-0 left-0 right-0 p-5 justify-between h-full">
-                          <View className="self-start bg-white/20 px-3 py-1.5 rounded-xl flex-row items-center gap-1.5 backdrop-blur-md">
-                            <BookOpen size={12} color="#FFF" />
-                            <ThemedText className="text-white text-[11px] font-black uppercase tracking-wider">
-                              {course.category}
-                            </ThemedText>
-                          </View>
-                          <View>
-                            <ThemedText
-                              className="text-xl font-black text-white mb-2"
-                              numberOfLines={2}
-                            >
-                              {course.title}
-                            </ThemedText>
+                        <View className="w-full h-[140px] p-4 bg-gray-50/50 justify-center items-center border-b border-gray-50">
+                          <Image
+                            source={{ uri: course.thumbnail }}
+                            className="w-full h-full"
+                            resizeMode="contain"
+                          />
+                        </View>
+                        <View className="p-4">
+                          <Text
+                            className="text-base font-black text-gray-900 mb-3"
+                            numberOfLines={2}
+                          >
+                            {course.title}
+                          </Text>
+                          <View className="flex-row items-center justify-between">
+                            <View className="flex-row items-center gap-1.5 bg-brand-lightPink px-2.5 py-1 rounded-lg">
+                              <BookOpen size={12} color="#ff66c4" />
+                              <Text className="text-brand-hotPink text-[10px] font-black uppercase tracking-wider">
+                                {course.category}
+                              </Text>
+                            </View>
                             <View className="flex-row items-center gap-1.5">
-                              <Clock size={12} color="rgba(255,255,255,0.8)" />
-                              <ThemedText className="text-white/80 text-xs font-bold">
-                                {course.duration}h restantes
-                              </ThemedText>
+                              <Clock size={14} color="#9CA3AF" />
+                              <Text className="text-gray-500 text-xs font-bold">
+                                {course.duration}h
+                              </Text>
                             </View>
                           </View>
                         </View>
@@ -221,9 +213,7 @@ export default function HomeScreen() {
               </Animated.View>
 
               <Animated.View entering={FadeInUp.duration(400).delay(400)} className="px-6 mb-4">
-                <ThemedText className="text-lg font-extrabold text-gray-900 dark:text-gray-100">
-                  Recomendados para ti
-                </ThemedText>
+                <Text className="text-lg font-extrabold text-gray-900 ">Recomendados para ti</Text>
               </Animated.View>
             </>
           }
@@ -242,13 +232,11 @@ export default function HomeScreen() {
           )}
           ListEmptyComponent={
             <View className="items-center py-10">
-              <ThemedText className="text-sm text-gray-400 dark:text-gray-500">
-                No se encontraron cursos.
-              </ThemedText>
+              <Text className="text-sm text-gray-400 ">No se encontraron cursos.</Text>
             </View>
           }
         />
       </View>
-    </ThemedView>
+    </View>
   );
 }

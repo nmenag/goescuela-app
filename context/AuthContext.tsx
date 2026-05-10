@@ -1,3 +1,4 @@
+import React from 'react';
 import { useAuthStore } from '@/features/auth/application/useAuthStore';
 
 // We're keeping this for compatibility, but moving the logic to Zustand
@@ -7,7 +8,7 @@ export const useAuth = () => {
   return { isAuthenticated, user, login, logout };
 };
 
-// Provider is now optional/empty but we keep it to avoid breaking _layout.tsx
+// Provider
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return <>{children}</>;
 };

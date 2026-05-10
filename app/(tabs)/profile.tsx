@@ -12,17 +12,8 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BrandingColors } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
-import { getCourseById } from '@/data/mockData';
-import {
-  FileText,
-  LogOut,
-  CheckCircle,
-  User,
-  Bell,
-  HelpCircle,
-  Shield,
-  RefreshCw,
-} from 'lucide-react-native';
+import { getCourseById, mockStudents, mockQuizzes } from '@/data/mockData';
+import { FileText, LogOut, CheckCircle, User, HelpCircle, RefreshCw } from 'lucide-react-native';
 import { useOffline } from '@/hooks/useOffline';
 
 // Components
@@ -65,7 +56,13 @@ export default function ProfileScreen() {
   }
 
   // Calculate stats from data
-  const averageScore = 0; // Simplified for now
+  const mockStudent = mockStudents.find((s) => s.id === student.id);
+  const allScores = mockStudent?.quizScores || [];
+  const averageScore =
+    allScores.length > 0
+      ? Math.round(allScores.reduce((acc, curr) => acc + curr.score, 0) / allScores.length)
+      : 0;
+  const totalQuizzes = allScores.length;
 
   return (
     <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
@@ -108,7 +105,7 @@ export default function ProfileScreen() {
         <View style={styles.statsGrid}>
           <ProfileStat label="Cursos" value={student.enrolledCourseIds.length} />
           <ProfileStat label="Promedio" value={`${averageScore}%`} />
-          <ProfileStat label="Quizzes" value={0} />
+          <ProfileStat label="Quizzes" value={totalQuizzes} />
         </View>
 
         {/* Grades Section */}
@@ -117,9 +114,23 @@ export default function ProfileScreen() {
           {student.enrolledCourseIds.map((courseId) => {
             const course = getCourseById(courseId);
             if (!course) return null;
-            const courseAvg = 0;
-            const progress = 0;
-            const topics = 0;
+
+            const courseProgress = mockStudent?.progress?.find((p) => p.courseId === courseId);
+            const progress = courseProgress?.progress || 0;
+
+            const courseScores =
+              mockStudent?.quizScores?.filter((s) => {
+                const quiz = mockQuizzes.find((q) => q.id === s.quizId);
+                return quiz?.courseId === courseId;
+              }) || [];
+            const courseAvg =
+              courseScores.length > 0
+                ? Math.round(
+                    courseScores.reduce((acc, curr) => acc + curr.score, 0) / courseScores.length,
+                  )
+                : 0;
+
+            const topics = course.modules?.length || 0;
 
             return (
               <View key={courseId} style={styles.academicCard}>
@@ -170,8 +181,6 @@ export default function ProfileScreen() {
         <View style={styles.section}>
           <ThemedText style={styles.sectionTitle}>Configuración</ThemedText>
           <SettingItem label="Editar Perfil" icon={<User size={20} color="#6B7280" />} />
-          <SettingItem label="Notificaciones" icon={<Bell size={20} color="#6B7280" />} />
-          <SettingItem label="Seguridad" icon={<Shield size={20} color="#6B7280" />} />
         </View>
 
         <View style={styles.section}>

@@ -19,7 +19,6 @@ The project follows **Clean Architecture** and **Feature-based Modularization**.
 - **State Management**: Zustand
 - **Local Database**: WatermelonDB (SQLite)
 - **Networking**: TanStack Query (React Query)
-- **Persistence**: MMKV
 
 ### Detailed Documentation
 

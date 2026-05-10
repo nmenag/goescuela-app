@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { Student } from '@/data/mockData';
-import { StorageService } from '@/infrastructure/storage/mmkv';
 
 interface AuthState {
   user: Student | null;
@@ -9,20 +8,13 @@ interface AuthState {
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
-  init: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
-  user: StorageService.getItem<Student>('user'),
-  token: StorageService.getToken(),
+  user: null,
+  token: null,
   isLoading: false,
   error: null,
-
-  init: () => {
-    const user = StorageService.getItem<Student>('user');
-    const token = StorageService.getToken();
-    set({ user, token });
-  },
 
   login: async (email, password) => {
     set({ isLoading: true, error: null });
@@ -38,9 +30,6 @@ export const useAuthStore = create<AuthState>((set) => ({
       };
       const mockToken = 'mock-jwt-token';
 
-      StorageService.setItem('user', mockUser);
-      StorageService.setToken(mockToken);
-
       set({ user: mockUser as any, token: mockToken, isLoading: false });
     } catch {
       set({ error: 'Login failed', isLoading: false });
@@ -48,8 +37,6 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   logout: () => {
-    StorageService.removeItem('user');
-    StorageService.removeToken();
     set({ user: null, token: null });
   },
 }));
