@@ -24,6 +24,7 @@ The project follows **Clean Architecture** and **Feature-based Modularization**.
 
 - [Architecture Overview](./docs/ARCHITECTURE.md)
 - [Offline & Sync Strategy](./docs/OFFLINE_FIRST.md)
+- [Database Model & MER](./docs/DATABASE_MODEL.md)
 
 ## 🛠️ Getting Started
 

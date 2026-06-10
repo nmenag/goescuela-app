@@ -56,3 +56,10 @@ src/
 3. The **Store** calls the **Repository (Infrastructure Layer)**.
 4. The **Repository** fetches data (from API or DB) and maps it to **Entities (Domain Layer)**.
 5. The **Store** updates, and the **Presentation** re-renders.
+
+---
+
+## 🔗 Related Documentation
+
+- [Offline-First Strategy](./OFFLINE_FIRST.md)
+- [Database Model & MER](./DATABASE_MODEL.md)
